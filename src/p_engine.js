@@ -210,7 +210,7 @@ function contractVisibility(emp, measures) {
   const dims = ROLE_VIEW[emp];
   return { clear: dims.filter(d => d.cats.some(c => cats.includes(c))).map(d => d.label), limited: dims.filter(d => !d.cats.some(c => cats.includes(c))).map(d => d.label) };
 }
-/* ---------- BLACK MIRROR ---------- */
+/* ---------- STAR RATING (game indicator) ---------- */
 function movementFor(total) {
   if (total >= 9) return 0.5;
   if (total >= 7) return 0.25;
