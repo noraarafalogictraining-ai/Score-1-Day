@@ -1,7 +1,7 @@
 import re, json
 from playwright.sync_api import sync_playwright
 import pathlib
-U=(pathlib.Path(__file__).resolve().parent.parent/"index.html").as_uri()
+U=(pathlib.Path(__file__).resolve().parent.parent.parent/"classic.html").as_uri()
 JS=r"""
 (args) => {
  const {emp, r2, r3, alt, sa, fac, clicks} = args;

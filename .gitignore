@@ -4,3 +4,4 @@ app_only.js
 .DS_Store
 .vercel
 s_*.png
+tests/shots/
