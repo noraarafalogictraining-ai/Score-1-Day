@@ -25,7 +25,7 @@ async function assessRound1() {
     api("/api/assess", { task: "plan", payload: { plan: planPayload(r) } }),
     r.align.manual ? Promise.resolve(null) : api("/api/assess", { task: "alignment", payload: { plan: planPayload(r), history: wire(r.align.log) } })
   ]);
-  if (p.status === "fulfilled") r.plan.assessment = p.value; else r.plan.error = `Plan assessment failed: ${p.reason.message}`;
+  if (p.status === "fulfilled") r.plan.assessment = p.value; else r.plan.error = `Plan assessment unavailable: ${p.reason.message}`;
   if (a.status === "fulfilled" && a.value) {
     r.align.assessment = a.value;
     const beh = (a.value.classification || {}).behaviour;
@@ -42,7 +42,7 @@ async function assessRound2() {
     if (!r.r2.manual) r.r2.pathway = res.pathway;
     if (res.events.length) applyEvents(r, res.events, clsReason(res, "Mid-year conversation assessed."));
     else pulseNote(r, "coaching", "Mid-year conversation: no clear pattern", "Neither clearly constructive nor punitive: no Pulse change.", 2);
-  } catch (e) { r.r2.error = `Round 2 assessment failed: ${e.message}`; }
+  } catch (e) { r.r2.error = `The mid-year review could not be processed: ${e.message}`; }
   UI.busy = null; save(); render();
 }
 async function assessRound3() {
@@ -55,7 +55,7 @@ async function assessRound3() {
     else pulseNote(r, "appraisal", "Final appraisal: mixed", "Appraisal partly evidence-based: no Pulse change.", 3);
     r.r3.done = true;
     UI.busy = null; save(); toast("Appraisal finalised."); go("inbox", "closed"); return;
-  } catch (e) { r.r3.final.error = `Final assessment failed: ${e.message}`; }
+  } catch (e) { r.r3.final.error = `The appraisal could not be finalised: ${e.message}`; }
   UI.busy = null; save(); render();
 }
 async function runBias() {
@@ -70,11 +70,12 @@ function releaseRound(k) {
   const r = rec();
   if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora's lower-priced Customer360 alternative put the Commercial Department under pressure.");
   save();
+  if (k === "r3") loadYearEnd();
 }
 async function loadYearEnd() {
   const r = rec();
   if (r.r3.dataset || UI.busy === "yearend") return;
-  if (!r.r2.pathway) { r.r3.error = "The year-end update depends on the Round 2 outcome, which has not been recorded. Ask your facilitator."; save(); return render(); }
+  if (!r.r2.pathway) { r.r3.error = "The year-end update is not available yet. Please contact your facilitator."; save(); return render(); }
   UI.busy = "yearend"; r.r3.error = null;
   try {
     const res = await api("/api/yearend", { pathway: r.r2.pathway });
@@ -86,7 +87,7 @@ async function loadYearEnd() {
 }
 function afterRoute() {
   const r = rec();
-  if (S.session && UI.signedIn && UI.route === "yearend" && r3Status(r) !== "locked" && !r.r3.dataset && !r.r3.error) loadYearEnd();
+  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !r.r3.dataset && !r.r3.error) loadYearEnd();
 }
 
 /* ---------- conversation ---------- */
@@ -108,7 +109,13 @@ async function sendChat(kind, text) {
 
 const ACTIONS = {
   /* --- session --- */
-  signin() { if (S.session) { UI.modal = { type: "newSession", name: document.getElementById("login-name").value }; return render(); } ACTIONS._start(document.getElementById("login-name").value); },
+  signin() {
+    const name = document.getElementById("login-name").value.trim();
+    if (!name) { UI.loginErr = "Enter your username."; render(); const f = document.getElementById("login-name"); if (f) f.focus(); return; }
+    UI.loginErr = null;
+    if (S.session) { UI.modal = { type: "newSession", name }; return render(); }
+    ACTIONS._start(name);
+  },
   signinConfirm() { const m = UI.modal; UI.modal = null; ACTIONS._start(m.name); },
   _start(name) { const p = document.getElementById("login-pass"); if (p) p.value = ""; startSession(name); setSignedIn(true); UI.facOK = false; go("inbox", "start"); },
   resume() { setSignedIn(true); go("home"); },
@@ -125,6 +132,11 @@ const ACTIONS = {
   closeDrawer() { UI.drawer = null; render(); },
   undo() { if (_undo) { _undo(); _undo = null; UI.toast = null; save(); render(); } },
   libOpen(el) { UI.libOpen = UI.libOpen === el.dataset.id ? null : el.dataset.id; render(); },
+  pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },
+  kpi(el) { UI.kpiOpen = UI.kpiOpen === el.dataset.id ? null : el.dataset.id; render(); },
+  kpiAlert() { UI.alertOpen = !UI.alertOpen; render(); },
+  month(el) { const i = +el.dataset.i; UI.month = UI.month === i ? null : i; render(); },
+  dashView(el) { UI.dashView = el.dataset.v; render(); },
 
   /* --- goal plan --- */
   addObj() { const r = rec(), o = blankObjective(); r.goals.objectives.push(o); if (r.goals.status === "not_started") r.goals.status = "draft"; UI.edit = o.id; UI.flash = "obj-" + o.id; save(); render(); const f = document.querySelector(`#obj-${o.id} textarea`); if (f) f.focus(); },
@@ -184,7 +196,7 @@ const ACTIONS = {
   /* --- rounds --- */
   releaseCode(el) {
     const k = el.dataset.k, v = ((document.getElementById("code-" + k) || {}).value || "").trim();
-    if (v === RELEASE_CODES[k] || v === FAC_CODE) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Round 2 started." : "Round 3 started."); go(k === "r2" ? "home" : "yearend"); }
+    if (v === RELEASE_CODES[k] || v === FAC_CODE) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update released." : "Year-end update released."); go(k === "r2" ? "home" : "yearend"); }
     else { UI.codeErr = k; render(); }
   },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; save(); assessRound2(); },
@@ -210,7 +222,13 @@ const ACTIONS = {
   assessRetry(el) { const k = el.dataset.k; if (k === "round1") assessRound1(); else if (k === "round2") assessRound2(); else assessRound3(); },
 
   /* --- facilitator --- */
-  facUnlock() { const v = ((document.getElementById("fac-code") || {}).value || "").trim(); if (v === FAC_CODE) { UI.facOK = true; UI.codeErr = null; } else UI.codeErr = "fac"; render(); },
+  facUnlock() {
+    const v = ((document.getElementById("fac-code") || {}).value || "").trim();
+    const k = Object.keys(RELEASE_CODES).find(x => RELEASE_CODES[x] === v);
+    if (v === FAC_CODE) { UI.facOK = true; UI.codeErr = null; return render(); }
+    if (k) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update released." : "Year-end update released."); go(k === "r2" ? "home" : "inbox", k === "r2" ? null : "yearend"); return; }
+    UI.codeErr = "fac"; render();
+  },
   release(el) { releaseRound(el.dataset.k); toast("Released on this device."); render(); },
   facAlign() { const r = rec(); if (r.goals.status !== "pending_alignment") return; r.goals.status = "approved"; r.align.confirmed = true; r.align.manual = true; r.align.log.push({ from: "sys", text: "Contract confirmed by the facilitator" }); pulseNote(r, "alignment", "Alignment confirmed manually", "Confirmed by the facilitator without an assessed conversation: no Pulse change.", 1); save(); toast("Alignment confirmed."); render(); assessRound1(); },
   facEnd(el) { const r = rec(); if (el.dataset.k === "diag") { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation ended by the facilitator" }); } else { r.r3.conv.ended = true; r.r3.conv.log.push({ from: "sys", text: "Conversation ended by the facilitator" }); } save(); render(); },
@@ -253,6 +271,9 @@ document.addEventListener("change", (ev) => {
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
   if (el.dataset.fac) { const r = rec(), id = el.dataset.fac, max = +el.max; if (el.value === "") delete r.fac[id]; else r.fac[id] = Math.max(0, Math.min(max, Math.round(+el.value))); save(); render(); }
 });
+
+let _rzT = null;
+window.addEventListener("resize", () => { clearTimeout(_rzT); _rzT = setTimeout(() => { if (document.querySelector(".chart")) render(); }, 200); });
 
 /* ---------- boot ---------- */
 (async function boot() {

@@ -36,7 +36,12 @@ const ICONS = {
   send: '<path d="M4 12 20 4l-6 16-3-7-7-1Z"/>',
   book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/>',
   layers: '<path d="m12 4 8.5 4.5L12 13 3.5 8.5 12 4Z"/><path d="m3.5 12.5 8.5 4.5 8.5-4.5M3.5 16.5 12 21l8.5-4.5"/>',
+  building: '<path d="M5 21V5l7-2v18M12 21h7V9l-7-2"/><path d="M8 8h1M8 12h1M8 16h1M15 12h1M15 16h1"/>',
+  clip: '<path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
   pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
+  trend: '<path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/>',
+  sprout: '<path d="M12 20v-8"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6Z"/><path d="M12 14c0-3-2-5-6-5 0 3 2 5 6 5Z"/>',
+  chevdown: '<path d="m6 9 6 6 6-6"/>',
   bars: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>',
   eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>'
@@ -63,7 +68,7 @@ const val = (path) => { const v = getPath(S, path); return v == null ? "" : v; }
 const P = (...parts) => ["recs", S.emp, ...parts].join(".");
 
 /* ---------- UI state (not saved) ---------- */
-const UI = { signedIn: (() => { try { return sessionStorage.getItem("hub-signed-in") === "1"; } catch (e) { return false; } })(), route: "login", sub: null, modal: null, toast: null, dd: null, side: false, edit: null, evFilter: "all", drawer: null, facOK: false, codeErr: null, flash: null, busy: null, chatErr: null, libOpen: null };
+const UI = { signedIn: (() => { try { return sessionStorage.getItem("hub-signed-in") === "1"; } catch (e) { return false; } })(), route: "login", sub: null, modal: null, toast: null, dd: null, side: false, edit: null, evFilter: "all", drawer: null, facOK: false, codeErr: null, flash: null, busy: null, chatErr: null, libOpen: null, pmOpen: true, kpiOpen: null, month: null, dashView: "trend" };
 function parseHash() {
   const h = (location.hash || "").replace(/^#\/?/, "");
   const [route, sub] = h.split("/");
@@ -90,7 +95,7 @@ function mailList() {
   const r = rec(), M = hrMessages(), out = [{ id: "start", kind: "hr", ...M.start }];
   if (goalsApproved(r)) out.unshift({ id: "approved", kind: "hr", ...M.approved });
   if (r2Status(r) !== "locked") STAKEHOLDER_EMAILS.forEach(e => out.unshift({ id: "sh-" + e.id, kind: "stakeholder", ...e }));
-  if (r3Status(r) !== "locked") out.unshift({ id: "yearend", kind: "hr", ...M.yearend });
+  if (r3Status(r) !== "locked") out.unshift({ id: "yearend", kind: "hr", attach: true, ...M.yearend });
   if (r.r3.done) out.unshift({ id: "closed", kind: "hr", ...M.closed });
   return out.map(m => ({ ...m, unread: !S.read[m.id] }));
 }
@@ -105,7 +110,7 @@ function pendingActions() {
   if (r2Status(r) !== "locked" && !r.r2.submitted) {
     if (!r.r2.seenDashboard) out.push({ t: "Business alert: review the latest performance data", d: "Commercial indicators changed after Valtora's announcement.", go: "business", urgent: true });
     if (!r.r2.diag.ended) out.push({ t: "Omar has asked to talk", d: "“Hi, do you have a few minutes?”", go: "conversations/midyear", urgent: true });
-    out.push({ t: "Complete and submit Round 2", d: "Interpretation of the data, conversation and Evidence Log.", go: "round2" });
+    out.push({ t: "Complete the mid-year review", d: "Interpretation of the data, conversation and Evidence Log.", go: "round2" });
   }
   if (r3Status(r) !== "locked" && !r.r3.done) {
     if (!r.r3.dataset) out.push({ t: "Open the year-end performance update", d: "December", go: "yearend", urgent: true });
@@ -125,86 +130,87 @@ function notifications() {
   return out.map(n => ({ ...n, unread: true }));
 }
 
-/* ---------- Pulse ---------- */
+/* ---------- Pulse (visual only; values come from the rules engine in state.js) ---------- */
+const PULSE_LOOK = { performance: { icon: "trend", cls: "pp-perf" }, trust: { icon: "shield", cls: "pp-trust" }, development: { icon: "sprout", cls: "pp-dev" } };
+const PERIOD = { 1: "January", 2: "July", 3: "December" };
+function pulseRing(v, cls, size = 30) {
+  const r = size / 2 - 3, c = 2 * Math.PI * r, off = c * (1 - v / 100);
+  return `<svg class="ring ${cls}" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" class="ring-bg"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" class="ring-fg" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`;
+}
 function pulseBars(r = rec(), compact = false) {
-  return PULSE.dims.map(d => { const v = r.pulse.values[d.id]; return `<div class="pulse-row ${compact ? "compact" : ""}" title="${esc(d.d)}"><span class="pl">${d.l}</span><span class="pbar"><i class="p-${d.id}" style="width:${v}%"></i></span><b class="num">${v}</b></div>`; }).join("");
+  return PULSE.dims.map(d => { const v = r.pulse.values[d.id], L = PULSE_LOOK[d.id]; return `<div class="pulse-row ${compact ? "compact" : ""} ${L.cls}" title="${esc(d.d)}"><span class="pl">${icon(L.icon, "i-sm")}${d.l}</span><span class="pbar"><i style="width:${v}%"></i></span><b class="num">${v}</b></div>`; }).join("");
 }
 function pulseWidget() {
   const r = rec();
-  return `<button class="pulse-chip" data-act="modal" data-m="pulse" aria-label="Employee Pulse">${icon("pulse", "i-sm")}<span class="pc-l">Omar's Pulse</span>${PULSE.dims.map(d => `<span class="pc-v"><span class="xs">${d.l[0]}</span> <b class="num">${r.pulse.values[d.id]}</b></span>`).join("")}</button>`;
+  return `<div class="pulse-top" role="group" aria-label="Employee Pulse: Omar Hassan"><span class="pt-label">Employee Pulse</span>${PULSE.dims.map(d => {
+    const v = r.pulse.values[d.id], L = PULSE_LOOK[d.id];
+    return `<button class="pt-item ${L.cls}" data-act="modal" data-m="pulse" data-k="${d.id}" aria-label="${d.l} ${v} out of 100. ${esc(d.d)}"><span class="pt-ring">${pulseRing(v, L.cls)}<span class="pt-ic">${icon(L.icon, "i-xs")}</span></span><span class="pt-txt"><span class="pt-n">${d.l}</span><b class="num">${v}</b></span><span class="pt-tip" role="tooltip"><b>${d.l} · ${v}/100</b>${esc(d.d)}</span></button>`;
+  }).join("")}</div>`;
 }
-MODALS.pulse = function () {
-  const r = rec();
-  return modalWrap("Employee Pulse · Omar Hassan", `${pulseBars(r)}
-    <p class="xs muted">Pulse reflects how Omar is experiencing the year (0–100). It changes only after meaningful decisions or completed conversations, using fixed pilot rules. It is separate from your SCORE Learning Score.</p>
-    <div class="stack-sm"><h4>Event history</h4>${pulseHistory(r)}</div>`, `<button class="btn" data-act="closeModal">Close</button>`, true);
+MODALS.pulse = function (m) {
+  const r = rec(), focus = PULSE.dims.find(d => d.id === m.k);
+  return modalWrap("Employee Pulse · Omar Hassan", `
+    <div class="pulse-cards">${PULSE.dims.map(d => { const L = PULSE_LOOK[d.id], v = r.pulse.values[d.id]; return `<div class="pulse-card ${L.cls} ${focus && focus.id === d.id ? "focus" : ""}"><span class="pt-ring">${pulseRing(v, L.cls, 56)}<span class="pt-ic">${icon(L.icon, "i-sm")}</span></span><div><b>${d.l}</b> <span class="num b">${v}</span><span class="xs muted">/100</span><div class="xs t2">${esc(d.d)}</div></div></div>`; }).join("")}</div>
+    <p class="xs muted">The Pulse reflects how Omar is experiencing the year (0–100). It changes after meaningful decisions and completed conversations, not after every message.</p>
+    <div class="stack-sm"><h4>What changed and why</h4>${pulseHistory(r)}</div>`, `<button class="btn" data-act="closeModal">Close</button>`, true);
 };
-function pulseHistory(r) {
+function pulseHistory(r, showRound = false) {
   const dl = (v) => v > 0 ? `<span class="pos">+${v}</span>` : v < 0 ? `<span class="neg">${v}</span>` : `<span class="muted">0</span>`;
-  return `<div class="table-wrap"><table class="tbl" style="min-width:640px"><thead><tr><th>Round</th><th>Event</th><th>Performance</th><th>Trust</th><th>Development</th><th>Why</th></tr></thead><tbody>
-    <tr><td>—</td><td>Starting values (fictional baseline)</td><td class="num">${PULSE.baseline.performance}</td><td class="num">${PULSE.baseline.trust}</td><td class="num">${PULSE.baseline.development}</td><td class="xs muted">Pilot baseline</td></tr>
-    ${r.pulse.history.map(h => `<tr><td>${h.round}</td><td>${esc(h.label)}</td><td class="num">${dl(h.delta.performance)}</td><td class="num">${dl(h.delta.trust)}</td><td class="num">${dl(h.delta.development)}</td><td class="xs">${esc(h.reason)}</td></tr>`).join("")}
+  return `<div class="table-wrap"><table class="tbl" style="min-width:600px"><thead><tr><th>${showRound ? "Round" : "When"}</th><th>Event</th><th>Performance</th><th>Trust</th><th>Development</th><th>Why</th></tr></thead><tbody>
+    <tr><td>${showRound ? "—" : "Start of year"}</td><td>Starting values</td><td class="num">${PULSE.baseline.performance}</td><td class="num">${PULSE.baseline.trust}</td><td class="num">${PULSE.baseline.development}</td><td class="xs muted">${showRound ? "Fictional pilot baseline" : ""}</td></tr>
+    ${r.pulse.history.map(h => `<tr><td>${showRound ? h.round : PERIOD[h.round] || ""}</td><td>${esc(h.label)}</td><td class="num">${dl(h.delta.performance)}</td><td class="num">${dl(h.delta.trust)}</td><td class="num">${dl(h.delta.development)}</td><td class="xs">${esc(h.reason)}</td></tr>`).join("")}
   </tbody></table></div>`;
 }
 
-/* ---------- Round progress ---------- */
-function roundSteps() {
-  const r = rec(), a = r.r3.appraisal.status;
-  return [
-    { n: 1, l: "Setting Performance Expectations", steps: [["Goal plan", r.goals.objectives.length > 0], ["Competencies", r.goals.comps.length >= COMP_RANGE.min], ["Alignment", goalsApproved(r)]], done: goalsApproved(r) },
-    { n: 2, l: "Performance Gaps, Diagnosis & Coaching", steps: [["Dashboard", r.r2.seenDashboard], ["Conversation", r.r2.diag.ended], ["Evidence Log", r.evidence.length > 0], ["Submitted", r.r2.submitted]], done: r.r2.submitted, locked: r2Status(r) === "locked" },
-    { n: 3, l: "Final-Year Performance Evaluation", steps: [["Year-end update", !!r.r3.dataset], ["Appraisal", a === "submitted" || r.r3.done], ["Conversation", r.r3.conv.ended], ["Final", r.r3.done]], done: r.r3.done, locked: r3Status(r) === "locked" }
-  ];
-}
-function roundTracker() {
-  const cur = currentRound();
-  return `<div class="rounds">${roundSteps().map(x => `<div class="round ${x.done ? "done" : ""} ${x.n === cur && !x.done ? "cur" : ""} ${x.locked ? "locked" : ""}"><div class="row between nowrap"><span class="round-tag">Round ${x.n}</span>${x.done ? `<span class="chip st-completed">Completed</span>` : x.locked ? `<span class="chip st-locked">Not yet open</span>` : `<span class="chip st-in_progress">Current</span>`}</div><b class="small">${x.l}</b><div class="steps">${x.steps.map(([l, ok]) => `<span class="step ${ok ? "ok" : ""}">${ok ? icon("check", "i-sm") : `<i></i>`}${l}</span>`).join("")}</div></div>`).join("")}</div>`;
-}
-
 /* ---------- shell ---------- */
+const PM_ROUTES = ["goals", "evidence", "appraisal"];
 function navItems() {
   const r = rec(), unreadMail = mailList().filter(m => m.unread).length;
   return [
     { id: "home", l: "Home", icon: "home" },
-    { id: "inbox", l: "Inbox", icon: "mail", cnt: unreadMail },
-    { id: "goals", l: "Performance Goals", icon: "target" },
-    { id: "business", l: "Business Dashboard", icon: "bars", locked: r2Status(r) === "locked" },
-    { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) },
-    { id: "conversations", l: "Employee Conversations", icon: "chat", cnt: conversationsStatus(r) === "action" ? 1 : 0 },
-    { id: "yearend", l: "Year-End Update", icon: "calendar", locked: r3Status(r) === "locked" },
-    { id: "appraisal", l: "Final Appraisal", icon: "clipboard", locked: r3Status(r) === "locked" },
-    { id: "review", l: "SCORE Review", icon: "chart", locked: !goalsApproved(r) }
+    { id: "inbox", l: "My Inbox", icon: "mail", cnt: unreadMail },
+    { id: "business", l: "Business Dashboard", icon: "bars", dot: r2Status(r) !== "locked" && !r.r2.seenDashboard },
+    { id: "pm", l: "Performance Management", icon: "layers", children: [
+      { id: "goals", l: "Objectives", icon: "target" },
+      { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) },
+      { id: "appraisal", l: "Final Appraisal", icon: "clipboard", locked: appraisalStatus(r) === "locked" }
+    ] },
+    { id: "conversations", l: "Employee Conversations", icon: "chat", cnt: conversationsStatus(r) === "action" ? 1 : 0 }
   ];
 }
 function header() {
-  const notes = notifications(), cur = currentRound();
+  const notes = notifications();
   return `<header class="head">
     <button class="icon-btn menu-btn" data-act="side" aria-label="Open navigation">${icon("menu")}</button>
-    <button class="row nowrap" data-act="go" data-go="home" style="background:none;border:0;padding:0;gap:12px" aria-label="Home"><img class="logo" src="${IMG.logoTop}" alt="NextWave"></button>
-    <span class="sep"></span><span class="app">SCORE <span class="app-full">Performance Hub</span></span>
-    <span class="round-pill">Round ${cur} of 3</span>
+    <button class="brand-btn" data-act="go" data-go="home" aria-label="NextWave home"><img class="logo" src="${IMG.logoTop}" alt="NextWave"></button>
     <span class="grow"></span>
     ${pulseWidget()}
-    <span style="position:relative"><button class="icon-btn" data-act="dd" data-dd="notif" aria-label="Notifications">${icon("bell")}${notes.length ? `<span class="badge">${notes.length}</span>` : ""}</button>${UI.dd === "notif" ? notifDropdown(notes) : ""}</span>
-    <span style="position:relative"><button class="user-btn" data-act="dd" data-dd="user"><span class="initials">${esc(initials(S.session.name))}</span><span class="uname small">${esc(S.session.name)}</span></button>${UI.dd === "user" ? userDropdown() : ""}</span>
+    <span class="head-tools">
+      <span style="position:relative"><button class="icon-btn" data-act="dd" data-dd="notif" aria-label="Notifications">${icon("bell")}${notes.length ? `<span class="badge">${notes.length}</span>` : ""}</button>${UI.dd === "notif" ? notifDropdown(notes) : ""}</span>
+      <span style="position:relative"><button class="user-btn" data-act="dd" data-dd="user" aria-label="Account menu"><span class="initials">${esc(initials(S.session.name))}</span><span class="uname small">${esc(S.session.name)}</span>${icon("chevdown", "i-xs")}</button>${UI.dd === "user" ? userDropdown() : ""}</span>
+    </span>
   </header>`;
 }
 function notifDropdown(notes) {
   return `<div class="dropdown wide" role="menu"><div class="dd-head">Notifications</div>${notes.length ? notes.slice(0, 10).map(n => `<button class="dd-item unread" data-act="go" data-go="${n.go}">${icon(n.icon, "i-sm")}<span class="stack-sm" style="gap:1px"><b class="small">${esc(n.t)}</b><span class="xs muted">${esc(n.d)}</span></span></button>`).join("") : `<div class="dd-item muted">No new notifications.</div>`}</div>`;
 }
 function userDropdown() {
-  return `<div class="dropdown" role="menu"><div class="dd-head">${esc(S.session.name)} · Commercial Director</div>
-    <button class="dd-item" data-act="go" data-go="facilitator">${icon("shield", "i-sm")} Facilitator view</button>
-    <button class="dd-item" data-act="signout">${icon("logout", "i-sm")} Sign out (progress is saved)</button></div>`;
+  return `<div class="dropdown" role="menu"><div class="dd-head">${esc(S.session.name)}<div class="xs muted" style="text-transform:none;letter-spacing:0;font-weight:500">${DIRECTOR.title}</div></div>
+    <button class="dd-item" data-act="go" data-go="profile">${icon("user", "i-sm")} My Profile</button>
+    <button class="dd-item" data-act="go" data-go="facilitator">${icon("shield", "i-sm")} Facilitator View</button>
+    <button class="dd-item" data-act="signout">${icon("logout", "i-sm")} Sign Out</button></div>`;
+}
+function navButton(n, child) {
+  return `<button class="nav-item ${child ? "child" : ""} ${UI.route === n.id ? "on" : ""}" data-act="go" data-go="${n.id}">${icon(n.icon)}<span>${n.l}</span>${n.cnt ? `<span class="cnt">${n.cnt}</span>` : n.dot ? `<span class="ndot" aria-label="New"></span>` : n.locked ? `<span class="lock">${icon("lock", "i-sm")}</span>` : ""}</button>`;
 }
 function sidebar() {
+  const open = UI.pmOpen !== false || PM_ROUTES.includes(UI.route);
   return `<div class="scrim-side ${UI.side ? "open" : ""}" data-act="side"></div><aside class="side ${UI.side ? "open" : ""}" aria-label="Navigation">
-    <nav class="nav">${navItems().map(n => `<button class="nav-item ${UI.route === n.id ? "on" : ""}" data-act="go" data-go="${n.id}">${icon(n.icon)}<span>${n.l}</span>${n.cnt ? `<span class="cnt">${n.cnt}</span>` : n.locked ? `<span class="lock">${icon("lock", "i-sm")}</span>` : ""}</button>`).join("")}</nav>
-    <div class="stack-sm"><div class="eyebrow side-h">Commercial team</div><div class="team">${EMP_ORDER.map(e => {
-      const E = EMPLOYEES[e], active = PILOT.active.includes(e);
-      return `<button class="team-item ${active ? "on" : ""}" data-act="modal" data-m="profile" data-emp="${e}">${avatar(e, "sm")}<span class="stack-sm" style="gap:0;min-width:0"><span class="nm">${esc(E.name)}</span><span class="rl">${esc(E.title)}${active ? "" : " · stakeholder"}</span></span></button>`;
-    }).join("")}</div></div>
-    <div class="side-foot">Pilot: Omar Hassan's journey. Youssef, Salma and Mariam appear as colleagues and stakeholders. NextWave is a fictional company.</div>
+    <nav class="nav">${navItems().map(n => n.children ? `<div class="nav-group ${open ? "open" : ""}">
+        <button class="nav-item parent ${PM_ROUTES.includes(UI.route) ? "in" : ""}" data-act="pmToggle" aria-expanded="${open}">${icon(n.icon)}<span>${n.l}</span><span class="caret">${icon("chevdown", "i-sm")}</span></button>
+        ${open ? `<div class="nav-children">${n.children.map(c => navButton(c, true)).join("")}</div>` : ""}
+      </div>` : navButton(n)).join("")}</nav>
+    <div class="side-foot">NextWave · ${APP.cycleYear}</div>
   </aside>`;
 }
 function pageHead(crumb, title, right = "", sub = "") {

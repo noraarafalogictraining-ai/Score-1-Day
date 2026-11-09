@@ -1,22 +1,23 @@
 /* =========================================================
    SCORE REVIEW — Learning Score (separate from the Employee Pulse)
    ========================================================= */
-const ROUND_TITLE = { 1: "Setting Performance Expectations", 2: "Performance Gaps, Diagnosis & Coaching", 3: "Final-Year Performance Evaluation" };
+const ROUND_TITLE = { 1: "Setting performance expectations", 2: "Diagnosis and coaching", 3: "Year-end evaluation" };
+const STAGE_TAB = { 1: "Expectations", 2: "Mid-year", 3: "Year-end" };
 function roundAvailable(n, r = rec()) { return n === 1 ? goalsApproved(r) : n === 2 ? r.r2.submitted : r.r3.done; }
 VIEWS.review = function () {
   const r = rec();
-  if (!goalsApproved(r)) return pageHead("SCORE Review", "SCORE Review", empChip()) + lockedPanel("Available after Round 1", "Your Round 1 results appear once the performance contract is confirmed.");
-  if (!AIS.scoring) return pageHead("SCORE Review", "SCORE Review", empChip()) + lockedPanel("Scoring unavailable", "The SCORE server could not be reached.");
+  if (!r.r3.done && !UI.facOK) return pageHead("Feedback report", "Feedback report") + lockedPanel("Not available yet", "Your feedback report is available once the year-end appraisal is complete.");
+  if (!AIS.scoring) return pageHead("Feedback report", "Feedback report", empChip()) + lockedPanel("Scoring unavailable", "The SCORE server could not be reached.");
   const sum = scoreSummary(r), tab = UI.sub || "summary";
-  const tabs = [["summary", "Overview"], ...[1, 2, 3].map(n => [String(n), `Round ${n}`])];
-  return pageHead("SCORE Review", "SCORE Review", empChip(), "Your Learning Score is criterion-based and separate from Omar's Employee Pulse.") + `
+  const tabs = [["summary", "Overview"], ...[1, 2, 3].map(n => [String(n), STAGE_TAB[n]])];
+  return pageHead("Feedback report", "SCORE feedback report", empChip(), "Your Learning Score is criterion-based and separate from Omar's Employee Pulse.") + `
     <div class="tabs" style="margin-bottom:16px">${tabs.map(([id, l]) => { const rr = sum.rounds.find(x => String(x.n) === id); return `<button class="tab ${tab === id ? "on" : ""}" data-act="go" data-go="review/${id}">${l}${rr && roundAvailable(rr.n, r) ? `<span class="n">${rr.score}/${rr.max}</span>` : ""}</button>`; }).join("")}</div>
-    ${tab === "summary" ? reviewSummary(r, sum) : roundAvailable(+tab, r) ? reviewRound(r, sum, +tab) : lockedPanel(`Round ${tab} not completed yet`, "Results appear when the round is submitted.")}`;
+    ${tab === "summary" ? reviewSummary(r, sum) : roundAvailable(+tab, r) ? reviewRound(r, sum, +tab) : lockedPanel("Not completed yet", "Results appear when this stage is submitted.")}`;
 };
 function reviewSummary(r, sum) {
   return `<div class="stack-lg">
     <div class="card pad-lg stack"><div class="row between"><div><div class="eyebrow">SCORE Learning Score</div><h2 style="margin-top:4px">How well you applied performance management</h2></div><span class="score-big num">${sum.total}<span class="small muted"> / ${sum.max}</span></span></div>
-      ${sum.rounds.map(x => `<div class="stack-sm"><div class="row between small"><b>Round ${x.n} · ${ROUND_TITLE[x.n]}</b><b class="num">${roundAvailable(x.n, r) ? `${x.score}/${x.max}` : "Not completed"}</b></div><div class="bar"><i style="width:${x.max ? x.score / x.max * 100 : 0}%"></i></div></div>`).join("")}
+      ${sum.rounds.map(x => `<div class="stack-sm"><div class="row between small"><b>${ROUND_TITLE[x.n]}</b><b class="num">${roundAvailable(x.n, r) ? `${x.score}/${x.max}` : "Not completed"}</b></div><div class="bar"><i style="width:${x.max ? x.score / x.max * 100 : 0}%"></i></div></div>`).join("")}
       ${sum.pending && r.r3.done ? `<p class="xs" style="color:var(--warn)">${sum.pending} criteria were not assessed and count as 0. Your facilitator can enter them.</p>` : ""}
       <p class="xs muted">Criteria are assessed against a rubric from what you wrote and said. Facilitator-entered scores replace the AI assessment for that criterion.</p>
     </div>
@@ -35,7 +36,7 @@ function reviewRound(r, sum, n) {
   const rr = sum.rounds.find(x => x.n === n);
   const fb = n === 1 ? r.plan.assessment && r.plan.assessment.feedback : n === 2 ? r.r2.assessment && r.r2.assessment.feedback : r.r3.final.assessment && r.r3.final.assessment.feedback;
   return `<div class="stack-lg">
-    <div class="card pad row between"><div><div class="eyebrow">Round ${n}</div><h3 style="margin-top:4px">${ROUND_TITLE[n]}</h3></div><span class="score-big num">${rr.score}<span class="small muted">/${rr.max}</span></span></div>
+    <div class="card pad row between"><div><div class="eyebrow">${STAGE_TAB[n]}</div><h3 style="margin-top:4px">${ROUND_TITLE[n]}</h3></div><span class="score-big num">${rr.score}<span class="small muted">/${rr.max}</span></span></div>
     ${retryFor(n, r)}
     ${n === 1 && fb ? planFeedback(r, fb) : ""}
     ${n !== 1 && fb && fb.summary ? `<div class="card pad stack-sm"><h4>Summary</h4><p class="small t2">${esc(fb.summary)}</p>${fb.overlooked ? `<p class="small t2"><b>Overlooked:</b> ${esc(fb.overlooked)}</p>` : ""}</div>` : ""}

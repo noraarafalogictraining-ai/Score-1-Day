@@ -79,6 +79,7 @@ A strong intervention may include: reconfirming reporting deadlines; agreeing ho
 /* ---------- Year-end evidence datasets (fictional pilot test data) ---------- */
 const COMPANY_YEAR_END = {
   label: "Company-level results (same in every pathway — not individual performance evidence)",
+  metrics: { month: "December", win: 28, objections: 24, opps: -6 },
   rows: [
     ["Proposal win rate", "32% (pre-launch) → 24% (June) → 28% (December)"],
     ["Price-related objections", "18% (pre-launch) → 29% (June) → 24% (December)"],

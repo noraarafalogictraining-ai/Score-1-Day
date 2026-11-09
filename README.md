@@ -36,13 +36,30 @@ Walks the full Omar journey in Chromium against the local server (test mode and 
 
 ---
 
-## The three-round experience
+## Participant interface (Phase 1 UI)
+
+The participant sees a corporate employee platform, not a training exercise: no round labels, progress trackers or simulation wording. The three rounds still run internally (content release, events, conversations, scoring) and remain visible in the Facilitator view.
+
+- **Login:** "Welcome to NextWave", Username, Password, Sign In. It follows the original SCORE artifact design (navy with cyan and purple glows, NextWave logo). This is training sign-in: any username, the password is not checked or stored. A saved session shows a discreet "Continue as …" link.
+- **Top bar:** NextWave logo, Employee Pulse (three ring indicators: Performance blue, Trust teal, Development purple; hover for meaning, click for details and history), notifications, and a user menu with **My Profile**, **Facilitator View** and **Sign Out**.
+- **Sidebar:** Home · My Inbox · Business Dashboard · Performance Management (Objectives, Evidence Log, Final Appraisal) · Employee Conversations.
+- **Home (Commercial overview):** Omar's employee overview and the commercial dashboard. At the start of the year it shows the CEO targets with baseline placeholders; after the Valtora release, the agreed mid-year figures; after the year-end update, the company's December figures. Home and Business Dashboard use the same data. KPI cards expand, chart months are clickable, and there is a trend / period-comparison switch and an expandable business alert.
+- **My Profile:** the participant as Commercial Director (name from login): employment information, job description, the CEO-set objectives for 2027 (read-only) and the reporting line with four direct reports.
+- **Relocated:**
+  - The year-end update arrives as an HR email with the evidence attached ("Open"), and the appraisal is opened from that email.
+  - The Round 2 checklist is now **Mid-year review**, reached from the Evidence Log and the conversation.
+  - SCORE Review is now a **feedback report**, shown to participants after the final appraisal (via the HR completion email) and to the facilitator at any time.
+  - Release codes are typed into the Facilitator View code box: **4826** releases the business event, **7319** releases the year-end update, **5050** opens the Facilitator view.
+
+Configuration: the director profile, job description and CEO objectives are `DIRECTOR` and `CEO_OBJECTIVES` in `src/pilot.js` (provisional fictional targets, separate from Omar's data). Company year-end figures for the dashboard come from the server (`COMPANY_YEAR_END.metrics` in `api/_lib/scenario_omar.js`), so they stay hidden until released.
+
+## The three-round experience (facilitator view of the structure)
 
 | Round | What happens | Facilitator |
 |---|---|---|
 | **1 · Setting Performance Expectations** | HR email → Goal Plan (objective, KPI with target, weight, evidence source, review frequency; weights must total 100%) → 3–5 competencies with expected proficiency levels (three observable levels shown) → *Submit for Employee Alignment* → status **Pending Employee Alignment** → **open-text AI conversation** with Omar, who opens with his fairness concern → *Confirm alignment* appears only when Omar's concern has been meaningfully addressed → HR "Contract Confirmed" email | — |
-| **2 · Performance Gaps, Diagnosis & Coaching** | Business alert → **Business Dashboard** (KPI cards, March–June trend chart, before/after bars, market intelligence indicators kept separate from business outcomes) → four stakeholder emails (Mariam's marked *secondhand, unverified*) → Omar's chat request → **open-text diagnostic and coaching conversation** (dashboard and inbox stay one click away) → participant writes their interpretation of the data and completes the Evidence Log → *Submit Round 2* | Announces Valtora (script in the Facilitator view), then releases Round 2 (code **4826**) |
-| **3 · Final-Year Performance Evaluation** | Year-end performance update (dataset depends on the Round 2 pathway) → appraisal pre-filled with the Round 1 objectives, KPIs, weights and competencies (WHAT, HOW, overall) → Omar responds in an **open-text appraisal conversation** → **bias reflection** grounded in the participant's own reasoning → reconsider or finalise → final SCORE assessment and Employee Pulse outcome | Releases Round 3 (code **7319**) |
+| **2 · Performance Gaps, Diagnosis & Coaching** | Business alert → **Business Dashboard** (KPI cards, March–June trend chart, before/after bars, market intelligence indicators kept separate from business outcomes) → four stakeholder emails (Mariam's marked *secondhand, unverified*) → Omar's chat request → **open-text diagnostic and coaching conversation** (dashboard and inbox stay one click away) → participant writes their interpretation of the data and completes the Evidence Log → *Submit Round 2* | Announces Valtora (script in the Facilitator view), then releases it (code **4826** in the Facilitator View code box, or the release button) |
+| **3 · Final-Year Performance Evaluation** | Year-end performance update (dataset depends on the Round 2 pathway) → appraisal pre-filled with the Round 1 objectives, KPIs, weights and competencies (WHAT, HOW, overall) → Omar responds in an **open-text appraisal conversation** → **bias reflection** grounded in the participant's own reasoning → reconsider or finalise → final SCORE assessment and Employee Pulse outcome | Releases the year-end update (code **7319**) |
 
 The **Employee Pulse** (Performance, Trust, Development; 0–100) is always visible in the header, with a full event history. The **SCORE Review** shows each round's criteria with the score, evidence quotes, reason, confidence and missing information.
 

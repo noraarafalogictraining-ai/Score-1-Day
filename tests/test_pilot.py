@@ -41,6 +41,7 @@ def shot(pg, name, full=True):
         SHOT_DIR.mkdir(exist_ok=True); pg.wait_for_timeout(150); pg.screenshot(path=str(SHOT_DIR / f"{name}.png"), full_page=full)
 
 def state(pg): return pg.evaluate("JSON.parse(JSON.stringify(S))")
+def S_rel(pg): return state(pg)["released"]
 def R(pg): return state(pg)["recs"]["omar"]
 def act(pg, a, **data):
     sel = f'[data-act="{a}"]' + "".join(f'[data-{k}="{v}"]' for k, v in data.items())
@@ -53,6 +54,12 @@ def fill_bind(pg, suffix, value):
 def say(pg, kind, text):
     fill_bind(pg, f"drafts.{kind}", text); pg.click(f"#send-{kind}")
     pg.wait_for_function("() => UI.busy === null", timeout=15000); pg.wait_for_timeout(120)
+ROUND_RX = re.compile(r"\bRound [123]\b|SCORE Performance Hub|\bpilot\b|simulation|training", re.I)
+def visible_text(pg):
+    return pg.inner_text(".head") + "\n" + pg.inner_text(".side") + "\n" + pg.inner_text("main")
+def facilitator_code(pg, U, code):
+    pg.goto(U + "#facilitator"); pg.wait_for_timeout(200); pg.fill("#fac-code", code); act(pg, "facUnlock"); pg.wait_for_timeout(500)
+
 def add_obj(pg, i, obj, kpi, w, ev, fq, other=None):
     act(pg, "addObj"); b = f".objectives.{i}."
     fill_bind(pg, b + "objective", obj); fill_bind(pg, b + "kpi", kpi); fill_bind(pg, b + "weight", w); fill_bind(pg, b + "freq", fq); fill_bind(pg, b + "evidence", ev)
@@ -109,11 +116,41 @@ def run():
             errs = []; pg.on("pageerror", lambda e: errs.append(str(e)))
             pg.route(re.compile(r"fonts\.(googleapis|gstatic)"), lambda r: r.abort())
             pg.goto(U); pg.evaluate("localStorage.clear()"); pg.reload(); pg.wait_for_timeout(400)
+            lt = pg.inner_text("body")
+            check("Login shows only the essentials", "Welcome to NextWave" in lt and pg.locator("#login-name").count() == 1 and pg.locator("#login-pass").count() == 1 and pg.locator("#signin-btn").count() == 1)
+            check("Login has no training, pilot or storage text", not re.search(r"training|pilot|simulation|not required|stored|SCORE", lt, re.I), lt[:200])
+            shot(pg, "u01_login", False)
+            pg.click("#signin-btn"); pg.wait_for_timeout(200)
+            check("Login validates the username", "Enter your username" in pg.inner_text("body") and not state(pg)["session"])
             pg.fill("#login-name", "Table 2"); pg.fill("#login-pass", "real-password-123"); pg.click("#signin-btn"); pg.wait_for_timeout(400)
             check("Password never stored", "real-password-123" not in pg.evaluate("JSON.stringify(localStorage)+JSON.stringify(sessionStorage)"))
             check("Test-mode banner is shown", "Test mode" in pg.inner_text("main"))
-            check("Pulse visible with baseline 80/60/55", R(pg)["pulse"]["values"] == {"performance": 80, "trust": 60, "development": 55} and pg.locator(".pulse-chip").count() == 1)
+            check("Pulse visible with baseline 80/60/55", R(pg)["pulse"]["values"] == {"performance": 80, "trust": 60, "development": 55} and pg.locator(".pulse-top .pt-item").count() == 3)
             shot(pg, "p01_hr_email")
+            head = pg.inner_text(".head")
+            check("Top bar: no app name or round indicator", "SCORE" not in head and not re.search(r"Round \d", head))
+            check("Pulse indicators show values and explanations", all(pg.locator(f'.pt-item[aria-label^="{d}"]').count() == 1 for d in ["Performance 80", "Trust 60", "Development 55"]) and "confidence in his manager" in pg.locator(".pt-item").nth(1).get_attribute("aria-label"))
+            pg.locator(".pt-item").nth(1).click(); pg.wait_for_timeout(200)
+            check("Clicking a Pulse indicator opens its explanation", "Employee Pulse" in pg.inner_text(".modal") and pg.locator(".pulse-card.focus").count() == 1); act(pg, "closeModal")
+            side = [t.strip() for t in pg.locator(".side .nav-item").all_inner_texts()]
+            check("Sidebar uses the new structure", [re.sub(r"\s*\d+$", "", x) for x in side] == ["Home", "My Inbox", "Business Dashboard", "Performance Management", "Objectives", "Evidence Log", "Final Appraisal", "Employee Conversations"], str(side))
+            st_ = pg.inner_text(".side")
+            check("No team list, SCORE Review or Year-End Update in the sidebar", not any(x in st_ for x in ["Youssef", "SCORE Review", "Year-End Update", "Commercial team"]))
+            act(pg, "dd", dd="user")
+            check("User menu: My Profile, Facilitator View, Sign Out", [t.strip() for t in pg.locator(".dropdown .dd-item").all_inner_texts()] == ["My Profile", "Facilitator View", "Sign Out"])
+            pg.locator('.dropdown [data-go="profile"]').click(); pg.wait_for_timeout(250)
+            prof = pg.inner_text("main")
+            check("My Profile shows the Commercial Director", all(x in prof for x in ["Table 2", "Commercial Director", "December 2026", "Chief Executive Officer (CEO)", "Corporate Office", "January – December 2027", "Leave information not available in pilot"]))
+            check("My Profile shows the job description", "Lead NextWave's commercial strategy" in prof and "Report commercial performance and strategic recommendations to the CEO." in prof)
+            check("CEO-set objectives shown, read-only", all(x in prof for x in ["Drive Commercial Growth", "at least 15%", "at least 35%", "at least 20%", "Strengthen Market Responsiveness", "Build a High-Performing Commercial Team", "Set by the Chief Executive Officer"]) and pg.locator("main input, main textarea").count() == 0)
+            check("My team shows CEO, director and four direct reports", "Chief Executive Officer" in prof and all(n in prof for n in ["Omar Hassan", "Youssef Ali", "Salma Tarek", "Mariam Adel"]))
+            shot(pg, "u03_profile")
+            pg.goto(U + "#home"); pg.wait_for_timeout(300)
+            home = pg.inner_text("main")
+            check("Home: employee overview + commercial overview only", "Omar Hassan" in home and "Commercial overview" in home and pg.locator(".tile, .rounds, .round").count() == 0 and not any(x in home for x in ["Pending actions", "Youssef", "Employee Pulse", "Inbox"]))
+            check("Home dashboard at start of year shows CEO targets, no invented results", all(x in home for x in ["≥ 15%", "≥ 35%", "+20%", "Baseline not yet published"]) and "−12%" not in home)
+            act(pg, "kpi", id="win"); check("KPI details expand", "What it measures" in pg.inner_text("main")); act(pg, "kpi", id="win")
+            shot(pg, "u02_home_start")
             # ---- Round 1 ----
             pg.goto(U + "#goals"); pg.wait_for_timeout(200)
             for i, o in enumerate(STRONG): add_obj(pg, i, *o)
@@ -151,14 +188,21 @@ def run():
             check("Round 1 assessed (plan + alignment)", r["plan"]["assessment"] and r["align"]["assessment"])
             check("Fair alignment → Pulse +2/+6/+3", r["pulse"]["values"] == {"performance": 82, "trust": 66, "development": 58}, str(r["pulse"]["values"]))
             pg.goto(U + "#review/1"); pg.wait_for_timeout(250)
-            check("Round 1 review shows KPI feedback and criteria", "Feedback on your plan" in pg.inner_text("main") and pg.locator(".crit-row").count() >= 16)
-            shot(pg, "p04_review_r1")
+            check("Feedback report hidden from participants until the year is complete", "available once the year-end appraisal is complete" in pg.inner_text("main") and R(pg)["plan"]["assessment"]["criteria"])
             # ---- Round 2 ----
             pg.goto(U + "#business"); pg.wait_for_timeout(200)
-            check("Round 2 hidden until released", pg.locator("#code-r2").count() == 1 and "Valtora" not in pg.inner_text("main"))
-            pg.fill("#code-r2", "4826"); act(pg, "releaseCode", k="r2"); pg.wait_for_timeout(300)
+            check("Business event hidden until released", "Valtora" not in pg.inner_text("main") and "Start of year" in pg.inner_text("main"))
+            facilitator_code(pg, U, "4826")
+            check("Release code 4826 starts the business event", S_rel(pg)["r2"])
             check("Mid-year disruption → Performance −5", R(pg)["pulse"]["values"]["performance"] == 77)
             check("Business alert on the dashboard", "Business alert" in pg.inner_text("main"))
+            home = pg.inner_text("main")
+            check("Home dashboard updated after the Valtora event", all(x in home for x in ["−12%", "29%", "24%", "35%"]) and "Updated Mon 5 Jul 2027" in home)
+            pg.locator('[data-act="month"][data-i="3"]').first.click(); pg.wait_for_timeout(150)
+            check("Clicking a month shows its figures", "-7 pts vs May" in pg.inner_text("main"))
+            act(pg, "dashView", v="compare"); check("Period comparison view", "Pre-launch" in pg.inner_text("main")); act(pg, "dashView", v="trend")
+            act(pg, "kpiAlert"); check("Business alert expands with details", "qualified opportunities −12%" in pg.inner_text("main")); act(pg, "kpiAlert")
+            shot(pg, "u04_home_event")
             pg.goto(U + "#business"); pg.wait_for_timeout(300)
             body = pg.inner_text("main")
             check("Dashboard values correct", all(s in body for s in ["−12%", "29%", "24%", "35%", "was 18%", "was 32%"]) and all(f"{m}" in body for m in ["March", "April", "May", "June"]))
@@ -195,9 +239,14 @@ def run():
             check("Constructive coaching → pathway A and Pulse +5 trust / +4 development", r["r2"]["pathway"] == "A" and r["pulse"]["values"] == {"performance": 77, "trust": 71, "development": 62}, str(r["pulse"]["values"]))
             check("Pathway is not shown to participants", "Pathway" not in pg.inner_text("main"))
             # ---- Round 3 ----
-            pg.goto(U + "#yearend"); pg.wait_for_timeout(200); pg.fill("#code-r3", "7319"); act(pg, "releaseCode", k="r3"); pg.wait_for_timeout(800)
+            facilitator_code(pg, U, "7319"); pg.wait_for_timeout(500)
             r = R(pg)
-            check("Year-end update loaded for the pathway (fictional data label)", r["r3"]["dataset"] and "Fictional training data" in pg.inner_text("main"))
+            check("Year-end update arrives by email with the evidence attached", r["r3"]["dataset"] and "Year-End Performance Update and Appraisal" in pg.inner_text("main") and pg.locator(".attach").count() == 1)
+            shot(pg, "u05_yearend_email")
+            pg.locator('.attach [data-go="yearend"]').click(); pg.wait_for_timeout(300)
+            check("Year-end evidence opens from the email", "Market intelligence reporting" in pg.inner_text("main"))
+            pg.goto(U + "#home"); pg.wait_for_timeout(300)
+            check("Dashboard shows company year-end figures from the same data", "Updated December 2027" in pg.inner_text("main") and "28%" in pg.inner_text("main"))
             check("Follow-through revealed → Pulse +3/+3/+8", r["pulse"]["values"] == {"performance": 80, "trust": 74, "development": 70}, str(r["pulse"]["values"]))
             shot(pg, "p07_yearend")
             pg.goto(U + "#appraisal"); pg.wait_for_timeout(250)
@@ -238,9 +287,25 @@ def run():
             check("Pulse history consistent with the final values", summed == r["pulse"]["values"], f"{summed} vs {r['pulse']['values']}")
             check("No Pulse slot counted twice", len(set(h["key"] for h in hist if h["key"] != "none")) == len([h for h in hist if h["key"] != "none"]))
             pg.goto(U + "#review"); pg.wait_for_timeout(300)
+            check("Feedback report available after the final appraisal, without round labels", "SCORE feedback report" in pg.inner_text("main") and not re.search(r"Round \d", pg.inner_text("main")))
             txt = pg.inner_text("main"); m = re.search(r"(\d+)\s*/\s*100", txt)
             check("Final Learning Score shown out of 100", m is not None and 0 < int(m.group(1)) <= 100)
             shot(pg, "p09_review")
+            leaks = []
+            for route in ["home", "inbox", "inbox/yearend", "business", "goals", "goals/competencies", "goals/submit", "evidence", "round2", "conversations/alignment", "conversations/midyear", "conversations/appraisal", "yearend", "appraisal", "reflection", "profile", "review"]:
+                pg.goto(U + "#" + route); pg.wait_for_timeout(200)
+                m_ = ROUND_RX.search(visible_text(pg).replace("Test mode: scripted test responses, not live AI. Use only for automated testing.", ""))
+                if m_: leaks.append(f"{route}: {m_.group(0)}")
+            check("No round, pilot or simulation labels on participant screens (except profile leave note)", leaks == ["profile: pilot"], "; ".join(leaks))
+            # mobile
+            mp = ctx.new_page(); mp.set_viewport_size({"width": 390, "height": 844}); mp.route(re.compile(r"fonts\.(googleapis|gstatic)"), lambda r: r.abort())
+            mp.goto(U + "#home"); mp.wait_for_timeout(300)
+            if mp.locator("#resume-btn").count(): mp.click("#resume-btn"); mp.wait_for_timeout(300)
+            for route in ["home", "profile", "inbox", "business", "goals", "appraisal"]:
+                mp.goto(U + "#" + route); mp.wait_for_timeout(250)
+                check(f"Phone 390px: no horizontal scroll on {route}", mp.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth") <= 0)
+            check("Phone: Pulse values readable in the top bar", all(v.is_visible() for v in mp.locator(".pt-txt b").all()) and mp.locator(".pt-txt b").count() == 3)
+            mp.goto(U + "#home"); mp.wait_for_timeout(250); shot(mp, "u06_home_phone"); act(mp, "side"); check("Phone: navigation drawer opens", mp.locator(".side.open").count() == 1); shot(mp, "u07_nav_phone", False); mp.close()
             # facilitator view & tablet
             pg.goto(U + "#facilitator"); pg.wait_for_timeout(150); pg.fill("#fac-code", "5050"); act(pg, "facUnlock")
             check("Facilitator sees pathway and Pulse history", "Round 2 pathway" in pg.inner_text("main") and "Event history" not in pg.inner_text("main"))
@@ -249,7 +314,7 @@ def run():
             tp = ctx.new_page(); tp.set_viewport_size({"width": 1024, "height": 1366}); tp.route(re.compile(r"fonts\.(googleapis|gstatic)"), lambda r: r.abort())
             tp.goto(U + "#home"); tp.wait_for_timeout(300)
             if tp.locator("#resume-btn").count(): tp.click("#resume-btn"); tp.wait_for_timeout(300)
-            for route in ["home", "business", "conversations/midyear", "evidence", "yearend", "appraisal", "reflection", "review/2"]:
+            for route in ["home", "profile", "business", "conversations/midyear", "evidence", "yearend", "appraisal", "reflection", "review/2"]:
                 tp.goto(U + "#" + route); tp.wait_for_timeout(250)
                 over = tp.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
                 check(f"Tablet 1024px: no horizontal scroll on {route}", over <= 0, str(over))

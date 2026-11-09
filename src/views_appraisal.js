@@ -4,7 +4,7 @@
 function kvTable(rows) { return `<div class="table-wrap"><table class="tbl" style="min-width:0"><tbody>${rows.map(([k, v]) => `<tr><td style="width:38%"><b class="small">${esc(k)}</b></td><td class="small">${esc(v)}</td></tr>`).join("")}</tbody></table></div>`; }
 function yearEndBody(d) {
   return `<div class="stack-lg">
-    <div class="notice">${icon("info", "i-sm")}<span>Fictional training data for the SCORE simulation.</span></div>
+    
     <div class="card"><div class="card-h"><h3>Market intelligence reporting</h3></div><div class="card-b">${kvTable(d.reporting)}</div></div>
     <div class="card"><div class="card-h"><h3>Commercial recommendations</h3></div><div class="card-b">${kvTable(d.recommendations)}</div></div>
     <div class="card"><div class="card-h"><h3>Stakeholder communication and collaboration</h3></div><div class="card-b stack">${kvTable(d.stakeholder)}
@@ -16,9 +16,9 @@ function yearEndBody(d) {
 }
 VIEWS.yearend = function () {
   const r = rec();
-  if (r3Status(r) === "locked") return pageHead("Year-End Update", "Year-End Performance Update") + lockedPanel("Not available yet", "The year-end update is published in December.") + (r.r2.submitted && !S.released.r3 ? releaseGate("r3", "Facilitator release", "Enter the release code your facilitator gives you.") : "");
-  if (!r.r3.dataset) return pageHead("Year-End Update", "Year-End Performance Update") + `<div class="card pad stack">${r.r3.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span>${esc(r.r3.error)}</span></div>` : `<p class="small t2">Loading the year-end update…</p>`}<div><button class="btn primary" data-act="loadYearEnd" id="load-yearend">Load year-end update</button></div></div>`;
-  return pageHead("Year-End Update", "Year-End Performance Update", `${empChip()}<button class="btn primary" data-act="go" data-go="appraisal">${icon("clipboard", "i-sm")} Open appraisal</button>`, `Omar Hassan · ${APP.cycleLabel} · Compare these results with the objectives and competencies you agreed in January.`) + yearEndBody(r.r3.dataset);
+  if (r3Status(r) === "locked") return pageHead("My Inbox / Year-end update", "Year-End Performance Update") + lockedPanel("Not available yet", "The year-end update is published in December.");
+  if (!r.r3.dataset) return pageHead("My Inbox / Year-end update", "Year-End Performance Update") + `<div class="card pad stack">${r.r3.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span>${esc(r.r3.error)}</span></div>` : `<p class="small t2">Loading the year-end update…</p>`}<div><button class="btn primary" data-act="loadYearEnd" id="load-yearend">Load year-end update</button></div></div>`;
+  return pageHead("My Inbox / Year-end update", "Year-End Performance Update — Omar Hassan", `<button class="btn" data-act="go" data-go="inbox/yearend">${icon("back", "i-sm")} Back to email</button><button class="btn primary" data-act="go" data-go="appraisal">${icon("clipboard", "i-sm")} Open appraisal</button>`, `${APP.cycleLabel} · Compare these results with the objectives and competencies agreed in January.`) + yearEndBody(r.r3.dataset);
 };
 
 function rateSeg(path, cur, err) {
@@ -30,17 +30,17 @@ const apEditable = (r = rec()) => ["not_started", "draft"].includes(r.r3.apprais
 VIEWS.appraisal = function () {
   const r = rec(), E = EMP(), st = appraisalStatus(r);
   if (r3Status(r) === "locked") return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Not yet open", "The year-end appraisal opens in December, together with the year-end performance update.");
-  if (!r.r3.dataset) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Open the year-end update first", "The appraisal uses the year-end performance update.") + `<div style="margin-top:12px"><button class="btn primary" data-act="go" data-go="yearend">Open year-end update</button></div>`;
+  if (!r.r3.dataset) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Year-end update not received", "The appraisal opens with the year-end performance update from HR.") + `<div style="margin-top:12px"><button class="btn primary" data-act="go" data-go="inbox/yearend">Open HR email</button></div>`;
   const a = r.r3.appraisal, ed = apEditable(r), t = a.tried, g = r.goals;
   const wE = (o, k) => t && !String((a.what[o.id] || {})[k] || "").trim();
   const hE = (c, k) => t && !String((a.how[c.id] || {})[k] || "").trim();
   const ta = (path, v, ph, err, rows = 2) => ed ? `<textarea class="ta ${err ? "err" : ""}" rows="${rows}" id="${path}" ${bind(path)} placeholder="${ph}">${esc(v || "")}</textarea>` : `<div class="small t2">${v ? esc(v) : "<span class='muted'>—</span>"}</div>`;
   const v = appraisalValidation(r);
-  return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence</button>`, `${APP.cycleLabel} · <span class="round-tag">Round 3</span> · Evaluate against the plan agreed in January.`) + `
+  return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence</button>`, `${APP.cycleLabel} · Evaluate against the plan agreed in January.`) + `
   <div class="stack-lg">
     ${a.revisions && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You are reconsidering the appraisal. Update it, then submit the revision.</span></div>` : ""}
     ${!ed ? `<div class="notice ${r.r3.done ? "good" : ""}">${icon(r.r3.done ? "check" : "info", "i-sm")}<span>${r.r3.done ? "The appraisal is final and recorded." : "Appraisal submitted to Omar."}</span></div>` : ""}
-    <section class="stack ap-sec" id="sec-a"><div class="row between"><h2>WHAT · Results</h2><span class="xs muted">${plural(g.objectives.length, "objective", "objectives")} from your Round 1 plan</span></div>
+    <section class="stack ap-sec" id="sec-a"><div class="row between"><h2>WHAT · Results</h2><span class="xs muted">${plural(g.objectives.length, "objective", "objectives")} from the agreed plan</span></div>
       ${g.objectives.map((o, i) => { const x = a.what[o.id] || {}, base = P("r3", "appraisal", "what", o.id); return `<div class="ap-item">
         <div class="ap-item-h"><div class="grow"><div class="xs muted">Objective ${i + 1} · Weight ${num(o.weight)}%</div><b>${esc(o.objective)}</b><div class="small t2" style="margin-top:3px"><span class="muted">KPI:</span> ${esc(o.kpi)}</div></div></div>
         <div class="ap-item-b">
@@ -49,7 +49,7 @@ VIEWS.appraisal = function () {
           <div class="field full"><label class="lbl" for="${base}.just">Justification <span class="req">*</span></label>${ta(base + ".just", x.just, "Why this rating, based on the evidence?", wE(o, "just"))}</div>
         </div></div>`; }).join("")}
     </section>
-    <section class="stack ap-sec" id="sec-b"><div class="row between"><h2>HOW · Competencies</h2><span class="xs muted">${plural(g.comps.length, "competency", "competencies")} from your Round 1 plan</span></div>
+    <section class="stack ap-sec" id="sec-b"><div class="row between"><h2>HOW · Competencies</h2><span class="xs muted">${plural(g.comps.length, "competency", "competencies")} from the agreed plan</span></div>
       ${g.comps.map(c => { const L = competencyById(S.emp, c.id) || { name: "Competency", levels: {} }, x = a.how[c.id] || {}, base = P("r3", "appraisal", "how", c.id); return `<div class="ap-item">
         <div class="ap-item-h"><div class="grow stack-sm" style="gap:4px"><div class="row" style="gap:8px"><b>${esc(L.name)}</b><span class="tag blue">Expected level: ${levelLabel(c.level)}</span></div>
           <div class="small t2"><span class="muted">Behavioural standard:</span> ${esc(L.levels[c.level] || "")}${c.standard ? ` <span class="muted">· Your addition:</span> ${esc(c.standard)}` : ""}</div></div></div>
@@ -104,7 +104,7 @@ VIEWS.reflection = function () {
     <div class="card"><div class="card-h"><h3>Your reflection</h3></div><div class="card-b stack">
       ${r.r3.done ? `<div class="small t2" style="white-space:pre-line">${esc(b.reflection)}</div>` : `<textarea class="ta ${b.tried && b.reflection.trim().length < 15 ? "err" : ""}" rows="4" id="${P("r3", "bias", "reflection")}" ${bind(P("r3", "bias", "reflection"))} placeholder="Which biases could have influenced your ratings? What did you check, and what, if anything, would you change?">${esc(b.reflection)}</textarea>`}
       ${r.r3.final.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.final.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round3">Retry assessment</button>` : ""}</div>` : ""}
-      ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review/3">SCORE results</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalise appraisal"}</button></div>`}
+      ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review">View feedback report</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalise appraisal"}</button></div>`}
     </div></div>
   </div>`;
 };

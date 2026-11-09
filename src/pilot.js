@@ -144,3 +144,44 @@ const PULSE = {
     fair_appraisal: { slot: "appraisal", round: 3, label: "Fair, evidence-based appraisal", d: { performance: 0, trust: 5, development: 4 } }
   }
 };
+
+/* ---------- The participant: Commercial Director (My Profile) ----------
+   CEO-set objectives are provisional fictional pilot targets; edit here.
+   They are kept separate from Omar's individual objectives. */
+const DIRECTOR = {
+  title: "Commercial Director", department: "Commercial", company: "NextWave",
+  joined: "December 2026", reportsTo: "Chief Executive Officer (CEO)", status: "Active",
+  location: "Corporate Office", directReports: 4, year: "January – December 2027",
+  leave: "Leave information not available in pilot",
+  purpose: "Lead NextWave's commercial strategy and performance, ensuring sustainable revenue growth, effective market positioning, strong customer relationships, and alignment between commercial priorities and organizational objectives.",
+  responsibilities: [
+    "Translate company strategy into commercial objectives and measurable performance targets.",
+    "Lead and develop the Commercial Department.",
+    "Monitor commercial performance, sales opportunities, and customer trends.",
+    "Evaluate market intelligence and competitor developments to support business decisions.",
+    "Coordinate commercial activities across Sales, Business Development, Market Intelligence, and Proposal Design.",
+    "Establish clear performance expectations and conduct regular performance reviews.",
+    "Coach employees, address performance gaps, and support employee development.",
+    "Collaborate with other departments to respond to market and customer needs.",
+    "Report commercial performance and strategic recommendations to the CEO."
+  ],
+  team: ["omar", "youssef", "salma", "mariam"]
+};
+const CEO_OBJECTIVES = [
+  { id: "growth", title: "Drive Commercial Growth", kpi: "Achieve at least 15% annual commercial revenue growth compared with 2026.", target: "≥ 15%", short: "Revenue growth vs 2026" },
+  { id: "conversion", title: "Improve Sales Conversion", kpi: "Achieve an average annual proposal win rate of at least 35%.", target: "≥ 35%", short: "Average proposal win rate" },
+  { id: "pipeline", title: "Strengthen Commercial Pipeline", kpi: "Increase qualified commercial opportunities by at least 20% compared with the 2026 baseline.", target: "+20%", short: "Qualified opportunities vs 2026" },
+  { id: "responsiveness", title: "Strengthen Market Responsiveness", kpi: "Ensure significant competitor developments are assessed and translated into documented commercial response recommendations within an agreed business timeframe.", target: "Within agreed timeframe", short: "Competitor response" },
+  { id: "team", title: "Build a High-Performing Commercial Team", kpi: "Complete performance goal alignment, scheduled check-ins, and final evaluations for all direct reports within the company's performance management cycle.", target: "All direct reports", short: "Performance cycle completion" }
+];
+
+/* ---------- Commercial dashboard: one data source for Home and Business Dashboard ----------
+   Start of year: CEO targets with baseline placeholders (no invented results).
+   After the Valtora event: the agreed mid-year figures (DASHBOARD above).
+   Year-end: company figures delivered by the server with the year-end update. */
+const DASHBOARD_INFO = {
+  opps: { obj: "pipeline", def: "Qualified commercial opportunities in the pipeline, compared with the baseline.", source: "CRM pipeline report" },
+  obj: { obj: "conversion", def: "Share of recorded customer objections that relate to price.", source: "CRM objection records" },
+  win: { obj: "conversion", def: "Share of submitted proposals that were won.", source: "Proposal tracker" },
+  val: { obj: "responsiveness", def: "Share of active customer discussions in which Valtora was mentioned.", source: "CRM discussion notes" }
+};

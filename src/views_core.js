@@ -3,91 +3,86 @@
    ========================================================= */
 VIEWS.login = function () {
   const saved = S.session;
-  const feats = [["target", "Goal plans & KPIs"], ["layers", "Competency expectations"], ["chat", "Live employee conversations"], ["bars", "Business dashboard"], ["clipboard", "Year-end appraisal"], ["pulse", "Employee Pulse"]];
   return `<div class="login">
-    <section class="login-brand">
-      <img class="logo" src="${IMG.logo}" alt="NextWave">
-      <div class="stack" style="gap:16px">
-        <div class="eyebrow" style="color:#5ED3E2">Performance &amp; Goals · Pilot</div>
-        <h1>NextWave | SCORE<br>Performance Hub</h1>
-        <p>You are NextWave's Commercial Director. Manage Omar Hassan's performance across the year: set expectations, diagnose and coach, and complete a fair year-end evaluation.</p>
-        <div class="login-feats">${feats.map(([i, t]) => `<div>${icon(i, "i-sm")}${t}</div>`).join("")}</div>
-      </div>
-      <img class="score" src="${IMG.scoreTop}" alt="SCORE">
-    </section>
-    <section class="login-form"><div class="login-card">
-      <div><h2>Manager sign in</h2><p class="small muted" style="margin-top:4px">Performance cycle ${APP.cycleLabel}</p></div>
-      ${saved ? `<div class="resume stack" style="gap:10px">
-        <div class="row nowrap" style="gap:12px"><span class="initials" style="background:var(--navy)">${esc(initials(saved.name))}</span><div class="grow"><b>Resume saved session</b><div class="xs muted">${esc(saved.name)} · Round ${currentRound()}${S.saved ? ` · saved ${new Date(S.saved).toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}` : ""}</div></div></div>
-        <button class="btn primary" data-act="resume" id="resume-btn">Resume session ${icon("arrow", "i-sm")}</button>
-      </div>
-      <div class="row" style="gap:8px"><span style="flex:1;height:1px;background:var(--line)"></span><span class="xs muted">or start a new session</span><span style="flex:1;height:1px;background:var(--line)"></span></div>` : ""}
-      <form class="stack" autocomplete="off" onsubmit="return false">
-        <div class="field"><label for="login-name">Manager name</label><input class="inp" id="login-name" placeholder="Your name or table name" maxlength="60" autocomplete="off"></div>
-        <div class="field"><label for="login-pass">Password</label><input class="inp masked" id="login-pass" type="text" placeholder="Not required in training mode" autocomplete="off" data-lpignore="true" spellcheck="false"><span class="hint">Training environment: no real credentials are needed and nothing typed here is stored or sent.</span></div>
-        <button class="btn primary" data-act="signin" id="signin-btn" type="submit">Sign In</button>
+    <div class="login-card">
+      <img class="login-logo" src="${IMG.logo}" alt="NextWave">
+      <h1>Welcome to NextWave</h1>
+      <form class="stack" autocomplete="off" onsubmit="return false" novalidate>
+        <div class="field"><label for="login-name">Username</label><input class="inp" id="login-name" maxlength="60" autocomplete="off" spellcheck="false" aria-describedby="login-err">${UI.loginErr ? `<span class="err-text" id="login-err" role="alert">${esc(UI.loginErr)}</span>` : ""}</div>
+        <div class="field"><label for="login-pass">Password</label><input class="inp masked" id="login-pass" type="text" autocomplete="off" data-lpignore="true" spellcheck="false"></div>
+        <button class="btn primary login-btn" data-act="signin" id="signin-btn" type="submit">Sign In</button>
       </form>
-      <p class="xs muted">NextWave is a fictional company used for training. Your progress is saved in this browser. Conversation messages are sent to the SCORE server for AI processing.</p>
-    </div></section>
+      ${saved ? `<button class="resume-link" data-act="resume" id="resume-btn"><span class="initials sm">${esc(initials(saved.name))}</span><span class="grow"><b>Continue as ${esc(saved.name)}</b><span class="xs">Last active ${S.saved ? new Date(S.saved).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "recently"}</span></span>${icon("arrow", "i-sm")}</button>` : ""}
+    </div>
   </div>`;
 };
 
+/* ---------- Home: Commercial Overview ---------- */
 VIEWS.home = function () {
-  const r = rec(), E = EMP(), acts = pendingActions();
-  const tiles = [
-    { go: "goals", icon: "target", t: "Performance Goals", d: `${plural(r.goals.objectives.length, "objective", "objectives")} · ${plural(r.goals.comps.length, "competency", "competencies")}`, st: r.goals.status },
-    { go: "business", icon: "bars", t: "Business Dashboard", d: r2Status(r) === "locked" ? "Commercial indicators" : "Valtora impact · mid-year", st: r2Status(r) === "locked" ? "locked" : r.r2.seenDashboard ? "in_progress" : "action" },
-    { go: "conversations", icon: "chat", t: "Employee Conversations", d: "Alignment · mid-year · appraisal", st: conversationsStatus(r) },
-    { go: "appraisal", icon: "clipboard", t: "Final Appraisal", d: r3Status(r) === "locked" ? "Opens in December" : "WHAT · HOW · overall", st: appraisalStatus(r) }
-  ];
-  return pageHead("Home", `Welcome, ${esc(S.session.name)}`, `<button class="btn" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Inbox</button>`, `Commercial Director · Performance cycle ${APP.cycleLabel}`) + `
+  const E = EMP(), r = rec();
+  return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", `${DIRECTOR.title} · Commercial Department`) + `
   <div class="stack-lg">
-    ${r2Status(r) !== "locked" && !r.r2.submitted ? `<button class="alert-bar" data-act="go" data-go="business">${icon("alert")}<span class="grow"><b>Business alert</b> · Commercial indicators have changed since Valtora's announcement. Review the latest performance information.</span>${icon("chev", "i-sm")}</button>` : ""}
-    ${roundTracker()}
-    <div class="grid2" style="align-items:start">
-      <div class="card pad-lg"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Your direct report</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)} · Previous year ${esc(E.prevRating)}</div><div><button class="btn sm" data-act="modal" data-m="profile" data-emp="${S.emp}">${icon("user", "i-sm")} Employee profile</button></div></div></div></div>
-      <div class="card pad-lg stack" style="gap:10px"><div class="row between"><h3>Employee Pulse</h3><button class="btn ghost sm" data-act="modal" data-m="pulse">History</button></div>${pulseBars(r)}<p class="xs muted">Updated after meaningful decisions and completed conversations.</p></div>
-    </div>
-    <div class="grid4">${tiles.map(t => `<button class="tile ${t.st === "locked" ? "locked" : ""}" data-act="go" data-go="${t.go}"><span class="ti">${icon(t.icon)}</span><div><h3>${t.t}</h3><div class="small muted">${esc(t.d)}</div></div><div class="meta">${statusChip(t.st)}${icon("chev", "i-sm")}</div></button>`).join("")}</div>
-    <div class="grid2" style="align-items:start">
-      <div class="card"><div class="card-h"><h3>Pending actions</h3><span class="tag">${acts.length}</span></div>${acts.length ? acts.map(a => `<button class="action-row" data-act="go" data-go="${a.go}"><span class="dot ${a.urgent ? "risk" : ""}"></span><span class="grow"><b class="small">${esc(a.t)}</b><div class="xs muted">${esc(a.d)}</div></span>${icon("chev", "i-sm")}</button>`).join("") : `<div class="card-b small muted">No pending actions. ${r.r3.done ? "The performance year is complete." : "Wait for the next instruction from your facilitator."}</div>`}</div>
-      ${inboxPreview()}
-    </div>
+    <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee overview</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div>
+      <button class="btn" data-act="modal" data-m="profile" data-emp="${S.emp}">${icon("user", "i-sm")} View profile</button></div></div>
+    ${commercialOverview(r, true)}
   </div>`;
 };
-function inboxPreview() {
-  const ms = mailList().slice(0, 5);
-  return `<div class="card"><div class="card-h"><h3>Inbox</h3><button class="btn ghost sm" data-act="go" data-go="inbox">Open inbox</button></div>${ms.map(m => `<button class="action-row" data-act="go" data-go="inbox/${m.id}"><span class="dot ${m.unread ? "" : "muted"}"></span><span class="grow"><b class="small" style="${m.unread ? "" : "font-weight:550"}">${esc(m.subject)}</b><div class="xs muted">${esc(senderOf(m).name)} · ${m.date}</div></span>${icon("chev", "i-sm")}</button>`).join("")}</div>`;
-}
+
+/* ---------- My Profile (the participant) ---------- */
+VIEWS.profile = function () {
+  const n = S.session.name, D = DIRECTOR;
+  const info = [["Employee name", n], ["Job title", D.title], ["Department", D.department], ["Company", D.company], ["Joining date", D.joined], ["Reporting line", D.reportsTo], ["Employment status", D.status], ["Work location", D.location], ["Direct reports", String(D.directReports)], ["Performance year", D.year]];
+  return pageHead("My Profile", "My Profile") + `<div class="stack-lg">
+    <div class="card pad-lg"><div class="emp-hero"><span class="initials xl">${esc(initials(n))}</span><div class="stack-sm grow" style="gap:3px"><h2>${esc(n)}</h2><div class="t2">${D.title} · ${D.department}</div><div class="xs muted">${D.company} · Joined ${D.joined}</div></div><span class="chip st-approved">${D.status}</span></div></div>
+    <div class="grid2" style="align-items:start">
+      <section class="card"><div class="card-h"><h3>Personal &amp; employment information</h3></div><div class="card-b"><dl class="kv">${info.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}<dt>Leave information</dt><dd class="muted">${esc(D.leave)}</dd></dl></div></section>
+      <section class="card"><div class="card-h"><h3>My team</h3></div><div class="card-b">
+        <div class="org"><div class="org-node top">${icon("building", "i-sm")}<span><b>Chief Executive Officer</b><span class="xs muted">CEO</span></span></div><div class="org-line"></div>
+          <div class="org-node me"><span class="initials sm">${esc(initials(n))}</span><span><b>${esc(n)}</b><span class="xs muted">${D.title}</span></span></div><div class="org-line"></div>
+          <div class="xs muted" style="text-align:center;margin-bottom:8px">Commercial Department</div>
+          <div class="org-team">${D.team.map(e => `<button class="org-node" data-act="modal" data-m="profile" data-emp="${e}">${avatar(e, "sm")}<span><b>${esc(EMPLOYEES[e].name)}</b><span class="xs muted">${esc(EMPLOYEES[e].title)}</span></span></button>`).join("")}</div></div>
+      </div></section>
+    </div>
+    <section class="card"><div class="card-h"><h3>My job description</h3><span class="xs muted">${D.title}</span></div><div class="card-b stack">
+      <div class="stack-sm"><h4>Job purpose</h4><p class="small t2">${esc(D.purpose)}</p></div>
+      <div class="stack-sm"><h4>Key responsibilities</h4><ol class="list-plain small t2">${D.responsibilities.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div>
+    </div></section>
+    <section class="card"><div class="card-h"><div><h3>My performance objectives ${APP.cycleYear}</h3><div class="xs muted">Set by the Chief Executive Officer · not editable</div></div><span class="tag">${CEO_OBJECTIVES.length} objectives</span></div><div class="card-b stack">
+      <p class="small t2">These are your own objectives, assigned by the CEO. They set the strategic context for the objectives you agree with your team. They are separate from your employees' individual objectives.</p>
+      ${CEO_OBJECTIVES.map((o, i) => `<div class="ceo-obj"><span class="goal-n">${i + 1}</span><div class="grow"><b>${esc(o.title)}</b><div class="small t2"><span class="muted">KPI:</span> ${esc(o.kpi)}</div></div><span class="tag blue">${esc(o.target)}</span></div>`).join("")}
+    </div></section>
+  </div>`;
+};
 MODALS.profile = function (m) {
   const e = m.emp || S.emp, E = EMPLOYEES[e], active = PILOT.active.includes(e);
   return modalWrap("Employee profile", `
-    <div class="row nowrap" style="gap:14px">${avatar(e, "lg")}<div><h3>${esc(E.name)}</h3><div class="small t2">${esc(E.title)} · ${esc(E.tenure)}</div></div></div>
+    <div class="row nowrap" style="gap:14px">${avatar(e, "lg")}<div><h3>${esc(E.name)}</h3><div class="small t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div></div>
     ${active ? `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd><dt>Previous rating</dt><dd>${esc(E.prevRating)}</dd></dl>
     <div class="stack-sm"><h4>Role responsibilities</h4><ul class="list-plain small t2">${E.role.responsibilities.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
     <div class="stack-sm"><h4>Strengths</h4><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div></div>
     <div class="stack-sm"><h4>Previous-year evidence</h4><ul class="list-plain small t2">${E.prevEvidence.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div class="stack-sm"><h4>Previous stakeholder feedback</h4>${E.prevFeedback.map(([w, t]) => `<div class="small"><b>${esc(w)}:</b> <span class="t2">“${esc(t)}”</span></div>`).join("")}</div>
-    <p class="xs muted">The full profile and job description are in your printed handouts.</p>`
-    : `<p class="small t2">${esc(E.name)} is part of your Commercial team. In this pilot, ${esc(E.name.split(" ")[0])} appears as a colleague and stakeholder; their own performance journey is not active yet.</p>`}`, `<button class="btn" data-act="closeModal">Close</button>`, true);
+    <div class="stack-sm"><h4>Previous stakeholder feedback</h4>${E.prevFeedback.map(([w, t]) => `<div class="small"><b>${esc(w)}:</b> <span class="t2">“${esc(t)}”</span></div>`).join("")}</div>`
+    : `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd></dl><div class="stack-sm"><h4>Role purpose</h4><p class="small t2">${esc(E.role.purpose)}</p></div>`}`, `<button class="btn" data-act="closeModal">Close</button>`, true);
 };
 
 VIEWS.inbox = function () {
   const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
-  return pageHead("Home / Inbox", "Inbox") + `<div class="card split">
-    <div class="list">${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${esc(m.subject)}</span></span></button>`).join("")}</div>
+  return pageHead("My Inbox", "My Inbox") + `<div class="card split">
+    <div class="list">${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
     <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
   </div>`;
 };
 function mailView(m) {
-  const s = senderOf(m);
+  const s = senderOf(m), r = rec();
   const body = m.body.map(p => p === "__LIST__" ? `<ul>${m.list.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p)}</p>`).join("");
+  const attach = m.attach ? `<div class="attach">${icon("clip", "i-sm")}<span class="grow"><b class="small">Year-End Performance Update — Omar Hassan.pdf</b><span class="xs muted">${r.r3.dataset ? "Performance evidence · December 2027" : r.r3.error ? esc(r.r3.error) : "Preparing…"}</span></span>${r.r3.dataset ? `<button class="btn sm" data-act="go" data-go="yearend">${icon("eye", "i-sm")} Open</button>` : r.r3.error ? `<button class="btn sm" data-act="loadYearEnd">Retry</button>` : ""}</div>` : "";
   return `<article class="mail">
     <h2>${esc(m.subject)}</h2>
-    <div class="mail-meta">${senderAvatar(m)}<div class="grow"><b class="small">${esc(s.name)}</b> <span class="xs muted">${esc(s.title)}</span><div class="xs muted">To: ${esc(S.session.name)} (Commercial Director) · ${m.date}</div></div></div>
+    <div class="mail-meta">${senderAvatar(m)}<div class="grow"><b class="small">${esc(s.name)}</b> <span class="xs muted">${esc(s.title)}</span><div class="xs muted">To: ${esc(S.session.name)} (${DIRECTOR.title}) · ${m.date}</div></div></div>
     ${m.secondhand ? `<div class="notice warn">${icon("info", "i-sm")}<span><b>Secondhand account.</b> Mariam is reporting what she observed and what Omar told her. It has not been verified.</span></div>` : ""}
     <div class="mail-body">${body}</div>
+    ${attach}
     ${m.action ? `<div><button class="btn primary" data-act="go" data-go="${m.action.go}">${esc(m.action.l)} ${icon("arrow", "i-sm")}</button></div>` : ""}
   </article>`;
 }
@@ -95,8 +90,8 @@ function mailView(m) {
 /* ---------- Facilitator view ---------- */
 VIEWS.facilitator = function () {
   if (!UI.facOK) return pageHead("Facilitator", "Facilitator view") + `<div class="card pad-lg stack" style="max-width:440px">
-    <p class="small t2">Enter the facilitator code to manage rounds, see the scenario state and apply manual controls.</p>
-    <div class="field"><label for="fac-code">Facilitator code</label><input class="inp" id="fac-code" inputmode="numeric" autocomplete="off" maxlength="8"></div>
+    <p class="small t2">Enter your code.</p>
+    <div class="field"><label for="fac-code">Code</label><input class="inp" id="fac-code" inputmode="numeric" autocomplete="off" maxlength="8"></div>
     ${UI.codeErr === "fac" ? `<div class="err-text">That code is not correct.</div>` : ""}
     <div><button class="btn primary" data-act="facUnlock">Open facilitator view</button></div></div>`;
   const r = rec(), sc = scoreSummary(r), crit = criterionResults(r);
@@ -126,7 +121,8 @@ VIEWS.facilitator = function () {
     <div class="card"><div class="card-h"><h3>Criterion scores</h3><span class="xs muted">Enter a score to override the AI assessment; clear it to restore</span></div><div class="card-b" style="overflow-x:auto">
       ${AIS.scoring ? `<table class="tbl" style="min-width:720px"><thead><tr><th>Round</th><th>Criterion</th><th>AI</th><th>Max</th><th>Override</th></tr></thead><tbody>${crit.map(c => `<tr><td>${c.round}</td><td>${esc(c.groupLabel)} · ${esc(c.label)}</td><td class="num">${c.a ? c.a.score : "—"}</td><td class="num">${c.max}</td><td><input class="inp" style="width:80px" type="number" min="0" max="${c.max}" data-fac="${c.id}" value="${r.fac[c.id] != null ? r.fac[c.id] : ""}"></td></tr>`).join("")}</tbody></table>` : `<p class="small muted">Scoring structure unavailable: the SCORE server could not be reached.</p>`}
     </div></div>
-    <div class="card"><div class="card-h"><h3>Employee Pulse history</h3></div><div class="card-b">${pulseHistory(r)}</div></div>
+    <div class="card"><div class="card-h"><h3>Employee Pulse history</h3></div><div class="card-b">${pulseHistory(r, true)}</div></div>
+    <div class="card pad row between"><div><b class="small">SCORE feedback report</b><div class="xs muted">Scores, evidence and feedback by round. Participants see it after the final appraisal.</div></div><button class="btn" data-act="go" data-go="review">Open report</button></div>
     <div class="card pad row between"><div><b class="small">Reset this device</b><div class="xs muted">Deletes this session's saved progress.</div></div><button class="btn danger" data-act="modal" data-m="reset">${icon("reset", "i-sm")} Reset session</button></div>
   </div>`;
 };

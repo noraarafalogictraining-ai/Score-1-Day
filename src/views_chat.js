@@ -13,7 +13,7 @@ VIEWS.conversations = function () {
   const r = rec(), ts = threads(r), cur = ts.find(t => t.id === UI.sub) || ts.find(t => t.st === "action") || ts[0];
   if (cur.id === "midyear") ensureDiagnosticOpening(r);
   return pageHead(`Employee Conversations / ${esc(EMP().name)}`, "Employee Conversations", empChip()) + `<div class="card split">
-    <div class="list">${ts.map(t => `<button class="msg-item ${t === cur ? "on" : ""}" data-act="go" data-go="conversations/${t.id}">${avatar(S.emp, "sm")}<span class="stack-sm grow" style="gap:2px"><span class="xs muted">Round ${t.round}</span><span class="subj">${t.t}</span><span class="xs muted">${t.d}</span></span>${statusChip(t.st)}</button>`).join("")}</div>
+    <div class="list">${ts.map(t => `<button class="msg-item ${t === cur ? "on" : ""}" data-act="go" data-go="conversations/${t.id}">${avatar(S.emp, "sm")}<span class="stack-sm grow" style="gap:2px"><span class="xs muted">${PERIOD[t.round]} 2027</span><span class="subj">${t.t}</span><span class="xs muted">${t.d}</span></span>${statusChip(t.st)}</button>`).join("")}</div>
     <div>${cur.id === "alignment" ? alignmentThread(r) : cur.id === "midyear" ? diagnosticThread(r) : appraisalThread(r)}</div>
   </div>`;
 };
@@ -43,7 +43,7 @@ function alignmentThread(r) {
   if (!r.align.log.length) return `<div class="empty">${icon("chat")}<b>No conversation yet</b><span class="small">Omar will reply when you submit the goal plan for alignment.</span>${goalsEditable(r) ? `<button class="btn primary" data-act="go" data-go="goals/submit">Open Review &amp; Submit</button>` : ""}</div>`;
   const pending = r.goals.status === "pending_alignment";
   return chatPanel("alignment", {
-    title: "Round 1 · Performance plan alignment", log: r.align.log, closed: !pending,
+    title: "Performance plan alignment · January 2027", log: r.align.log, closed: !pending,
     top: pending && r.align.ready ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Omar is ready to confirm the plan.</span><button class="btn primary sm" data-act="alignConfirm" id="align-confirm" ${UI.busy ? "disabled" : ""}>Confirm alignment</button></div>` : "",
     extra: pending ? `<button class="btn sm" data-act="reopenPlan">Edit the plan</button>` : "",
     bottom: !pending ? `<div class="small t2">${icon("check", "i-sm")} Performance contract confirmed${r.align.manual ? " by the facilitator" : ""}.</div>` : ""
@@ -53,17 +53,17 @@ function diagnosticThread(r) {
   if (r2Status(r) === "locked") return `<div class="empty">${icon("lock")}<b>Not yet</b><span class="small">Nothing here yet.</span></div>`;
   const n = r.r2.diag.log.filter(m => m.from === "manager").length;
   return chatPanel("diagnostic", {
-    title: `Round 2 · ${SIM_DATES.midyear}`, log: r.r2.diag.log, closed: r.r2.diag.ended,
+    title: `Mid-year conversation · ${SIM_DATES.midyear}`, log: r.r2.diag.log, closed: r.r2.diag.ended,
     headRight: `<span class="row nowrap" style="gap:6px"><button class="btn ghost sm" data-act="go" data-go="business">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Inbox</button></span>`,
     extra: `<button class="btn sm" data-act="modal" data-m="endChat" data-k="diagnostic" ${n < CHAT_LIMITS.diagnosticMin ? `disabled title="Exchange at least ${CHAT_LIMITS.diagnosticMin} messages first"` : ""}>End conversation</button>`,
-    bottom: r.r2.diag.ended ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Conversation ended. Record what you learned in the Evidence Log.</span><button class="btn sm primary" data-act="go" data-go="round2">Round 2 checklist</button></div>` : ""
+    bottom: r.r2.diag.ended ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Conversation ended. Record what you learned in the Evidence Log.</span><button class="btn sm primary" data-act="go" data-go="round2">Mid-year review</button></div>` : ""
   });
 }
 function appraisalThread(r) {
   if (r.r3.appraisal.status !== "submitted" && !r.r3.done) return `<div class="empty">${icon("chat")}<b>No conversation yet</b><span class="small">Omar will respond after you submit the year-end appraisal.</span></div>`;
   const n = r.r3.conv.log.filter(m => m.from === "manager").length;
   return chatPanel("appraisal", {
-    title: `Round 3 · ${SIM_DATES.yearend}`, log: r.r3.conv.log, closed: r.r3.conv.ended,
+    title: `Year-end appraisal · ${SIM_DATES.yearend}`, log: r.r3.conv.log, closed: r.r3.conv.ended,
     headRight: `<button class="btn ghost sm" data-act="drawerAppraisal">${icon("clipboard", "i-sm")} Your appraisal</button>`,
     top: !r.r3.conv.log.some(m => m.from === "employee") && !UI.busy && aiReady() && !r.r3.conv.ended ? `<div class="row between"><span class="small t2">Omar has not replied yet.</span><button class="btn sm primary" data-act="appraisalOpen">Fetch Omar's response</button></div>` : "",
     extra: `<button class="btn sm" data-act="modal" data-m="endChat" data-k="appraisal" ${n < CHAT_LIMITS.appraisalMin ? "disabled" : ""}>End conversation</button>`,

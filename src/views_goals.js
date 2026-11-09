@@ -10,9 +10,9 @@ VIEWS.goals = function () {
     ? `<div class="notice" style="margin-bottom:14px">${icon("info", "i-sm")}<span class="grow"><b>Pending Employee Alignment.</b> Omar has replied to your plan. The contract is finalised once you have aligned with him.</span><button class="btn sm primary" data-act="go" data-go="conversations/alignment">Open conversation</button></div>`
     : g.status === "approved" ? `<div class="notice good" style="margin-bottom:14px">${icon("check", "i-sm")}<span>The performance contract is confirmed and locked for the year. It will carry forward into the year-end appraisal.</span></div>` : "";
   const tabs = [["objectives", "Performance Objectives", g.objectives.length], ["competencies", "Competencies & Proficiency Levels", g.comps.length], ["submit", ed ? "Review & Submit" : "Summary", null]];
-  return pageHead(`Performance Goals / ${esc(E.name)}`, "Performance Goal Plan", statusChip(g.status)) + `
+  return pageHead(`Performance Management / Objectives`, `Objectives · ${esc(E.name)}`, statusChip(g.status)) + `
   <div class="card pad" style="margin-bottom:14px"><div class="plan-head">
-    <div class="row nowrap" style="gap:12px">${avatar(S.emp, "lg")}<div><h3>${esc(E.name)}</h3><div class="small t2">${esc(E.title)}</div><div class="xs muted">Goal plan ${APP.cycleYear} · ${APP.cycleLabel} · <span class="round-tag">Round 1</span></div></div></div>
+    <div class="row nowrap" style="gap:12px">${avatar(S.emp, "lg")}<div><h3>${esc(E.name)}</h3><div class="small t2">${esc(E.title)}</div><div class="xs muted">Goal plan ${APP.cycleYear} · ${APP.cycleLabel}</div></div></div>
     <div class="row"><button class="btn sm" data-act="modal" data-m="profile" data-emp="${S.emp}">${icon("user", "i-sm")} Profile</button>${ed ? `<button class="btn primary" data-act="go" data-go="goals/submit">${icon("send", "i-sm")} Submit for Employee Alignment</button>` : ""}</div>
   </div></div>
   ${banner}

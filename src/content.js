@@ -43,10 +43,10 @@ function hrMessages() {
       list: ["Tracking progress.", "Documenting evidence.", "Monitoring performance gaps.", "Maintaining regular employee communication.", "Taking appropriate management action."],
       action: { l: "Open Evidence Log", go: "evidence" } },
     yearend: { subject: "Year-End Performance Update and Appraisal", date: SIM_DATES.yearend,
-      body: ["Dear Commercial Director,", "The year-end performance update for Omar Hassan is now available. Please review it, compare the results with the objectives and competencies you agreed in January, and complete the year-end appraisal.", "NextWave HR"],
-      action: { l: "Open Year-End Update", go: "yearend" } },
+      body: ["Dear Commercial Director,", "Please find attached the year-end performance update for Omar Hassan.", "Review the evidence, compare the results with the objectives and competencies agreed in January, and complete the year-end appraisal.", "NextWave HR"],
+      action: { l: "Open Final Appraisal", go: "appraisal" } },
     closed: { subject: "Performance Appraisal Completed", date: SIM_DATES.closed,
       body: ["Dear Commercial Director,", `Thank you. The ${APP.cycleYear} appraisal for Omar Hassan has been completed and recorded.`, "NextWave HR"],
-      action: { l: "Open SCORE Review", go: "review" } }
+      action: { l: "View feedback report", go: "review" } }
   };
 }
