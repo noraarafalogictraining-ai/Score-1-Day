@@ -53,6 +53,20 @@ The participant sees a corporate employee platform, not a training exercise: no 
 
 Configuration: the director profile, job description and CEO objectives are `DIRECTOR` and `CEO_OBJECTIVES` in `src/pilot.js` (provisional fictional targets, separate from Omar's data). Company year-end figures for the dashboard come from the server (`COMPANY_YEAR_END.metrics` in `api/_lib/scenario_omar.js`), so they stay hidden until released.
 
+## Phase 2: objectives, competencies and the Omar chat
+
+- **Objectives** has two tabs, **Performance Objectives** and **Competencies**. Each objective is Objective, KPI / Performance measure (target written into it) and Weight. Evidence Source and Review Frequency were removed from the form, the validation and the assessment. *Add Objective* sits above the list; validation (blocking gaps plus advisory quality prompts) sits under each tab. *Submit for Employee Alignment* is enabled when both tabs are complete.
+- **Competencies:** select 3–5 from the library (names only), choose Basic / Intermediate / Advanced, and write a required **Expected Behavioral Standard**. Level descriptions are no longer shown; participants use the printed competency dictionary. The descriptions stay on the server (`COMPETENCY_LEVELS` in `api/_lib/scenario_omar.js`) for the assessment, which judges whether each written standard is observable and fits its level.
+- **KPI scoring** (still 20 points): relevance 3, clarity 2, measurability 4, target specificity and reasonableness 3, controllability 3, alignment with commercial priorities 2, weights and balance 3.
+- **One continuous chat with Omar**, opened from his round photo button (red unread badge) or from the **Chat** entry at the top of My Inbox. It replaces the Employee Conversations page. The thread shows a December 2026 welcome exchange (configured in `CHAT.history`, never scored), then:
+  - Omar's January message after the plan is submitted;
+  - his June support request when the business event is released;
+  - his December reply after the appraisal is submitted.
+
+  The chat never opens by itself, and messages are added once only, so they don't repeat on refresh or repeat clicks.
+- **Internally** each message still belongs to its own context (alignment, diagnostic, appraisal). Only that context's messages go to the AI and to its assessment, with earlier agreements passed as background. The mid-year conversation closes when the mid-year review is submitted. The appraisal conversation closes with *Continue to bias reflection* on the appraisal page.
+- **Omar's style:** natural workplace chat, usually 1–3 short sentences, concrete when asked, no theory, no coaching the manager, no automatic agreement. In January he says only that he has a concern; he explains it when asked.
+
 ## The three-round experience (facilitator view of the structure)
 
 | Round | What happens | Facilitator |

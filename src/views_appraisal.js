@@ -39,7 +39,7 @@ VIEWS.appraisal = function () {
   return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence</button>`, `${APP.cycleLabel} · Evaluate against the plan agreed in January.`) + `
   <div class="stack-lg">
     ${a.revisions && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You are reconsidering the appraisal. Update it, then submit the revision.</span></div>` : ""}
-    ${!ed ? `<div class="notice ${r.r3.done ? "good" : ""}">${icon(r.r3.done ? "check" : "info", "i-sm")}<span>${r.r3.done ? "The appraisal is final and recorded." : "Appraisal submitted to Omar."}</span></div>` : ""}
+    ${!ed ? appraisalStatusNotice(r) : ""}
     <section class="stack ap-sec" id="sec-a"><div class="row between"><h2>WHAT · Results</h2><span class="xs muted">${plural(g.objectives.length, "objective", "objectives")} from the agreed plan</span></div>
       ${g.objectives.map((o, i) => { const x = a.what[o.id] || {}, base = P("r3", "appraisal", "what", o.id); return `<div class="ap-item">
         <div class="ap-item-h"><div class="grow"><div class="xs muted">Objective ${i + 1} · Weight ${num(o.weight)}%</div><b>${esc(o.objective)}</b><div class="small t2" style="margin-top:3px"><span class="muted">KPI:</span> ${esc(o.kpi)}</div></div></div>
@@ -52,7 +52,7 @@ VIEWS.appraisal = function () {
     <section class="stack ap-sec" id="sec-b"><div class="row between"><h2>HOW · Competencies</h2><span class="xs muted">${plural(g.comps.length, "competency", "competencies")} from the agreed plan</span></div>
       ${g.comps.map(c => { const L = competencyById(S.emp, c.id) || { name: "Competency", levels: {} }, x = a.how[c.id] || {}, base = P("r3", "appraisal", "how", c.id); return `<div class="ap-item">
         <div class="ap-item-h"><div class="grow stack-sm" style="gap:4px"><div class="row" style="gap:8px"><b>${esc(L.name)}</b><span class="tag blue">Expected level: ${levelLabel(c.level)}</span></div>
-          <div class="small t2"><span class="muted">Behavioural standard:</span> ${esc(L.levels[c.level] || "")}${c.standard ? ` <span class="muted">· Your addition:</span> ${esc(c.standard)}` : ""}</div></div></div>
+          <div class="small t2"><span class="muted">Expected behavioral standard:</span> ${c.standard ? esc(c.standard) : "<span class='muted'>None</span>"}</div></div></div>
         <div class="ap-item-b">
           <div class="field full"><label class="lbl" for="${base}.observed">Observed behaviour <span class="req">*</span></label>${ta(base + ".observed", x.observed, "What did Omar do that you or others observed?", hE(c, "observed"))}</div>
           <div class="field full"><span class="lbl">Manager rating (1–5) <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, t && !x.rating) : rateRO(x.rating)}<span class="hint">The rating is how well Omar performed against the expected level, not the level itself.</span></div>
@@ -79,6 +79,12 @@ VIEWS.appraisal = function () {
     </div></div>` : ""}
   </div>`;
 };
+function appraisalStatusNotice(r) {
+  if (r.r3.done) return `<div class="notice good">${icon("check", "i-sm")}<span>The appraisal is final and recorded.</span></div>`;
+  if (r.r3.conv.ended) return `<div class="notice">${icon("info", "i-sm")}<span class="grow">Appraisal shared with Omar.</span><button class="btn sm primary" data-act="go" data-go="reflection">Bias reflection</button></div>`;
+  const replied = r.r3.conv.log.some(m => m.from === "employee"), answered = managerCount(r.r3.conv.log) >= CHAT_LIMITS.appraisalMin;
+  return `<div class="notice">${icon("chat", "i-sm")}<span class="grow">${replied ? "Omar has replied about the appraisal. Discuss it with him in the chat." : "Appraisal shared with Omar. Waiting for his reply…"}</span>${replied ? `<button class="btn sm" data-act="openChat">Open chat</button>` : ""}${answered ? `<button class="btn sm primary" data-act="appraisalContinue" id="appraisal-continue">Continue to bias reflection</button>` : ""}</div>`;
+}
 DRAWERS.evidence = function (d) {
   const r = rec(), list = r.evidence.filter(e => d.id === "all" || e.link === d.id);
   return `<div class="drawer-scrim" data-act="closeDrawer"></div><aside class="drawer wide" role="dialog" aria-label="Evidence"><div class="drawer-h"><h3>Evidence</h3><button class="icon-btn" data-act="closeDrawer" aria-label="Close">${icon("x")}</button></div>

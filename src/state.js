@@ -5,7 +5,7 @@
 let _uid = 0;
 const uid = (p = "x") => p + Date.now().toString(36) + (_uid++).toString(36);
 
-function blankObjective() { return { id: uid("o"), objective: "", kpi: "", weight: "", evidence: "", evidenceOther: "", freq: "" }; }
+function blankObjective() { return { id: uid("o"), objective: "", kpi: "", weight: "" }; }
 function freshRecord() {
   return {
     goals: { status: "not_started", objectives: [], comps: [], tried: false, submits: 0 },
@@ -21,6 +21,7 @@ function freshRecord() {
       final: { assessment: null, error: null }, done: false
     },
     pulse: { values: { ...PULSE.baseline }, history: [], slots: {} },
+    chat: { seen: 0 },
     fac: {}, pc: {}
   };
 }
@@ -104,23 +105,42 @@ function objMissing(o) {
   if (!o.kpi.trim()) m.push("KPI / Performance measure");
   if (o.weight === "" || o.weight == null) m.push("Weight");
   else if (!(num(o.weight) > 0) || num(o.weight) > 100) m.push("Weight between 1 and 100");
-  if (!o.evidence) m.push("Evidence source");
-  else if (o.evidence === "Other" && !o.evidenceOther.trim()) m.push("Name the other evidence source");
-  if (!o.freq) m.push("Review frequency");
   return m;
 }
-const evidenceLabel = (o) => o.evidence === "Other" ? (o.evidenceOther.trim() || "Other") : o.evidence;
-function planValidation(r = rec()) {
-  const g = r.goals, errors = [], notes = [], n = g.objectives.length;
-  if (!n) errors.push("Add at least one performance objective.");
+const HAS_TARGET = /\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|all|every)\b/i;
+const words = (t) => String(t || "").trim().split(/\s+/).filter(Boolean).length;
+/* Objectives tab: completeness (blocking) and quality prompts (advisory, never scored here) */
+function objectiveValidation(r = rec()) {
+  const g = r.goals, errors = [], tips = [], n = g.objectives.length, wt = weightTotal(r);
+  if (!n) errors.push("Add at least one objective.");
   g.objectives.forEach((o, i) => { const m = objMissing(o); if (m.length) errors.push(`Objective ${i + 1}: ${m.join(", ")}.`); });
-  const wt = weightTotal(r);
-  if (n && wt !== 100) errors.push(`Objective weights total ${wt}%. They must total 100%.`);
-  if (n && (n < OBJ_RANGE.min || n > OBJ_RANGE.max)) notes.push(`You have ${n} objective${n === 1 ? "" : "s"}. ${OBJ_RANGE.min}–${OBJ_RANGE.max} is the recommended range.`);
-  const c = g.comps.length;
+  if (n && wt !== 100) errors.push(`Weights total ${wt}%. They must total 100%.`);
+  if (n && (n < OBJ_RANGE.min || n > OBJ_RANGE.max)) tips.push(`${n} objective${n === 1 ? "" : "s"}: ${OBJ_RANGE.min}–${OBJ_RANGE.max} is the recommended range.`);
+  g.objectives.forEach((o, i) => {
+    if (o.kpi.trim() && !HAS_TARGET.test(o.kpi)) tips.push(`Objective ${i + 1}: the KPI has no target figure. State the target in the KPI wording if it can be measured.`);
+    if (o.kpi.trim() && words(o.kpi) < 5) tips.push(`Objective ${i + 1}: the KPI is very short. Would you and Omar judge it the same way at year-end?`);
+    if (o.objective.trim() && words(o.objective) < 2) tips.push(`Objective ${i + 1}: describe what must be achieved more clearly.`);
+    if (num(o.weight) > 0 && num(o.weight) < 10) tips.push(`Objective ${i + 1}: a weight under 10% suggests it may not be a priority for the year.`);
+  });
+  return { errors, tips, ok: errors.length === 0 };
+}
+/* Competencies tab */
+function competencyValidation(r = rec()) {
+  const g = r.goals, errors = [], tips = [], c = g.comps.length;
   if (c < COMP_RANGE.min || c > COMP_RANGE.max) errors.push(`Select ${COMP_RANGE.min}–${COMP_RANGE.max} competencies (currently ${c}).`);
-  g.comps.forEach(k => { if (!k.level) errors.push(`${compName(k.id)}: choose the expected proficiency level.`); });
-  return { errors, notes, ok: errors.length === 0 };
+  g.comps.forEach(k => {
+    const n = compName(k.id), miss = [];
+    if (!k.level) miss.push("expected proficiency level");
+    if (!(k.standard || "").trim()) miss.push("expected behavioral standard");
+    if (miss.length) errors.push(`${n}: ${miss.join(" and ")}.`);
+    else if (words(k.standard) < 6) tips.push(`${n}: describe the behavior in more detail: what would Omar do or say?`);
+    else if (/\b(good|great|strong|excellent|positive attitude|team player)\b/i.test(k.standard) && words(k.standard) < 12) tips.push(`${n}: the standard reads like a trait. Describe what you would observe Omar doing.`);
+  });
+  return { errors, tips, ok: errors.length === 0 };
+}
+function planValidation(r = rec()) {
+  const a = objectiveValidation(r), b = competencyValidation(r);
+  return { errors: [...a.errors, ...b.errors], notes: [...a.tips, ...b.tips], ok: a.ok && b.ok };
 }
 function compName(id) { return (competencyById(S.emp, id) || {}).name || "Competency"; }
 function planItems(r = rec()) {
@@ -135,7 +155,7 @@ const levelLabel = (id) => (LEVELS.find(l => l.id === id) || {}).l || "Not set";
 /* ---------- Payloads for the server ---------- */
 function planPayload(r = rec()) {
   return {
-    objectives: r.goals.objectives.map(o => ({ objective: o.objective, kpi: o.kpi, weight: num(o.weight), evidence: evidenceLabel(o), freq: o.freq })),
+    objectives: r.goals.objectives.map(o => ({ objective: o.objective, kpi: o.kpi, weight: num(o.weight) })),
     comps: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "" }))
   };
 }
@@ -169,3 +189,22 @@ function appraisalValidation(r = rec()) {
   return { errors, ok: errors.length === 0 };
 }
 const ratingLabel = (v) => { const r = RATING_SCALE.find(x => x.v === v); return r ? `${r.v} · ${r.l}` : "Not rated"; };
+
+/* ---------- Omar chat: one visible thread built from the internal contexts ---------- */
+function chatThread(r = rec()) {
+  const out = CHAT.history.map((m, i) => ({ ...m, ctx: "history", key: "h" + i }));
+  [["alignment", r.align.log], ["diagnostic", r.r2.diag.log], ["appraisal", r.r3.conv.log]].forEach(([ctx, log]) =>
+    log.forEach((m, i) => { if (m.from === "manager" || m.from === "employee") out.push({ ...m, ctx, key: ctx + i }); }));
+  return out;
+}
+const incoming = (r = rec()) => chatThread(r).filter(m => m.ctx !== "history" && m.from === "employee").length;
+function chatUnread(r = rec()) { return Math.max(0, incoming(r) - (r.chat.seen || 0)); }
+function markChatSeen(r = rec()) { const n = incoming(r); if (r.chat.seen !== n) { r.chat.seen = n; save(); } }
+/* Which internal context a new manager message belongs to (null = no open topic) */
+function activeChatContext(r = rec()) {
+  if (r.goals.status === "pending_alignment") return "alignment";
+  if (r2Status(r) !== "locked" && !r.r2.diag.ended && !r.r2.submitted) return "diagnostic";
+  if (r.r3.appraisal.status === "submitted" && !r.r3.conv.ended && !r.r3.done) return "appraisal";
+  return null;
+}
+const managerCount = (log) => log.filter(m => m.from === "manager").length;

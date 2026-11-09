@@ -9,17 +9,16 @@ const GROUPS = [
   { id: "r1_kpi", round: 1, label: "Objectives and KPI quality", task: "plan", criteria: [
     { id: "r1_kpi_relevance", max: 3, label: "Relevance to Omar's responsibilities", desc: "Objectives reflect the Market Intelligence Analyst role and its main purpose." },
     { id: "r1_kpi_clarity", max: 2, label: "Clarity of objectives", desc: "Each objective states clearly what must be achieved." },
-    { id: "r1_kpi_measurable", max: 3, label: "Measurability and specificity", desc: "KPIs can be measured unambiguously; what counts as success is specific." },
-    { id: "r1_kpi_target", max: 2, label: "Reasonableness of targets", desc: "Targets are realistic given Omar's track record (e.g. 11/12 on time, 95% quality, 6 recommendations) yet meaningful." },
+    { id: "r1_kpi_measurable", max: 4, label: "Measurability", desc: "KPIs can be measured and verified unambiguously; it is clear how the result would be known." },
+    { id: "r1_kpi_target", max: 3, label: "Target specificity and reasonableness", desc: "Each KPI states a specific target within its wording, realistic given Omar's track record (e.g. 11/12 on time, 95% quality, 6 recommendations) yet meaningful." },
     { id: "r1_kpi_control", max: 3, label: "Controllability / influence", desc: "Omar can materially influence each KPI. KPIs that make him solely accountable for senior-management decisions (e.g. % of recommendations adopted) are NOT rewarded." },
-    { id: "r1_kpi_evidence", max: 2, label: "Verifiable evidence", desc: "Each evidence source is credible and would actually show the KPI result." },
-    { id: "r1_kpi_review", max: 2, label: "Appropriate review frequency", desc: "Review rhythm suits how fast each KPI moves (monthly reporting, quarterly recommendations/feedback)." },
+    { id: "r1_kpi_priorities", max: 2, label: "Alignment with commercial priorities", desc: "Objectives support the Commercial Department's priorities set by the CEO (growth, conversion, pipeline, market responsiveness, team performance), especially market responsiveness to competitors. Evidence sources and review frequencies are not part of the form and must not be required." },
     { id: "r1_kpi_balance", max: 3, label: "Logical weighting and overall balance", desc: "Weights total 100%, reflect priorities, and the plan balances reliable delivery, actionable recommendations and stakeholder communication/collaboration." }
   ] },
   { id: "r1_comp", round: 1, label: "Competency selection and expectations", task: "plan", criteria: [
     { id: "r1_comp_relevance", max: 3, label: "Role relevance", desc: "Selected competencies matter for the role (reference set: Analytical Thinking, Business Acumen, Communication, Stakeholder Management; other relevant choices accepted)." },
     { id: "r1_comp_level", max: 3, label: "Appropriateness of expected levels", desc: "Expected proficiency levels fit the role and Omar's tenure (reference: Analytical Thinking Advanced; others Intermediate). Selecting Advanced everywhere is not automatically better." },
-    { id: "r1_comp_clarity", max: 2, label: "Clarity of behavioural expectations", desc: "Any behavioural standards added are observable; levels are used as expectations, not as performance ratings." },
+    { id: "r1_comp_clarity", max: 2, label: "Observable behavioural standards", desc: "Each written standard describes observable behaviour (what Omar does or says) that fits the selected proficiency level; wording need not match the competency dictionary. Levels are expectations, not performance ratings." },
     { id: "r1_comp_alignment", max: 2, label: "Alignment with responsibilities and development needs", desc: "The plan covers Omar's development needs (business-friendly communication, stakeholder concerns, influence without defensiveness, prioritisation and escalation)." }
   ] },
   { id: "r1_align", round: 1, label: "Employee alignment conversation", task: "alignment", criteria: [

@@ -103,29 +103,12 @@ function markRead(id) { S.read[id] = true; save(); }
 const senderOf = (m) => m.kind === "stakeholder" ? STAKEHOLDERS[m.from] : { name: HR_SENDER.name, title: "Human Resources", initials: "HR" };
 function senderAvatar(m, size = "") { const s = senderOf(m); return s.emp ? avatar(s.emp, size) : `<span class="hr-av ${size}">${esc(s.initials)}</span>`; }
 
-function pendingActions() {
-  const r = rec(), out = [], g = r.goals.status;
-  if (g === "not_started" || g === "draft") out.push({ t: g === "draft" ? "Complete and submit Omar's performance goal plan" : "Create Omar's performance goal plan", d: `HR request · due ${SIM_DATES.deadline}`, go: "goals", urgent: true });
-  if (g === "pending_alignment") out.push({ t: "Align the performance plan with Omar", d: "Omar has replied to your plan.", go: "conversations/alignment", urgent: true });
-  if (r2Status(r) !== "locked" && !r.r2.submitted) {
-    if (!r.r2.seenDashboard) out.push({ t: "Business alert: review the latest performance data", d: "Commercial indicators changed after Valtora's announcement.", go: "business", urgent: true });
-    if (!r.r2.diag.ended) out.push({ t: "Omar has asked to talk", d: "“Hi, do you have a few minutes?”", go: "conversations/midyear", urgent: true });
-    out.push({ t: "Complete the mid-year review", d: "Interpretation of the data, conversation and Evidence Log.", go: "round2" });
-  }
-  if (r3Status(r) !== "locked" && !r.r3.done) {
-    if (!r.r3.dataset) out.push({ t: "Open the year-end performance update", d: "December", go: "yearend", urgent: true });
-    else if (["not_started", "draft"].includes(r.r3.appraisal.status)) out.push({ t: "Complete Omar's year-end appraisal", d: "WHAT · HOW · overall rating", go: "appraisal", urgent: true });
-    else if (!r.r3.conv.ended) out.push({ t: "Omar responded to your appraisal", d: "Continue the appraisal conversation.", go: "conversations/appraisal", urgent: true });
-    else out.push({ t: "Reflect on possible rating biases and finalise", d: "Bias reflection", go: "reflection", urgent: true });
-  }
-  return out;
-}
 function notifications() {
   const out = [], r = rec();
-  if (r.goals.status === "pending_alignment") out.push({ t: "Omar replied to your performance plan", d: "Employee alignment is required before the contract is finalised.", go: "conversations/alignment", icon: "chat" });
+  const cu = chatUnread(r);
+  if (cu) { const last = chatThread(r).filter(m => m.from === "employee").pop(); out.push({ t: `Omar Hassan sent you ${cu === 1 ? "a message" : cu + " messages"}`, d: last ? last.text.slice(0, 80) + (last.text.length > 80 ? "…" : "") : "", act: "openChat", icon: "chat" }); }
   if (r2Status(r) !== "locked" && !r.r2.seenDashboard) out.push({ t: "Business alert: commercial indicators changed", d: "Valtora launched a lower-priced alternative to Customer360.", go: "business", icon: "alert" });
-  if (r2Status(r) !== "locked" && !r.r2.diag.ended) out.push({ t: "Omar Hassan: “Hi, do you have a few minutes?”", d: "Chat request", go: "conversations/midyear", icon: "chat" });
-  if (r.r3.appraisal.status === "submitted" && !r.r3.conv.ended) out.push({ t: "Omar responded to your appraisal", d: "Appraisal conversation", go: "conversations/appraisal", icon: "chat" });
+
   mailList().filter(m => m.unread).forEach(m => out.push({ t: m.subject, d: `${senderOf(m).name} · ${m.date}`, go: "inbox/" + m.id, icon: "mail" }));
   return out.map(n => ({ ...n, unread: true }));
 }
@@ -165,7 +148,7 @@ function pulseHistory(r, showRound = false) {
 /* ---------- shell ---------- */
 const PM_ROUTES = ["goals", "evidence", "appraisal"];
 function navItems() {
-  const r = rec(), unreadMail = mailList().filter(m => m.unread).length;
+  const r = rec(), unreadMail = mailList().filter(m => m.unread).length + chatUnread(r);
   return [
     { id: "home", l: "Home", icon: "home" },
     { id: "inbox", l: "My Inbox", icon: "mail", cnt: unreadMail },
@@ -174,8 +157,7 @@ function navItems() {
       { id: "goals", l: "Objectives", icon: "target" },
       { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) },
       { id: "appraisal", l: "Final Appraisal", icon: "clipboard", locked: appraisalStatus(r) === "locked" }
-    ] },
-    { id: "conversations", l: "Employee Conversations", icon: "chat", cnt: conversationsStatus(r) === "action" ? 1 : 0 }
+    ] }
   ];
 }
 function header() {
@@ -192,7 +174,7 @@ function header() {
   </header>`;
 }
 function notifDropdown(notes) {
-  return `<div class="dropdown wide" role="menu"><div class="dd-head">Notifications</div>${notes.length ? notes.slice(0, 10).map(n => `<button class="dd-item unread" data-act="go" data-go="${n.go}">${icon(n.icon, "i-sm")}<span class="stack-sm" style="gap:1px"><b class="small">${esc(n.t)}</b><span class="xs muted">${esc(n.d)}</span></span></button>`).join("") : `<div class="dd-item muted">No new notifications.</div>`}</div>`;
+  return `<div class="dropdown wide" role="menu"><div class="dd-head">Notifications</div>${notes.length ? notes.slice(0, 10).map(n => `<button class="dd-item unread" ${n.act ? `data-act="${n.act}"` : `data-act="go" data-go="${n.go}"`}>${icon(n.icon, "i-sm")}<span class="stack-sm" style="gap:1px"><b class="small">${esc(n.t)}</b><span class="xs muted">${esc(n.d)}</span></span></button>`).join("") : `<div class="dd-item muted">No new notifications.</div>`}</div>`;
 }
 function userDropdown() {
   return `<div class="dropdown" role="menu"><div class="dd-head">${esc(S.session.name)}<div class="xs muted" style="text-transform:none;letter-spacing:0;font-weight:500">${DIRECTOR.title}</div></div>
@@ -230,6 +212,8 @@ function render() {
     const v = VIEWS[UI.route] || VIEWS.home;
     html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}</main></div>`;
   }
+  if (UI.chatOpen && S.session && UI.signedIn) markChatSeen();
+  if (S.session && UI.signedIn) html += chatBubble() + chatPanel();
   html += modalHTML() + drawerHTML() + (UI.toast ? `<div class="toast" role="status">${esc(UI.toast.text)}${UI.toast.undo ? `<button data-act="undo">Undo</button>` : ""}</div>` : "");
   app.innerHTML = html;
   if (key) {

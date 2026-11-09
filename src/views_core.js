@@ -69,10 +69,14 @@ VIEWS.inbox = function () {
   const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
   return pageHead("My Inbox", "My Inbox") + `<div class="card split">
-    <div class="list">${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
+    <div class="list">${chatInboxItem()}<div class="list-h">Email</div>${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
     <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
   </div>`;
 };
+function chatInboxItem() {
+  const r = rec(), last = chatThread(r).slice(-1)[0], n = chatUnread(r);
+  return `<div class="list-h">Chat</div><button class="msg-item chat-item ${n ? "unread" : ""}" data-act="openChat" id="inbox-chat">${avatar(S.emp, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><b class="small">Omar Hassan</b>${n ? `<span class="cb-badge static">${n}</span>` : ""}</span><span class="xs muted ellipsis">${last ? `${last.from === "manager" ? "You: " : ""}${esc(last.text)}` : ""}</span></span></button>`;
+}
 function mailView(m) {
   const s = senderOf(m), r = rec();
   const body = m.body.map(p => p === "__LIST__" ? `<ul>${m.list.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p)}</p>`).join("");

@@ -52,50 +52,33 @@ const STAKEHOLDERS = {
 };
 
 /* ---------- Competency library ----------
-   The four competencies from the pilot brief carry the approved level descriptors.
-   The other NextWave competencies carry DRAFT descriptors written for the pilot
-   (status "draft") so every competency shows three levels; review before scaling. */
-const C = (id, name, basic, intermediate, advanced, status = "approved") => ({ id, name, status, levels: { basic, intermediate, advanced } });
+   Names only. Participants use the printed competency dictionary for the Basic /
+   Intermediate / Advanced descriptions; the descriptions live on the server
+   (api/_lib/scenario_omar.js, COMPETENCY_LEVELS) for the assessment only. */
 const COMPETENCY_LIBRARY = [
-  C("analytical", "Analytical Thinking",
-    "Organizes data, identifies straightforward trends, and produces accurate analysis using established methods and guidance.",
-    "Independently analyzes information from multiple sources, identifies meaningful trends, and explains implications.",
-    "Interprets complex or conflicting data, anticipates market shifts, and develops well-supported insights that inform strategic decisions."),
-  C("acumen", "Business Acumen",
-    "Understands NextWave's products, customers, and commercial objectives.",
-    "Connects market findings to commercial priorities, assesses opportunities and risks, and proposes practical actions.",
-    "Anticipates broader commercial implications, evaluates strategic trade-offs, and influences priorities through commercially grounded recommendations."),
-  C("communication", "Communication",
-    "Explains findings accurately and responds to straightforward questions.",
-    "Adapts technical findings to the audience, highlights business implications, and responds constructively to questions.",
-    "Communicates complex or sensitive insights persuasively, facilitates difficult discussions, and builds understanding across audiences."),
-  C("stakeholder", "Stakeholder Management",
-    "Identifies stakeholders, shares information, and responds professionally to requests.",
-    "Clarifies stakeholder needs, seeks input, and manages disagreements constructively.",
-    "Builds alignment among stakeholders with competing priorities and influences complex decisions while preserving trust."),
-  C("problem", "Problem Solving",
-    "Identifies the problem and applies known approaches to resolve routine issues.",
-    "Analyses root causes, weighs options and recommends practical solutions.",
-    "Resolves complex, ambiguous problems across functions and anticipates the consequences of solutions.", "draft"),
-  C("time", "Time Management & Prioritization",
-    "Plans own tasks and meets agreed deadlines when priorities are stable.",
-    "Prioritises competing requests against agreed objectives and flags deadline risks early.",
-    "Manages shifting, high-stakes priorities across stakeholders and renegotiates commitments proactively.", "draft"),
-  C("accountability", "Accountability & Ownership",
-    "Completes assigned work and reports progress when asked.",
-    "Takes ownership of outcomes, admits mistakes and follows through on commitments without reminders.",
-    "Owns cross-functional outcomes, holds self and others to commitments and drives corrective action.", "draft"),
-  C("adaptability", "Adaptability & Flexibility",
-    "Adjusts to changes when given clear direction.",
-    "Adapts plans and approach quickly when circumstances change, keeping quality.",
-    "Leads others through change and turns disruption into opportunities.", "draft"),
-  C("coaching", "Coaching",
-    "Shares knowledge with colleagues when asked.",
-    "Gives constructive feedback and helps colleagues build capability.",
-    "Builds team capability systematically and develops successors.", "draft")
+  { id: "analytical", name: "Analytical Thinking" },
+  { id: "acumen", name: "Business Acumen" },
+  { id: "communication", name: "Communication" },
+  { id: "stakeholder", name: "Stakeholder Management" },
+  { id: "problem", name: "Problem Solving" },
+  { id: "time", name: "Time Management & Prioritization" },
+  { id: "accountability", name: "Accountability & Ownership" },
+  { id: "adaptability", name: "Adaptability & Flexibility" },
+  { id: "coaching", name: "Coaching" }
 ];
 function competencyLibrary() { return COMPETENCY_LIBRARY; }
 function competencyById(_emp, id) { return COMPETENCY_LIBRARY.find(c => c.id === id); }
+
+/* ---------- Omar chat: one continuous thread ----------
+   December 2026 history is part of the existing relationship (never sent to the AI or scored).
+   Later messages come from the three internal conversation contexts. */
+const CHAT = {
+  history: [
+    { from: "employee", text: "Hi, congratulations on joining NextWave! Looking forward to working with you and getting to know you better in our first one-on-one.", at: "Tue 15 Dec 2026 · 09:12" },
+    { from: "manager", text: "Thanks, Omar! Looking forward to meeting you and working together.", at: "Tue 15 Dec 2026 · 09:40" }
+  ],
+  dates: { history: "December 2026", alignment: "January 2027", diagnostic: "June 2027", appraisal: "December 2027" }
+};
 
 /* ---------- Round 2: Valtora event ---------- */
 const VALTORA_ANNOUNCEMENT = "Valtora, one of NextWave's main competitors, has introduced a lower-priced alternative to Customer360 and launched an aggressive campaign targeting NextWave's existing and potential customers.\n\nThe announcement is creating pressure across the Commercial Department.\n\nAs Commercial Director, review the latest business performance information and communications in your Performance Hub.";

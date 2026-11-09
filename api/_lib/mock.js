@@ -26,6 +26,7 @@ function converse(kind, history, ctx) {
   const last = mgr[mgr.length - 1] || "", all = mgr.join("\n");
   if (kind === "alignment") {
     const ready = has(all, ADDRESS_A) && has(all, ADDRESS_B);
+    if (!ready && /(what('s| is) (the|your) concern|tell me more|what concern|go ahead|what's on your mind)/.test(lc(last))) return { reply: "Last year some of my recommendations weren't adopted, even though the analysis was solid. I don't want my rating to depend on whether management agrees with me.", ready: false, dismissive: false };
     const dismissive = !ready && has(last, DISMISS);
     const reply = ready ? "That's clear, thank you. Judged on quality, relevance and actionability, I'm happy to confirm the plan."
       : dismissive ? "This matters to me. How will my recommendations be evaluated if management doesn't follow them?"
@@ -76,15 +77,14 @@ function assess(task, inp) {
       criteria: [
         crit("r1_kpi_relevance", Math.round(3 * k), ev, "Relevance estimated from KPI completeness."),
         crit("r1_kpi_clarity", Math.round(2 * k), ev, "Clarity estimated."),
-        crit("r1_kpi_measurable", Math.round(3 * measurable), ev, `${Math.round(measurable * 100)}% of KPIs contain a figure.`),
-        crit("r1_kpi_target", Math.round(2 * k), ev, "Targets estimated."),
+        crit("r1_kpi_measurable", Math.round(4 * measurable), ev, `${Math.round(measurable * 100)}% of KPIs contain a figure.`),
+        crit("r1_kpi_target", Math.round(3 * k), ev, "Targets estimated."),
         crit("r1_kpi_control", adoption ? 1 : 3, adoption ? adoption.kpi.slice(0, 60) : ev, adoption ? "A KPI depends on management adoption decisions." : "KPIs are within Omar's influence."),
-        crit("r1_kpi_evidence", o.every(x => x.evidence) ? 2 : 1, null, "Evidence sources named."),
-        crit("r1_kpi_review", o.every(x => x.freq) ? 2 : 1, null, "Review frequencies set."),
+        crit("r1_kpi_priorities", Math.round(2 * k), null, "Alignment with commercial priorities estimated."),
         crit("r1_kpi_balance", wsum === 100 ? Math.round(3 * k) : 0, null, `Weights total ${wsum}%.`),
         crit("r1_comp_relevance", Math.min(3, relevant), null, `${relevant} reference-set competencies selected.`),
         crit("r1_comp_level", allAdv ? 1 : 3, null, allAdv ? "Advanced selected for every competency." : "Levels look appropriate."),
-        crit("r1_comp_clarity", cs.some(c => c.standard) ? 2 : 1, null, "Standards checked."),
+        crit("r1_comp_clarity", cs.every(c => c.standard.split(/\s+/).length >= 6) ? 2 : 1, null, "Standards checked."),
         crit("r1_comp_alignment", cs.some(c => /communication|stakeholder/i.test(c.name)) ? 2 : 0, null, "Development needs coverage.")
       ],
       feedback: { objectives: o.map((x, i) => ({ index: i + 1, verdict: /\d/.test(x.kpi) ? "strong" : "needs_improvement", comment: /\d/.test(x.kpi) ? "[Test] Measurable target included." : "[Test] Add a measurable target." })), competencies: cs.map(c => ({ name: c.name, comment: "[Test] Comment." })), overall: "[Scripted test assessment]" }

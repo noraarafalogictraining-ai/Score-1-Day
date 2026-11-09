@@ -436,6 +436,36 @@ button.org-node:hover { border-color: var(--blue-line); }
 @media (max-width: 860px) { .pt-txt .pt-n { display: none; } .pulse-top { padding: 2px 4px; gap: 0; } .pt-item { padding: 2px 5px 2px 2px; gap: 4px; } .pulse-cards { grid-template-columns: minmax(0,1fr); } .org-team { grid-template-columns: minmax(0,1fr); } .head .logo { height: 22px; } }
 @media (max-width: 560px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; } .kpi-v { font-size: 1.4rem; } .kpi-btn { padding: 12px; } .head .icon-btn { width: 30px; } .head { padding: 0 8px; } .pulse-top { padding: 2px; } .pt-ring svg { width: 24px; height: 24px; } .pt-ring .pt-ic svg { width: 11px; height: 11px; } .pt-txt b { font-size: .8rem; } .pt-item { padding: 2px; gap: 3px; } .user-btn svg { display: none; } .head .logo { height: 18px; } .head { gap: 6px; } .emp-overview .emp-hero { flex-direction: column; align-items: flex-start; } .uname { display: none; } .login-card { padding: 28px 20px 24px; } .main { padding: 14px 14px 50px; } .page-head h1 { font-size: 1.3rem; } }
 
+/* ---------- Phase 2: Omar chat ---------- */
+.chat-bubble { position: fixed; right: 22px; bottom: 22px; z-index: 85; width: 60px; height: 60px; border-radius: 50%; padding: 0; border: 3px solid #fff; background: #fff; box-shadow: 0 8px 26px rgba(10,22,48,.28); }
+.chat-bubble .av { display: block; width: 100%; height: 100%; border: 0; }
+.chat-bubble:hover { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(10,22,48,.34); }
+.chat-bubble.has-unread { animation: cbpulse 2s ease-out 2; }
+@keyframes cbpulse { 0% { box-shadow: 0 0 0 0 rgba(229,72,77,.45), 0 8px 26px rgba(10,22,48,.28); } 100% { box-shadow: 0 0 0 16px rgba(229,72,77,0), 0 8px 26px rgba(10,22,48,.28); } }
+.cb-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: #E5484D; color: #fff; font-size: .74rem; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
+.cb-badge.static { position: static; border: 0; min-width: 18px; height: 18px; font-size: .68rem; }
+.chat-win { position: fixed; right: 22px; bottom: 22px; z-index: 95; width: 380px; height: min(600px, calc(100vh - 100px)); background: #fff; border-radius: 14px; box-shadow: var(--shadow-lg); border: 1px solid var(--line); display: flex; flex-direction: column; overflow: hidden; }
+.chat-win .chat-head { padding: 12px 12px 12px 14px; background: var(--navy); color: #fff; border-bottom: 0; }
+.chat-win .chat-head .muted { color: #9FB0CF; } .chat-win .chat-head .icon-btn { color: #C9D4EA; } .chat-win .chat-head .icon-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+.chat-win .chat-log { flex: 1; max-height: none; padding: 12px; gap: 8px; }
+.chat-win .bubble-row { max-width: 88%; gap: 7px; }
+.chat-win .bubble { padding: 8px 11px 6px; font-size: .87rem; border-radius: 14px; border-bottom-left-radius: 4px; }
+.chat-win .bubble-row.me .bubble { border-bottom-left-radius: 14px; border-bottom-right-radius: 4px; }
+.b-time { display: block; font-size: .66rem; color: var(--muted); margin-top: 3px; text-align: right; }
+.bubble-row.me .b-time { color: #D5E2FB; }
+.chat-sep { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .72rem; font-weight: 650; margin: 6px 0 2px; }
+.chat-sep::before, .chat-sep::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.chat-win .chat-foot { padding: 10px 12px; gap: 8px; }
+.chat-win .composer { flex-direction: row; align-items: flex-end; gap: 8px; }
+.chat-win .composer .ta { min-height: 42px; max-height: 120px; resize: none; border-radius: 12px; }
+.send-btn { width: 42px; height: 42px; padding: 0; border-radius: 50%; flex: none; }
+.chat-off { font-size: .82rem; color: var(--muted); display: flex; gap: 6px; align-items: center; padding: 6px 2px; }
+.list-h { padding: 8px 14px 6px; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--surface2); border-bottom: 1px solid var(--line); }
+.chat-item .ellipsis { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 230px; }
+.goal-meta.one { grid-template-columns: minmax(0,1fr); }
+.validation .card-h h3 { font-size: .96rem; }
+@media (max-width: 560px) { .chat-win { inset: 0; width: auto; height: auto; border-radius: 0; } .chat-bubble { right: 14px; bottom: 14px; width: 54px; height: 54px; } }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .shell { grid-template-columns: minmax(0, 1fr); }

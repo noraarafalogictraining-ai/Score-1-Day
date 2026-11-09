@@ -64,11 +64,20 @@ async function runBias() {
   catch (e) { r.r3.bias.error = `Bias check failed: ${e.message}`; }
   UI.busy = null; save(); render();
 }
+/* Adds Omar's scripted opening to a context once (idempotent: safe on refresh and repeat events) */
+function ensureChatOpenings(r = rec()) {
+  if (!AIS.openings) return false;
+  let changed = false;
+  if (r.goals.status === "pending_alignment" && !r.align.log.some(m => m.from === "employee")) { r.align.log.push({ from: "employee", text: AIS.openings.alignment }); changed = true; }
+  if (r2Status(r) !== "locked" && !r.r2.diag.log.some(m => m.from === "employee")) { r.r2.diag.log.push({ from: "employee", text: AIS.openings.diagnostic }); changed = true; }
+  return changed;
+}
 function releaseRound(k) {
   if (S.released[k]) return;
   S.released[k] = true;
   const r = rec();
   if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora's lower-priced Customer360 alternative put the Commercial Department under pressure.");
+  ensureChatOpenings(r);
   save();
   if (k === "r3") loadYearEnd();
 }
@@ -102,7 +111,8 @@ async function sendChat(kind, text) {
     if (kind === "alignment") r.align.ready = !!res.ready;
   } catch (e) {
     if (text) { log.pop(); setPath(S, P("drafts", kind), text); }
-    UI.chatErr = { kind, message: text ? `Your message was not sent: ${e.message}` : e.message, retry: !text };
+    UI.chatErr = { kind, message: text ? `Your message was not sent: ${e.message}` : `Omar's message could not be loaded: ${e.message}`, retry: !text };
+    if (!UI.chatOpen && !text) toast("A chat message could not be loaded. Open the chat to retry.");
   }
   UI.busy = null; save(); render();
 }
@@ -141,7 +151,7 @@ const ACTIONS = {
   /* --- goal plan --- */
   addObj() { const r = rec(), o = blankObjective(); r.goals.objectives.push(o); if (r.goals.status === "not_started") r.goals.status = "draft"; UI.edit = o.id; UI.flash = "obj-" + o.id; save(); render(); const f = document.querySelector(`#obj-${o.id} textarea`); if (f) f.focus(); },
   editObj(el) { UI.edit = el.dataset.id; UI.flash = "obj-" + el.dataset.id; render(); },
-  doneObj() { UI.edit = null; save(); render(); },
+  doneObj() { UI.edit = null; rec().goals.tried = true; save(); render(); },
   delObj(el) {
     const r = rec(), i = r.goals.objectives.findIndex(o => o.id === el.dataset.id); if (i < 0) return;
     const [o] = r.goals.objectives.splice(i, 1); _undo = () => rec().goals.objectives.splice(i, 0, o);
@@ -152,34 +162,37 @@ const ACTIONS = {
   compLevel(el) { rec().goals.comps[+el.dataset.i].level = el.dataset.v; save(); render(); },
   submitGoals() {
     const r = rec(), v = planValidation(r);
+    if (r.goals.status !== "not_started" && r.goals.status !== "draft") return;   /* repeated clicks */
     r.goals.tried = true;
-    if (!v.ok) { save(); toast(`${plural(v.errors.length, "item needs", "items need")} attention before submitting.`); UI.edit = null; go("goals", "submit"); return; }
+    if (!v.ok) { save(); toast(`${plural(v.errors.length, "item needs", "items need")} attention before submitting.`); UI.edit = null; render(); return; }
     r.goals.status = "pending_alignment"; r.goals.submits++; r.goals.tried = false; UI.edit = null; r.align.ready = false;
-    if (r.goals.submits === 1) {
-      r.align.log.push({ from: "sys", text: `Performance plan shared with Omar · ${SIM_DATES.submitted}` });
-      if (AIS.openings) r.align.log.push({ from: "employee", text: AIS.openings.alignment });
-    } else r.align.log.push({ from: "sys", text: "Revised performance plan shared with Omar" });
-    save(); toast("Plan submitted. Status: Pending Employee Alignment.");
-    go("conversations", "alignment");
+    r.align.log.push({ from: "sys", text: r.goals.submits === 1 ? `Performance plan shared with Omar · ${SIM_DATES.submitted}` : "Revised performance plan shared with Omar" });
+    ensureChatOpenings(r);
+    save(); toast("Plan submitted for employee alignment.");
+    render();
   },
-  reopenPlan() { const r = rec(); if (r.goals.status !== "pending_alignment") return; r.goals.status = "draft"; r.align.ready = false; r.align.log.push({ from: "sys", text: "Plan reopened for editing" }); save(); go("goals"); },
+  reopenPlan() { const r = rec(); if (r.goals.status !== "pending_alignment") return; r.goals.status = "draft"; r.align.ready = false; r.align.log.push({ from: "sys", text: "Plan reopened for editing" }); UI.chatOpen = false; save(); go("goals"); },
   async alignConfirm() {
     const r = rec(); if (r.goals.status !== "pending_alignment" || !r.align.ready || UI.busy) return;
     r.goals.status = "approved"; r.align.confirmed = true; r.align.log.push({ from: "sys", text: `Performance contract confirmed · ${SIM_DATES.approved}` });
-    save(); toast("Performance contract confirmed."); go("inbox", "approved");
+    UI.chatOpen = false; save(); toast("Performance contract confirmed."); go("inbox", "approved");
     await assessRound1();
   },
 
-  /* --- conversations --- */
-  chatSend(el) { const kind = el.dataset.k, path = P("drafts", kind), text = String(val(path)).trim(); if (!text || UI.busy) return; if (text.length > CHAT_LIMITS.message) { UI.chatErr = { kind, message: `Please keep messages under ${CHAT_LIMITS.message} characters.` }; return render(); } setPath(S, path, ""); sendChat(kind, text); },
-  chatRetry(el) { sendChat(el.dataset.k, null); },
-  appraisalOpen() { sendChat("appraisal", null); },
-  chatEnd(el) {
-    const r = rec(), k = el.dataset.k; UI.modal = null;
-    if (k === "diagnostic") { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation ended" }); save(); go("round2"); return; }
-    r.r3.conv.ended = true; r.r3.conv.log.push({ from: "sys", text: "Conversation ended" }); save(); go("reflection"); if (aiReady()) runBias();
+  /* --- chat --- */
+  openChat() { UI.chatOpen = true; UI.dd = null; UI.side = false; markChatSeen(); render(); const t = document.querySelector(".chat-win textarea"); if (t) t.focus({ preventScroll: true }); },
+  closeChat() { UI.chatOpen = false; render(); },
+  chatSend() {
+    const r = rec(), kind = activeChatContext(r), path = P("drafts", "chat"), text = String(val(path)).trim();
+    if (!kind || !text || UI.busy) return;
+    if (text.length > CHAT_LIMITS.message) { UI.chatErr = { kind, message: `Please keep messages under ${CHAT_LIMITS.message} characters.` }; return render(); }
+    setPath(S, path, ""); sendChat(kind, text);
   },
-  drawerAppraisal() { UI.drawer = { type: "appraisal" }; render(); },
+  chatRetry(el) { sendChat(el.dataset.k, null); },
+  appraisalContinue() {
+    const r = rec(); if (r.r3.conv.ended || managerCount(r.r3.conv.log) < CHAT_LIMITS.appraisalMin) return;
+    r.r3.conv.ended = true; r.r3.conv.log.push({ from: "sys", text: "Conversation closed" }); UI.chatOpen = false; save(); go("reflection"); if (aiReady()) runBias();
+  },
 
   /* --- evidence --- */
   evNew() { UI.modal = { type: "evidence", d: evDraft(null) }; if (UI.evFilter !== "all") UI.modal.d.link = UI.evFilter; render(); const f = document.getElementById("ev-period"); if (f) f.focus(); },
@@ -199,7 +212,7 @@ const ACTIONS = {
     if (v === RELEASE_CODES[k] || v === FAC_CODE) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update released." : "Year-end update released."); go(k === "r2" ? "home" : "yearend"); }
     else { UI.codeErr = k; render(); }
   },
-  submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; save(); assessRound2(); },
+  submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
   loadYearEnd() { rec().r3.error = null; loadYearEnd(); },
   rate(el) { setPath(S, el.dataset.path, +el.dataset.v); afterBind(el.dataset.path); save(); render(); },
   submitAppraisal() {
@@ -209,7 +222,7 @@ const ACTIONS = {
     a.status = "submitted"; a.tried = false;
     if (a.revisions) { r.r3.conv.log.push({ from: "sys", text: "Revised appraisal recorded" }); r.r3.bias.result = null; save(); go("reflection"); if (aiReady()) runBias(); return; }
     r.r3.conv.log.push({ from: "sys", text: `Appraisal shared with Omar · ${SIM_DATES.yearend}` });
-    save(); go("conversations", "appraisal"); if (aiReady()) sendChat("appraisal", null);
+    save(); toast("Appraisal shared with Omar."); render(); if (aiReady()) sendChat("appraisal", null);
   },
   reconsider() { const r = rec(); if (r.r3.done) return; r.r3.appraisal.status = "draft"; r.r3.appraisal.revisions++; save(); go("appraisal"); },
   runBias() { runBias(); },
@@ -280,5 +293,6 @@ window.addEventListener("resize", () => { clearTimeout(_rzT); _rzT = setTimeout(
   const h = parseHash(); UI.route = h.route === "login" ? "home" : h.route; UI.sub = h.sub;
   render();
   await loadStatus();
+  if (S.session && ensureChatOpenings()) save();
   render(); afterRoute();
 })();
