@@ -68,7 +68,7 @@ After editing `src/`, run `python3 build.py`. Server files take effect on the ne
 
 Three separate responsibilities:
 
-1. **Employee simulation model** (`api/converse.js`): generates Omar's replies from his profile, fairness need, the submitted plan, the manager's messages, the conversation so far, earlier decisions and the current Pulse (Trust sets his openness). Hidden facts are revealed progressively when the manager asks relevant questions. Plain text, 2–5 sentences, no multiple choice.
+1. **Employee simulation model** (`api/converse.js`): generates Omar's replies from his profile, fairness need, the submitted plan, the manager's messages, the conversation so far, earlier decisions and the current Pulse (Trust sets his openness). Hidden facts are revealed progressively when the manager asks relevant questions. Plain text, kept short (1–3 sentences, normally under 50 words, one point per reply), no multiple choice.
 2. **Assessment model** (`api/assess.js`): evaluates the participant's demonstrated behaviour against the rubric and returns structured JSON for each criterion: `id`, `score`, `max`, `evidence` (verbatim quotes), `reason`, `confidence`, `missing`. In Round 1 a short assessment after each manager message decides whether Omar's concern has been meaningfully addressed; empathy alone ("I understand") is not enough.
 3. **Rules engine**: deterministic code applies scores, Round 2 pathway, Pulse changes and progression (`RULES` in `api/_lib/rubrics.js`; Pulse values in `src/pilot.js`, applied by `applyPulse` in `src/state.js`).
 

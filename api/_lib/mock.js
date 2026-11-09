@@ -27,34 +27,34 @@ function converse(kind, history, ctx) {
   if (kind === "alignment") {
     const ready = has(all, ADDRESS_A) && has(all, ADDRESS_B);
     const dismissive = !ready && has(last, DISMISS);
-    const reply = ready ? "Thank you, that's clear. If my recommendations are judged on their quality, relevance and how actionable they are, I'm comfortable with these expectations, and I'm happy to confirm the plan."
-      : dismissive ? "I hear you, but this does matter to me. Could you be specific about how my recommendations will be evaluated if management decides not to follow them?"
-      : "Thank you, I appreciate that. But I still want to understand how my recommendations will be evaluated. If I provide strong analysis and management decides not to follow it, would that affect my rating?";
+    const reply = ready ? "That's clear, thank you. Judged on quality, relevance and actionability, I'm happy to confirm the plan."
+      : dismissive ? "This matters to me. How will my recommendations be evaluated if management doesn't follow them?"
+      : "Thanks. But if my analysis is strong and management doesn't follow it, would that affect my rating?";
     return { reply, ready, dismissive };
   }
   if (kind === "diagnostic") {
-    if (has(last, BLAME)) return { reply: "I don't think that's a fair summary. The analysis was solid and it passed review. I'd rather understand what you need from me than argue about it." };
+    if (has(last, BLAME)) return { reply: "That's not a fair summary. The analysis passed review. What do you need from me?" };
     const rules = [
-      [/(late|deadline|report|what happened|walk me through)/, "The June report was late because I spent two extra working days validating Valtora's pricing and our competitor assumptions. I didn't want to put numbers in front of leadership that I wasn't sure of."],
-      [/(flag|escalat|tell me|let me know|raise|warn)/, "Honestly, no. I knew the deadline was at risk, but I assumed I could manage both. Looking back, I should have told you and asked which came first."],
-      [/(nadine|meeting|present)/, "The analysis held up, but I probably spent the meeting defending the numbers instead of asking what Operations could actually implement."],
-      [/(priorit|expect|clear|clarif)/, "I knew the reporting deadline. After Valtora, though, nobody really said whether the urgent analysis or the monthly report came first."],
-      [/(skill|good at|develop|strength|hard for you)/, "I'm confident in the analysis itself. Where I could improve is presenting it for people who aren't analysts, and influencing without turning it into a debate."],
-      [/(feel|recogni|fair|motivat|credit)/, "It sometimes feels like recommendations that challenge leadership's assumptions get less recognition. That's how I see it, anyway."],
-      [/(tool|resource|support|data|help)/, "I had the tools and data I needed. The real problem was competing deadlines, and I can't reprioritise agreed deliverables on my own."],
-      [/(plan|next step|agree|going forward|what could|what would)/, "Maybe I could prepare a one-page options summary for Operations, and we could agree a simple way for me to flag deadline conflicts early. A joint session with Sales would help too."]
+      [/(late|deadline|report|what happened|walk me through)/, "I spent two extra working days validating Valtora's pricing, so the June report slipped."],
+      [/(flag|escalat|tell me|let me know|raise|warn)/, "No. I assumed I could manage both. I should have told you and asked which came first."],
+      [/(nadine|meeting|present)/, "The analysis held up, but I defended the numbers instead of asking what Operations could implement."],
+      [/(priorit|expect|clear|clarif)/, "I knew the deadline, but after Valtora nobody said which came first."],
+      [/(skill|good at|develop|strength|hard for you)/, "The analysis is my strength. I could improve at presenting to non-analysts and influencing without debating."],
+      [/(feel|recogni|fair|motivat|credit)/, "It feels like recommendations that challenge leadership get less recognition. That's my view."],
+      [/(tool|resource|support|data|help)/, "I had the tools. The problem was competing deadlines I can't reprioritise alone."],
+      [/(plan|next step|agree|going forward|what could|what would)/, "I could send Operations a one-page options summary, flag deadline conflicts early, and join a session with Sales."]
     ];
     const hit = rules.find(([rx]) => rx.test(lc(last)));
-    return { reply: hit ? hit[1] : "It's been a lot to juggle since the announcement. What would you like to start with?" };
+    return { reply: hit ? hit[1] : "It's been a lot to juggle. Where would you like to start?" };
   }
   /* appraisal */
   const a = ctx.appraisal, adoptReason = a && a.overall.final <= 2 && has(a.overall.just, /(not adopted|weren't adopted|were not adopted|didn't adopt|not implemented)/);
   if (!history.length) {
-    if (adoptReason) return { reply: "I understand that not every recommendation will be implemented, but I thought we agreed that my analysis would be evaluated on its quality and usefulness, not only on the final decision. Can you help me understand how that affected my rating?" };
-    if (a && a.overall.final >= 5) return { reply: "Thank you, I really appreciate the recognition. Is there anything you think I should still be working on next year?" };
-    return { reply: "Thank you for the detailed feedback. The point about deadlines and communication is fair. What development opportunities could help me with the stakeholder side next year?" };
+    if (adoptReason) return { reply: "I thought we agreed my analysis would be judged on quality, not adoption. How did that affect my rating?" };
+    if (a && a.overall.final >= 5) return { reply: "Thank you, I appreciate it. What should I still work on next year?" };
+    return { reply: "Thanks, the deadline and communication points are fair. What development could help me with stakeholders?" };
   }
-  return { reply: "That helps me understand the rating. I'd like to agree on a couple of concrete development steps for next year." };
+  return { reply: "That helps. Can we agree two concrete development steps for next year?" };
 }
 
 /* ---------- assessments ---------- */

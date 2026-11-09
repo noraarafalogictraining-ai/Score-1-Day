@@ -38,7 +38,7 @@ module.exports = H.handler(async (body) => {
     ready = !!v.concern_addressed; dismissive = !!v.dismissive && !ready;
     stance = ready ? SC.ALIGNMENT.stance.ready : dismissive ? SC.ALIGNMENT.stance.guarded : SC.ALIGNMENT.stance.open;
   }
-  if (kind === "appraisal" && !history.length) stance = "Open the conversation now with your first reaction to the appraisal you received.";
+  if (kind === "appraisal" && !history.length) stance = "Open the conversation with your first reaction to the appraisal, in 2-3 short sentences.";
   const reply = await AI.employeeReply({ system: PR.omarSystem(kind, ctx), history, stance });
   return { provider, reply, ready, dismissive };
 });
