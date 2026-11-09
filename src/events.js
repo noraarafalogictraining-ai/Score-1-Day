@@ -74,7 +74,7 @@ function ensureChatOpenings(r = rec()) {
 }
 function releaseRound(k) {
   if (S.released[k]) return;
-  S.released[k] = true;
+  S.released[k] = true; UI.period = null;
   const r = rec();
   if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora's lower-priced Customer360 alternative put the Commercial Department under pressure.");
   ensureChatOpenings(r);
@@ -88,7 +88,7 @@ async function loadYearEnd() {
   UI.busy = "yearend"; r.r3.error = null;
   try {
     const res = await api("/api/yearend", { pathway: r.r2.pathway });
-    r.r3.dataset = res.dataset; r.r3.tag = res.tag;
+    r.r3.dataset = res.dataset; r.r3.tag = res.tag; UI.period = null;   /* show the newest period when results arrive */
     if (r.r2.pathway === "A") applyPulse(r, "intervention_followthrough", "The development plan agreed at mid-year was followed through (year-end outcomes).");
     else pulseNote(r, "intervention", "No development intervention with follow-through", r.r2.pathway === "B" ? "Limited coaching and follow-up after mid-year: no Pulse change." : "No constructive development support after mid-year: no Pulse change.", 3);
   } catch (e) { r.r3.error = `The year-end update could not be loaded: ${e.message}`; }
@@ -142,8 +142,14 @@ const ACTIONS = {
   closeDrawer() { UI.drawer = null; render(); },
   undo() { if (_undo) { _undo(); _undo = null; UI.toast = null; save(); render(); } },
   libOpen(el) { UI.libOpen = UI.libOpen === el.dataset.id ? null : el.dataset.id; render(); },
+  orgToggle() { UI.orgOpen = UI.orgOpen === false; render(); },
+  respToggle(el) { UI.respOpen = UI.respOpen || { strategy: true }; UI.respOpen[el.dataset.id] = !UI.respOpen[el.dataset.id]; render(); },
+  ceoToggle(el) { UI.ceoOpen = UI.ceoOpen === el.dataset.id ? null : el.dataset.id; render(); },
   pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },
   kpi(el) { UI.kpiOpen = UI.kpiOpen === el.dataset.id ? null : el.dataset.id; render(); },
+  period(el) { if (!periodAvailable(el.dataset.v)) return; UI.period = el.dataset.v; UI.month = null; UI.kpiOpen = null; render(); },
+  focus(el) { UI.focus = el.dataset.v; render(); },
+  series(el) { UI.series = UI.series || { win: true, obj: true }; const k = el.dataset.k, other = k === "win" ? "obj" : "win"; if (UI.series[k] && !UI.series[other]) return; UI.series[k] = !UI.series[k]; render(); },
   kpiAlert() { UI.alertOpen = !UI.alertOpen; render(); },
   month(el) { const i = +el.dataset.i; UI.month = UI.month === i ? null : i; render(); },
   dashView(el) { UI.dashView = el.dataset.v; render(); },
@@ -178,6 +184,10 @@ const ACTIONS = {
     UI.chatOpen = false; save(); toast("Performance contract confirmed."); go("inbox", "approved");
     await assessRound1();
   },
+
+  /* --- email notifications --- */
+  openMailPop(el) { const id = el.dataset.id; clearTimeout(UI.mailHide); UI.mailPop = null; markRead(id); go("inbox", id); pumpMailQueue(); },
+  closeMailPop() { dismissMailPop(); },
 
   /* --- chat --- */
   openChat() { UI.chatOpen = true; UI.dd = null; UI.side = false; markChatSeen(); render(); const t = document.querySelector(".chat-win textarea"); if (t) t.focus({ preventScroll: true }); },
@@ -282,6 +292,7 @@ document.addEventListener("change", (ev) => {
   if (el.dataset.bind && el.tagName === "SELECT") { handleBind(el); render(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) { UI.modal.d[el.dataset.ev] = el.value; if (el.tagName === "SELECT") render(); return; }
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
+  if (el.dataset.actChange === "compPick") { if (el.value) ACTIONS.compAdd({ dataset: { id: el.value } }); return; }
   if (el.dataset.fac) { const r = rec(), id = el.dataset.fac, max = +el.max; if (el.value === "") delete r.fac[id]; else r.fac[id] = Math.max(0, Math.min(max, Math.round(+el.value))); save(); render(); }
 });
 

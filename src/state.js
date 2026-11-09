@@ -26,7 +26,7 @@ function freshRecord() {
   };
 }
 function freshState() {
-  return { v: 2, session: null, emp: PILOT.employee, released: { r2: false, r3: false }, read: {}, recs: Object.fromEntries(PILOT.active.map(e => [e, freshRecord()])), saved: null };
+  return { v: 2, session: null, emp: PILOT.employee, released: { r2: false, r3: false }, read: {}, notified: {}, recs: Object.fromEntries(PILOT.active.map(e => [e, freshRecord()])), saved: null };
 }
 function deepMerge(base, over) {
   if (Array.isArray(over)) return over;

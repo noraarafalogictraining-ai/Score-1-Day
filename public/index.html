@@ -474,6 +474,96 @@ button.org-node:hover { border-color: var(--blue-line); }
 .validation .card-h h3 { font-size: .96rem; }
 @media (max-width: 560px) { .chat-win { inset: 0; width: auto; height: auto; border-radius: 0; } .chat-bubble { right: 14px; bottom: 14px; width: 54px; height: 54px; } }
 
+/* ---------- Phase 3: communications ---------- */
+.sender-img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex: none; border: 1px solid var(--line); background: #fff; }
+.sender-img.sm { width: 28px; height: 28px; }
+.sender-img.logo { border: 0; background: transparent; object-fit: contain; }
+.mail-meta .sender-img { width: 40px; height: 40px; }
+.mail-rcpt { margin-top: 2px; }
+.mail-pop { position: fixed; top: calc(var(--head) + 12px); right: 18px; z-index: 96; width: 360px; max-width: calc(100vw - 24px); display: flex; align-items: flex-start; background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--blue); border-radius: 10px; box-shadow: var(--shadow-lg); animation: mpin .25s ease-out; }
+@keyframes mpin { from { transform: translateY(-8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.mp-body { display: flex; gap: 10px; align-items: flex-start; flex: 1; min-width: 0; padding: 12px 4px 12px 12px; background: none; border: 0; text-align: left; }
+.mp-body .grow { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mp-subj { font-size: .84rem; font-weight: 650; color: var(--text); }
+.mp-prev { font-size: .78rem; color: var(--text2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.mp-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); flex: none; }
+.mp-x { margin: 6px 6px 0 0; }
+/* ---------- Phase 3: competencies ---------- */
+.comp-add { position: relative; display: flex; align-items: center; }
+.comp-add .sel { padding-left: 32px; min-width: 240px; font-weight: 600; color: var(--blue); border-color: var(--blue-line); background-color: var(--blue-soft); }
+.comp-add .comp-add-ic { position: absolute; left: 10px; color: var(--blue); pointer-events: none; display: flex; }
+.comp-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.comp-card .card-h { padding: 10px 14px; } .comp-card .card-b { padding: 12px 14px; }
+/* ---------- Phase 3: profile ---------- */
+.profile-hero { display: flex; gap: 16px; align-items: center; padding: 22px 24px; border-radius: 14px; color: #fff; background: radial-gradient(600px 220px at 90% 0%, rgba(154,140,242,.35), transparent 60%), radial-gradient(500px 220px at 0% 100%, rgba(73,207,224,.25), transparent 60%), var(--navy); flex-wrap: wrap; }
+.profile-hero h2 { color: #fff; } .profile-hero .initials.xl { background: #1F3155; border-color: rgba(255,255,255,.3); }
+.ph-meta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 6px; font-size: .8rem; color: #B9C6E0; } .ph-meta span { display: inline-flex; gap: 5px; align-items: center; }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.info-card { display: flex; gap: 10px; align-items: center; padding: 12px 14px; background: #fff; border: 1px solid var(--line); border-radius: 10px; transition: border-color .15s, box-shadow .15s; }
+.info-card:hover { border-color: var(--blue-line); box-shadow: var(--shadow); }
+.info-card > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.info-ic { width: 32px; height: 32px; border-radius: 9px; background: var(--blue-soft); color: var(--blue); display: flex; align-items: center; justify-content: center; flex: none; }
+.purpose-card { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; border-radius: 12px; background: var(--navy); color: #E9EEF7; } .purpose-card svg { color: #5ED3E2; margin-top: 2px; } .purpose-card p { margin-top: 4px; font-size: .95rem; }
+.acc { background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.acc-h { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; background: none; border: 0; text-align: left; }
+.acc-h:hover { background: var(--surface2); } .acc-h > svg:last-child { color: var(--muted); transition: transform .15s; } .acc.open .acc-h > svg:last-child { transform: rotate(180deg); }
+.acc-b { list-style: none; margin: 0; padding: 4px 16px 14px 58px; display: flex; flex-direction: column; gap: 8px; font-size: .9rem; color: var(--text2); }
+.acc-b li { display: flex; gap: 8px; } .acc-b svg { color: var(--good); margin-top: 3px; }
+.obj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; align-items: start; }
+.ceo-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); transition: border-color .15s, transform .15s; }
+.ceo-card:hover { border-color: var(--blue-line); transform: translateY(-1px); } .ceo-card.open { border-color: var(--blue); }
+.ceo-btn { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 14px 16px; background: none; border: 0; text-align: left; }
+.ceo-more { color: var(--blue); display: inline-flex; gap: 4px; align-items: center; font-weight: 600; }
+.ceo-detail { border-top: 1px solid var(--line); padding: 12px 16px 14px; display: flex; flex-direction: column; gap: 8px; color: var(--text2); }
+.ceo-detail span.muted { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 650; }
+.org-branches { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; width: 100%; border-top: 1px solid var(--line2); padding-top: 0; }
+.org-branch { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.org-stem { width: 1px; height: 14px; background: var(--line2); }
+.org-branch > .org-node { width: 100%; min-width: 0; }
+.org-mgr { color: var(--purple); font-weight: 600; }
+.org-toggle { font-size: .76rem; }
+.org-sub { display: flex; flex-direction: column; align-items: center; width: 90%; }
+.org-subline { width: 1px; height: 12px; background: var(--line2); }
+.org-sub .org-node { width: 100%; min-width: 0; background: var(--surface2); }
+/* ---------- Phase 3: dashboard ---------- */
+.dash { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #F6F8FC; box-shadow: var(--shadow); }
+.dash-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 18px; color: #fff; background: linear-gradient(90deg, #12234A 0%, #3A2C8C 60%, #6B5BD6 100%); }
+.dash-bar h2 { color: #fff; font-size: 1.15rem; } .dash-bar .xs { color: #CFD8F0; }
+.period-filter { display: inline-flex; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22); border-radius: 10px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.period-filter button { border: 0; background: none; color: #E9EEF7; font-weight: 600; font-size: .84rem; padding: 7px 14px; border-radius: 8px; display: inline-flex; gap: 5px; align-items: center; }
+.period-filter button:hover:not([disabled]) { background: rgba(255,255,255,.12); }
+.period-filter button.on { background: #fff; color: var(--navy); }
+.period-filter button[disabled] { opacity: .5; cursor: not-allowed; }
+.dash-body { padding: 16px 18px 18px; }
+.focus-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.focus-chips button { border: 1px solid var(--line2); background: #fff; color: var(--text2); border-radius: 999px; padding: 4px 12px; font-size: .78rem; font-weight: 600; }
+.focus-chips button.on { background: var(--purple); border-color: var(--purple); color: #fff; }
+.kpi-row { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; }
+.kpi.dim, .target-row.dim { opacity: .38; }
+.kpi.na .kpi-v { color: #A3AEC2; }
+.kpi-l { display: inline-flex; gap: 5px; align-items: center; font-size: .76rem; color: var(--muted); font-weight: 600; }
+.kpi-t { color: var(--text2); font-weight: 600; }
+.kpi-series { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 4px; } .kpi-series span { display: flex; flex-direction: column; }
+.dash-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.vis-row { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-around; }
+.donut, .gauge, .stat-tile { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; min-width: 120px; }
+.donut .d-bg, .gauge .g-bg { fill: none; stroke: #E6EAF2; stroke-width: 10; } .gauge .g-bg, .gauge .g-fg { stroke-linecap: round; }
+.donut .d-fg { fill: none; stroke-width: 10; stroke-linecap: round; } .dn-orange .d-fg { stroke: #E0832F; } .dn-purple .d-fg { stroke: var(--purple); }
+.gauge .g-fg { fill: none; stroke: var(--blue); stroke-width: 10; }
+.d-v { font-family: var(--f-display); font-weight: 700; font-size: 18px; fill: var(--text); }
+.stat-tile { justify-content: center; padding: 10px; } .stat-tile b { font-family: var(--f-display); font-size: 1.6rem; color: var(--risk); }
+.legend .lg { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 2px 10px; font-size: .76rem; color: var(--text2); display: inline-flex; align-items: center; }
+.legend .lg:not(.on) { opacity: .5; text-decoration: line-through; }
+.cbar { position: relative; } .cbar-tg { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--good); }
+.insights { display: flex; flex-direction: column; gap: 10px; }
+.insight { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 9px; background: var(--risk-soft); color: #7A2A20; font-size: .86rem; }
+.insight.good { background: var(--good-soft); color: #145C3D; } .insight.neutral { background: var(--surface2); color: var(--text2); border: 1px solid var(--line); }
+.insight svg { margin-top: 2px; flex: none; }
+@media (max-width: 1280px) { .kpi-row { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (max-width: 1100px) { .dash-grid { grid-template-columns: minmax(0,1fr); } }
+@media (max-width: 860px) { .comp-grid { grid-template-columns: minmax(0,1fr); } .org-branches { grid-template-columns: minmax(0,1fr); border-top: 0; } }
+@media (max-width: 560px) { .kpi-row { grid-template-columns: repeat(2, minmax(0,1fr)); } .dash-bar { padding: 12px 14px; } .period-filter { width: 100%; } .period-filter button { flex: 1; justify-content: center; padding: 7px 6px; font-size: .78rem; } .dash-body { padding: 12px; } .mail-pop { right: 12px; left: 12px; width: auto; } .comp-add, .comp-add .sel { width: 100%; min-width: 0; } }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
@@ -767,10 +857,12 @@ Object.assign(EMPLOYEES.omar, {
   ]
 });
 const STAKEHOLDERS = {
-  nadine: { name: "Nadine Farouk", title: "Operations Director", initials: "NF" },
+  nadine: { name: "Nadine Farouk", title: "Operations Director", initials: "NF", img: "assets/people/nadine.jpg" },
+  nour: { name: "Nour", title: "Account Manager", initials: "N", img: "assets/people/nour.jpg" },
   youssef: { name: "Youssef Ali", title: "Business Development Manager", emp: "youssef" },
   salma: { name: "Salma Tarek", title: "Sales Executive", emp: "salma" },
-  mariam: { name: "Mariam Adel", title: "Proposal Designer", emp: "mariam" }
+  mariam: { name: "Mariam Adel", title: "Proposal Designer", emp: "mariam" },
+  hr: { name: "NextWave HR", title: "Human Resources", initials: "HR", img: "assets/brand/hr-team.png", logo: true }
 };
 
 /* ---------- Competency library ----------
@@ -822,11 +914,18 @@ const DASHBOARD = {
     { t: "NextWave's commercial response is still being evaluated", st: "open" }
   ]
 };
+/* Released with the Valtora business event. "me" = the participant (Commercial Director). */
 const STAKEHOLDER_EMAILS = [
-  { id: "nadine", from: "nadine", subject: "Urgent Commercial Response to Valtora", date: "Mon 5 Jul 2027", body: ["Following Valtora's launch, we need a practical response to the increased pricing pressure.", "Omar's analysis raises valid concerns about matching competitor prices. However, during our meeting, I felt that the discussion focused heavily on defending the analysis rather than identifying what we could implement immediately.", "We need clearer options and a faster way forward."] },
-  { id: "youssef", from: "youssef", subject: "Sales Team Concerns — Valtora", date: "Mon 5 Jul 2027", body: ["The team is facing increasing pressure from customers comparing our prices with Valtora.", "Omar's analysis helped us understand why an immediate price reduction could be risky. However, we still need practical alternatives that the sales team can use in customer discussions.", "I believe a joint discussion between Market Intelligence and Sales would help."] },
-  { id: "salma", from: "salma", subject: "Customer Objections and Competitive Offers", date: "Tue 6 Jul 2027", body: ["Several customers have recently asked why they should choose Customer360 when Valtora is offering a lower price.", "Omar's findings are useful, especially the risks of competing only on price. But we need a simpler explanation of our value and clearer alternatives to share with customers.", "Could we arrange a discussion to align on our response?"] },
-  { id: "mariam", from: "mariam", subject: "Concern Regarding Omar", date: "Tue 6 Jul 2027", secondhand: true, body: ["I wanted to share something I noticed after the recent Valtora discussions.", "Omar and I were reviewing some of the information needed for the updated commercial proposals. He seemed quite frustrated and mentioned that he had spent a lot of time validating the competitor analysis but felt his recommendations weren't being given a fair chance.", "He also mentioned that he was struggling to keep up with his regular reporting alongside the urgent requests.", "I thought you should know because he doesn't seem like his usual self. I haven't discussed this with anyone else."] }
+  { id: "nadine", from: "nadine", to: ["me"], subject: "Valtora Response — Need for Faster Decisions", date: "Mon 5 Jul 2027",
+    body: ["Hi,", "Following our meeting about Valtora, I'm concerned that we're taking too long to agree on a response.", "Omar's analysis raised valid points about the risks of matching Valtora's prices. However, when I asked how we could respond quickly, he focused mainly on explaining the data rather than discussing practical options.", "We need recommendations that balance commercial risks with the urgency of the situation.", "Let's agree on the next steps soon.", "Best,\nNadine\nOperations Director"] },
+  { id: "youssef", from: "youssef", to: ["me"], subject: "Valtora — Commercial Team Needs Direction", date: "Mon 5 Jul 2027",
+    body: ["Hi,", "The team is facing more customer questions about Valtora's pricing, and we're finding it difficult to respond consistently.", "Omar's analysis helped us understand why matching their prices across the board could be risky. However, we still need clearer alternatives that the team can discuss with customers.", "I think it would help if we could work together on a few practical options.", "Thanks,\nYoussef"] },
+  { id: "salma", from: "salma", to: ["Youssef Ali — Business Development Manager"], cc: ["me"], subject: "Customer Updates — Valtora Pricing Objections", date: "Tue 6 Jul 2027",
+    body: ["Hi Youssef,", "A few customers have been comparing our Customer360 offering with Valtora's lower prices.", "Some are asking whether we can provide better offers, and a few opportunities are becoming harder to close.", "Omar's findings helped us understand the risks of simply matching their prices, but we still need guidance on what alternatives we can offer.", "Could we align on a response before the next customer meetings?", "Thanks,\nSalma"] },
+  { id: "mariam", from: "mariam", to: ["me"], subject: "Concern About Omar", date: "Tue 6 Jul 2027", secondhand: true,
+    body: ["Hi,", "I wanted to flag something following a conversation I had with Omar.", "He seemed quite frustrated about the Valtora discussions. He feels that his analysis was challenged before everyone had properly considered the evidence, and that the pressure to provide quick answers is affecting his work.", "He also mentioned spending additional time checking the competitor analysis, which contributed to his latest scheduled report being submitted late.", "I thought you should know because he seemed more frustrated than usual.", "Best,\nMariam"] },
+  { id: "nour", from: "nour", to: ["Sales Team", "Account Management Team", "Operations Team", "HR Team"], cc: ["Chief Executive Officer (CEO)", "Chief Human Resources Officer (CHRO)", "Nadine Farouk — Operations Director", "me"], subject: "Great Customer Feedback — Well Done, Team!", date: "Wed 7 Jul 2027",
+    body: ["Hi everyone,", "I wanted to share some great feedback we received from one of our customers!", "The customer recently launched a new product and told us that the insights provided by NextWave helped them better understand their target market and make more confident launch decisions.", "They particularly appreciated the quality of our analysis and how useful the findings were in shaping their launch approach.", "It's great to see our work making a real difference for customers.", "Well done to everyone involved!", "Best,\nNour\nAccount Manager"] }
 ];
 
 /* ---------- Employee Pulse (deterministic rules engine; configurable pilot values) ---------- */
@@ -856,7 +955,7 @@ const PULSE = {
 const DIRECTOR = {
   title: "Commercial Director", department: "Commercial", company: "NextWave",
   joined: "December 2026", reportsTo: "Chief Executive Officer (CEO)", status: "Active",
-  location: "Corporate Office", directReports: 4, year: "January – December 2027",
+  location: "Corporate Office", directReports: 3, year: "January – December 2027",
   leave: "Leave information not available in pilot",
   purpose: "Lead NextWave's commercial strategy and performance, ensuring sustainable revenue growth, effective market positioning, strong customer relationships, and alignment between commercial priorities and organizational objectives.",
   responsibilities: [
@@ -870,7 +969,10 @@ const DIRECTOR = {
     "Collaborate with other departments to respond to market and customer needs.",
     "Report commercial performance and strategic recommendations to the CEO."
   ],
-  team: ["omar", "youssef", "salma", "mariam"]
+  team: ["omar", "youssef", "salma", "mariam"],
+  /* reporting lines inside the Commercial Department */
+  directs: ["omar", "youssef", "mariam"],
+  indirect: { youssef: ["salma"] }
 };
 const CEO_OBJECTIVES = [
   { id: "growth", title: "Drive Commercial Growth", kpi: "Achieve at least 15% annual commercial revenue growth compared with 2026.", target: "≥ 15%", short: "Revenue growth vs 2026" },
@@ -972,7 +1074,7 @@ function freshRecord() {
   };
 }
 function freshState() {
-  return { v: 2, session: null, emp: PILOT.employee, released: { r2: false, r3: false }, read: {}, recs: Object.fromEntries(PILOT.active.map(e => [e, freshRecord()])), saved: null };
+  return { v: 2, session: null, emp: PILOT.employee, released: { r2: false, r3: false }, read: {}, notified: {}, recs: Object.fromEntries(PILOT.active.map(e => [e, freshRecord()])), saved: null };
 }
 function deepMerge(base, over) {
   if (Array.isArray(over)) return over;
@@ -1196,6 +1298,7 @@ const ICONS = {
   building: '<path d="M5 21V5l7-2v18M12 21h7V9l-7-2"/><path d="M8 8h1M8 12h1M8 16h1M15 12h1M15 16h1"/>',
   clip: '<path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
   pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
+  compass: '<circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/>',
   trend: '<path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/>',
   sprout: '<path d="M12 20v-8"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6Z"/><path d="M12 14c0-3-2-5-6-5 0 3 2 5 6 5Z"/>',
   chevdown: '<path d="m6 9 6 6 6-6"/>',
@@ -1225,7 +1328,7 @@ const val = (path) => { const v = getPath(S, path); return v == null ? "" : v; }
 const P = (...parts) => ["recs", S.emp, ...parts].join(".");
 
 /* ---------- UI state (not saved) ---------- */
-const UI = { signedIn: (() => { try { return sessionStorage.getItem("hub-signed-in") === "1"; } catch (e) { return false; } })(), route: "login", sub: null, modal: null, toast: null, dd: null, side: false, edit: null, evFilter: "all", drawer: null, facOK: false, codeErr: null, flash: null, busy: null, chatErr: null, libOpen: null, pmOpen: true, kpiOpen: null, month: null, dashView: "trend" };
+const UI = { signedIn: (() => { try { return sessionStorage.getItem("hub-signed-in") === "1"; } catch (e) { return false; } })(), route: "login", sub: null, modal: null, toast: null, dd: null, side: false, edit: null, evFilter: "all", drawer: null, facOK: false, codeErr: null, flash: null, busy: null, chatErr: null, libOpen: null, mailQueue: [], mailPop: null, mailTimer: null, mailHide: null, mailGap: 1400, pmOpen: true, kpiOpen: null, month: null, dashView: "trend" };
 function parseHash() {
   const h = (location.hash || "").replace(/^#\/?/, "");
   const [route, sub] = h.split("/");
@@ -1251,14 +1354,51 @@ function mailList() {
   if (!S.session) return [];
   const r = rec(), M = hrMessages(), out = [{ id: "start", kind: "hr", ...M.start }];
   if (goalsApproved(r)) out.unshift({ id: "approved", kind: "hr", ...M.approved });
-  if (r2Status(r) !== "locked") STAKEHOLDER_EMAILS.forEach(e => out.unshift({ id: "sh-" + e.id, kind: "stakeholder", ...e }));
+  if (S.released.r2) STAKEHOLDER_EMAILS.forEach(e => out.unshift({ ...e, id: "sh-" + e.id, kind: "stakeholder" }));   /* newest first */
   if (r3Status(r) !== "locked") out.unshift({ id: "yearend", kind: "hr", attach: true, ...M.yearend });
   if (r.r3.done) out.unshift({ id: "closed", kind: "hr", ...M.closed });
   return out.map(m => ({ ...m, unread: !S.read[m.id] }));
 }
 function markRead(id) { S.read[id] = true; save(); }
-const senderOf = (m) => m.kind === "stakeholder" ? STAKEHOLDERS[m.from] : { name: HR_SENDER.name, title: "Human Resources", initials: "HR" };
-function senderAvatar(m, size = "") { const s = senderOf(m); return s.emp ? avatar(s.emp, size) : `<span class="hr-av ${size}">${esc(s.initials)}</span>`; }
+const senderOf = (m) => m.kind === "stakeholder" ? STAKEHOLDERS[m.from] : STAKEHOLDERS.hr;
+function senderAvatar(m, size = "") {
+  const s = senderOf(m);
+  if (s.emp) return avatar(s.emp, size);
+  if (s.img) return `<img class="sender-img ${size} ${s.logo ? "logo" : ""}" src="${s.img}" alt="${esc(s.name)}">`;
+  return `<span class="hr-av ${size}">${esc(s.initials)}</span>`;
+}
+const recipient = (x) => x === "me" ? `${S.session.name} (${DIRECTOR.title})` : x;
+
+/* ---------- Incoming email notifications (Outlook/Gmail-style) ----------
+   Event-driven: any email that becomes available and has not been announced is queued once.
+   "Announced" ids are saved, so a refresh never repeats a notification. */
+function queueNewMail() {
+  if (!S.session || !UI.signedIn) return;
+  S.notified = S.notified || {};
+  const fresh = mailList().filter(m => !S.notified[m.id]).reverse();   /* oldest first */
+  if (!fresh.length) return;
+  fresh.forEach(m => { S.notified[m.id] = true; if (m.unread) UI.mailQueue.push(m.id); });
+  save();
+  pumpMailQueue();
+}
+function pumpMailQueue() {
+  if (UI.mailPop || UI.mailTimer || !UI.mailQueue.length) return;
+  UI.mailTimer = setTimeout(() => {
+    UI.mailTimer = null;
+    while (UI.mailQueue.length && S.read[UI.mailQueue[0]]) UI.mailQueue.shift();   /* already opened */
+    const id = UI.mailQueue.shift(); if (!id) return;
+    UI.mailPop = id; render();
+    clearTimeout(UI.mailHide); UI.mailHide = setTimeout(() => dismissMailPop(), 6500);
+  }, UI.mailGap);
+}
+function dismissMailPop() { clearTimeout(UI.mailHide); UI.mailPop = null; render(); pumpMailQueue(); }
+function mailPopHTML() {
+  if (!UI.mailPop || !S.session || !UI.signedIn) return "";
+  const m = mailList().find(x => x.id === UI.mailPop); if (!m) return "";
+  const s = senderOf(m), text = m.body.filter(p => p !== "__LIST__" && !/^(hi|dear)\b/i.test(p))[0] || "";
+  const waiting = UI.mailQueue.filter(id => !S.read[id]).length;
+  return `<div class="mail-pop" role="status" aria-live="polite"><button class="mp-body" data-act="openMailPop" data-id="${m.id}">${senderAvatar(m)}<span class="grow"><span class="row between nowrap"><b class="small">${esc(s.name)}</b>${m.unread ? `<span class="mp-dot" aria-label="Unread"></span>` : ""}</span><span class="mp-subj">${esc(m.subject)}</span><span class="mp-prev">${esc(text.slice(0, 110))}${text.length > 110 ? "…" : ""}</span>${waiting ? `<span class="xs muted">+${waiting} more new</span>` : ""}</span></button><button class="icon-btn mp-x" data-act="closeMailPop" aria-label="Dismiss">${icon("x", "i-sm")}</button></div>`;
+}
 
 function notifications() {
   const out = [], r = rec();
@@ -1307,9 +1447,8 @@ const PM_ROUTES = ["goals", "evidence", "appraisal"];
 function navItems() {
   const r = rec(), unreadMail = mailList().filter(m => m.unread).length + chatUnread(r);
   return [
-    { id: "home", l: "Home", icon: "home" },
+    { id: "home", l: "Home", icon: "home", dot: S.released.r2 && !r.r2.seenDashboard },
     { id: "inbox", l: "My Inbox", icon: "mail", cnt: unreadMail },
-    { id: "business", l: "Business Dashboard", icon: "bars", dot: r2Status(r) !== "locked" && !r.r2.seenDashboard },
     { id: "pm", l: "Performance Management", icon: "layers", children: [
       { id: "goals", l: "Objectives", icon: "target" },
       { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) },
@@ -1360,6 +1499,7 @@ function lockedPanel(title, text) { return `<div class="card"><div class="empty"
 
 /* ---------- render ---------- */
 function render() {
+  if (S.session && UI.signedIn) queueNewMail();
   const app = document.getElementById("app");
   const ae = document.activeElement, key = ae && (ae.getAttribute("data-bind") || ae.id), selS = ae && ae.selectionStart, selE = ae && ae.selectionEnd;
   const chat = document.getElementById("chat-log"), chatScroll = chat ? chat.scrollTop : null, chatBottom = chat ? chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40 : true;
@@ -1370,7 +1510,7 @@ function render() {
     html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}</main></div>`;
   }
   if (UI.chatOpen && S.session && UI.signedIn) markChatSeen();
-  if (S.session && UI.signedIn) html += chatBubble() + chatPanel();
+  if (S.session && UI.signedIn) html += chatBubble() + chatPanel() + mailPopHTML();
   html += modalHTML() + drawerHTML() + (UI.toast ? `<div class="toast" role="status">${esc(UI.toast.text)}${UI.toast.undo ? `<button data-act="undo">Undo</button>` : ""}</div>` : "");
   app.innerHTML = html;
   if (key) {
@@ -1468,35 +1608,58 @@ VIEWS.home = function () {
   <div class="stack-lg">
     <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee overview</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div>
       <button class="btn" data-act="modal" data-m="profile" data-emp="${S.emp}">${icon("user", "i-sm")} View profile</button></div></div>
-    ${commercialOverview(r, true)}
+    ${commercialOverview(r)}
   </div>`;
 };
 
 /* ---------- My Profile (the participant) ---------- */
 VIEWS.profile = function () {
-  const n = S.session.name, D = DIRECTOR;
-  const info = [["Employee name", n], ["Job title", D.title], ["Department", D.department], ["Company", D.company], ["Joining date", D.joined], ["Reporting line", D.reportsTo], ["Employment status", D.status], ["Work location", D.location], ["Direct reports", String(D.directReports)], ["Performance year", D.year]];
+  const n = S.session.name, D = DIRECTOR, tab = ["responsibilities", "objectives"].includes(UI.sub) ? UI.sub : "overview";
+  const tabs = [["overview", "Overview", "user"], ["responsibilities", "My Responsibilities", "book"], ["objectives", "My Performance Objectives", "target"]];
   return pageHead("My Profile", "My Profile") + `<div class="stack-lg">
-    <div class="card pad-lg"><div class="emp-hero"><span class="initials xl">${esc(initials(n))}</span><div class="stack-sm grow" style="gap:3px"><h2>${esc(n)}</h2><div class="t2">${D.title} · ${D.department}</div><div class="xs muted">${D.company} · Joined ${D.joined}</div></div><span class="chip st-approved">${D.status}</span></div></div>
-    <div class="grid2" style="align-items:start">
-      <section class="card"><div class="card-h"><h3>Personal &amp; employment information</h3></div><div class="card-b"><dl class="kv">${info.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}<dt>Leave information</dt><dd class="muted">${esc(D.leave)}</dd></dl></div></section>
-      <section class="card"><div class="card-h"><h3>My team</h3></div><div class="card-b">
-        <div class="org"><div class="org-node top">${icon("building", "i-sm")}<span><b>Chief Executive Officer</b><span class="xs muted">CEO</span></span></div><div class="org-line"></div>
-          <div class="org-node me"><span class="initials sm">${esc(initials(n))}</span><span><b>${esc(n)}</b><span class="xs muted">${D.title}</span></span></div><div class="org-line"></div>
-          <div class="xs muted" style="text-align:center;margin-bottom:8px">Commercial Department</div>
-          <div class="org-team">${D.team.map(e => `<button class="org-node" data-act="modal" data-m="profile" data-emp="${e}">${avatar(e, "sm")}<span><b>${esc(EMPLOYEES[e].name)}</b><span class="xs muted">${esc(EMPLOYEES[e].title)}</span></span></button>`).join("")}</div></div>
-      </div></section>
-    </div>
-    <section class="card"><div class="card-h"><h3>My job description</h3><span class="xs muted">${D.title}</span></div><div class="card-b stack">
-      <div class="stack-sm"><h4>Job purpose</h4><p class="small t2">${esc(D.purpose)}</p></div>
-      <div class="stack-sm"><h4>Key responsibilities</h4><ol class="list-plain small t2">${D.responsibilities.map(x => `<li>${esc(x)}</li>`).join("")}</ol></div>
-    </div></section>
-    <section class="card"><div class="card-h"><div><h3>My performance objectives ${APP.cycleYear}</h3><div class="xs muted">Set by the Chief Executive Officer · not editable</div></div><span class="tag">${CEO_OBJECTIVES.length} objectives</span></div><div class="card-b stack">
-      <p class="small t2">These are your own objectives, assigned by the CEO. They set the strategic context for the objectives you agree with your team. They are separate from your employees' individual objectives.</p>
-      ${CEO_OBJECTIVES.map((o, i) => `<div class="ceo-obj"><span class="goal-n">${i + 1}</span><div class="grow"><b>${esc(o.title)}</b><div class="small t2"><span class="muted">KPI:</span> ${esc(o.kpi)}</div></div><span class="tag blue">${esc(o.target)}</span></div>`).join("")}
-    </div></section>
+    <div class="profile-hero"><span class="initials xl">${esc(initials(n))}</span><div class="grow"><h2>${esc(n)}</h2><div>${D.title} · ${D.department}</div><div class="ph-meta"><span>${icon("building", "i-xs")} ${D.company}</span><span>${icon("calendar", "i-xs")} Joined ${D.joined}</span><span>${icon("people", "i-xs")} ${D.directReports} direct reports</span></div></div><span class="chip st-approved">${D.status}</span></div>
+    <div class="tabs" role="tablist">${tabs.map(([id, l, ic]) => `<button class="tab ${tab === id ? "on" : ""}" role="tab" aria-selected="${tab === id}" data-act="go" data-go="profile/${id}">${icon(ic, "i-sm")} ${l}</button>`).join("")}</div>
+    ${tab === "responsibilities" ? profileResponsibilities() : tab === "objectives" ? profileObjectives() : profileOverview()}
   </div>`;
 };
+function profileOverview() {
+  const D = DIRECTOR, n = S.session.name;
+  const info = [["user", "Employee name", n], ["clipboard", "Position", D.title], ["layers", "Department", D.department], ["building", "Company", D.company], ["calendar", "Joining date", D.joined], ["arrow", "Reporting line", D.reportsTo], ["check", "Employment status", D.status], ["home", "Work location", D.location], ["people", "Direct reports", `${D.directReports} (plus 1 indirect)`], ["clock", "Performance year", D.year], ["info", "Leave information", D.leave]];
+  return `<div class="info-grid">${info.map(([ic, k, v]) => `<div class="info-card"><span class="info-ic">${icon(ic, "i-sm")}</span><span><span class="xs muted">${k}</span><b class="small">${esc(v)}</b></span></div>`).join("")}</div>
+    <section class="card"><div class="card-h"><div><h3>My team</h3><div class="xs muted">Commercial Department · select a person for details</div></div></div><div class="card-b">${orgChart()}</div></section>`;
+}
+function orgPerson(e, extra = "") {
+  const E = EMPLOYEES[e];
+  return `<button class="org-node" data-act="modal" data-m="profile" data-emp="${e}">${avatar(e, "sm")}<span><b>${esc(E.name)}</b><span class="xs muted">${esc(E.title)}</span>${extra}</span></button>`;
+}
+function orgChart() {
+  const D = DIRECTOR, n = S.session.name, open = UI.orgOpen !== false;
+  return `<div class="org">
+    <div class="org-node top">${icon("building", "i-sm")}<span><b>Chief Executive Officer</b><span class="xs muted">CEO</span></span></div><div class="org-line"></div>
+    <div class="org-node me"><span class="initials sm">${esc(initials(n))}</span><span><b>${esc(n)}</b><span class="xs muted">${D.title} · you</span></span></div><div class="org-line"></div>
+    <div class="org-branches">${D.directs.map(e => { const sub = (D.indirect[e] || []); return `<div class="org-branch"><div class="org-stem"></div>${orgPerson(e, sub.length ? `<span class="xs org-mgr">Manages ${sub.length}</span>` : "")}
+      ${sub.length ? `<button class="btn ghost sm org-toggle" data-act="orgToggle" aria-expanded="${open}">${icon(open ? "chevdown" : "chev", "i-xs")} ${open ? "Hide" : "Show"} team</button>${open ? `<div class="org-sub">${sub.map(x => `<div class="org-subline"></div>${orgPerson(x, `<span class="xs muted">Reports to ${esc(EMPLOYEES[e].name)}</span>`)}`).join("")}</div>` : ""}` : ""}</div>`; }).join("")}</div>
+  </div>`;
+}
+const RESP_GROUPS = [
+  { id: "strategy", t: "Strategy and targets", icon: "target", items: [0, 3, 8] },
+  { id: "team", t: "Leading the Commercial team", icon: "people", items: [1, 5, 6] },
+  { id: "ops", t: "Commercial operations and collaboration", icon: "layers", items: [2, 4, 7] }
+];
+function profileResponsibilities() {
+  const D = DIRECTOR, open = UI.respOpen || { strategy: true };
+  return `<div class="stack">
+    <section class="purpose-card">${icon("compass")}<div><div class="eyebrow" style="color:#5ED3E2">Job purpose</div><p>${esc(D.purpose)}</p></div></section>
+    ${RESP_GROUPS.map(g => `<section class="acc ${open[g.id] ? "open" : ""}"><button class="acc-h" data-act="respToggle" data-id="${g.id}" aria-expanded="${!!open[g.id]}"><span class="info-ic">${icon(g.icon, "i-sm")}</span><b class="grow">${g.t}</b><span class="tag">${g.items.length}</span>${icon("chevdown", "i-sm")}</button>
+      ${open[g.id] ? `<ul class="acc-b">${g.items.map(i => `<li>${icon("check", "i-sm")}<span>${esc(D.responsibilities[i])}</span></li>`).join("")}</ul>` : ""}</section>`).join("")}
+  </div>`;
+}
+const CEO_INDICATOR = { growth: "Commercial revenue growth", conversion: "Proposal win rate", pipeline: "Qualified opportunities", responsiveness: "Competitor developments and market intelligence reporting", team: "Performance management cycle for your direct reports" };
+function profileObjectives() {
+  return `<div class="stack"><p class="small t2">Your ${APP.cycleYear} objectives, set by the Chief Executive Officer. They are read-only and give the strategic context for the objectives you agree with your team.</p>
+    <div class="obj-grid">${CEO_OBJECTIVES.map((o, i) => { const on = UI.ceoOpen === o.id; return `<div class="ceo-card ${on ? "open" : ""}"><button class="ceo-btn" data-act="ceoToggle" data-id="${o.id}" aria-expanded="${on}"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span><span class="xs ceo-more">${on ? "Hide details" : "View details"} ${icon(on ? "chevdown" : "chev", "i-xs")}</span></button>
+      ${on ? `<div class="ceo-detail small"><div><span class="muted">KPI</span>${esc(o.kpi)}</div><div><span class="muted">Target</span>${esc(o.target)}</div><div><span class="muted">Tracked through</span>${esc(CEO_INDICATOR[o.id])}</div><div><span class="muted">Strategic context</span>One of the CEO's ${APP.cycleYear} priorities for the Commercial Department. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
+}
 MODALS.profile = function (m) {
   const e = m.emp || S.emp, E = EMPLOYEES[e], active = PILOT.active.includes(e);
   return modalWrap("Employee profile", `
@@ -1523,11 +1686,12 @@ function chatInboxItem() {
 }
 function mailView(m) {
   const s = senderOf(m), r = rec();
-  const body = m.body.map(p => p === "__LIST__" ? `<ul>${m.list.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p)}</p>`).join("");
+  const body = m.body.map(p => p === "__LIST__" ? `<ul>${m.list.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("");
+  const to = (m.to || ["me"]).map(recipient), cc = (m.cc || []).map(recipient);
   const attach = m.attach ? `<div class="attach">${icon("clip", "i-sm")}<span class="grow"><b class="small">Year-End Performance Update — Omar Hassan.pdf</b><span class="xs muted">${r.r3.dataset ? "Performance evidence · December 2027" : r.r3.error ? esc(r.r3.error) : "Preparing…"}</span></span>${r.r3.dataset ? `<button class="btn sm" data-act="go" data-go="yearend">${icon("eye", "i-sm")} Open</button>` : r.r3.error ? `<button class="btn sm" data-act="loadYearEnd">Retry</button>` : ""}</div>` : "";
   return `<article class="mail">
     <h2>${esc(m.subject)}</h2>
-    <div class="mail-meta">${senderAvatar(m)}<div class="grow"><b class="small">${esc(s.name)}</b> <span class="xs muted">${esc(s.title)}</span><div class="xs muted">To: ${esc(S.session.name)} (${DIRECTOR.title}) · ${m.date}</div></div></div>
+    <div class="mail-meta">${senderAvatar(m)}<div class="grow"><div class="row between"><span><b class="small">${esc(s.name)}</b> <span class="xs muted">${esc(s.title)}</span></span><span class="xs muted">${m.date}</span></div><div class="xs t2 mail-rcpt"><span class="muted">To:</span> ${to.map(esc).join("; ")}</div>${cc.length ? `<div class="xs t2 mail-rcpt"><span class="muted">Cc:</span> ${cc.map(esc).join("; ")}</div>` : ""}</div></div>
     ${m.secondhand ? `<div class="notice warn">${icon("info", "i-sm")}<span><b>Secondhand account.</b> Mariam is reporting what she observed and what Omar told her. It has not been verified.</span></div>` : ""}
     <div class="mail-body">${body}</div>
     ${attach}
@@ -1646,21 +1810,18 @@ function objCard(o, i, ed, tried) {
 }
 
 function compTab(r, ed) {
-  const g = r.goals, lib = competencyLibrary(), selIds = g.comps.map(c => c.id), full = g.comps.length >= COMP_RANGE.max;
-  return `<div class="comp-layout">
-    <div class="card"><div class="card-h"><div><h3>Competency library</h3><div class="xs muted">Select ${COMP_RANGE.min}–${COMP_RANGE.max}. Use your printed competency dictionary for the level descriptions.</div></div></div><div class="card-b stack" style="gap:8px">
-      ${lib.map(c => { const on = selIds.includes(c.id); return `<div class="lib-item ${on ? "sel" : ""}"><div class="row between nowrap"><b class="small">${esc(c.name)}</b>${ed ? (on ? `<button class="btn sm" data-act="compDel" data-id="${c.id}">Remove</button>` : `<button class="btn sm ${full ? "disabled" : "primary"}" data-act="compAdd" data-id="${c.id}" ${full ? "disabled" : ""}>${icon("plus", "i-sm")} Add</button>`) : on ? `<span class="chip st-approved">Selected</span>` : ""}</div></div>`; }).join("")}
-    </div></div>
-    <div class="stack">
-      <div class="summary-bar"><div class="sb-item"><span class="xs muted">Selected competencies</span><b class="num">${g.comps.length} / ${COMP_RANGE.max}</b></div><div class="sb-item"><span class="xs muted">Note</span><span class="xs t2">The expected level is what the role requires. It is not a performance rating.</span></div></div>
-      ${g.comps.length ? g.comps.map((c, i) => selectedComp(c, i, ed, g.tried)).join("") : `<div class="card"><div class="empty">${icon("layers")}<b>No competencies selected yet</b><span class="small">Add ${COMP_RANGE.min}–${COMP_RANGE.max} competencies that matter most for Omar's role.</span></div></div>`}
-      ${ed ? validationBlock("Competency validation", competencyValidation(r), "Every competency has an expected level and a written behavioral standard.") : ""}
-    </div>
+  const g = r.goals, selIds = g.comps.map(c => c.id), avail = competencyLibrary().filter(c => !selIds.includes(c.id)), full = g.comps.length >= COMP_RANGE.max;
+  return `<div class="stack">
+    <div class="row between"><div><h2>Competencies</h2><div class="xs muted">Select ${COMP_RANGE.min}–${COMP_RANGE.max}. Use your printed competency dictionary to write the expected behaviors.</div></div>
+      ${ed ? `<div class="comp-add"><label class="sr" for="comp-add">Add competency</label><span class="comp-add-ic">${icon("plus", "i-sm")}</span><select class="sel" id="comp-add" data-act-change="compPick" ${full || !avail.length ? "disabled" : ""}><option value="">${full ? `Maximum of ${COMP_RANGE.max} selected` : "Add Competency"}</option>${avail.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select></div>` : ""}</div>
+    <div class="summary-bar"><div class="sb-item"><span class="xs muted">Selected competencies</span><b class="num">${g.comps.length} / ${COMP_RANGE.max}</b></div><div class="sb-item"><span class="xs muted">Note</span><span class="xs t2">The expected level is what the role requires. It is not a performance rating.</span></div></div>
+    ${g.comps.length ? `<div class="comp-grid">${g.comps.map((c, i) => selectedComp(c, i, ed, g.tried)).join("")}</div>` : `<div class="card"><div class="empty">${icon("layers")}<b>No competencies selected yet</b><span class="small">Use Add Competency to choose ${COMP_RANGE.min}–${COMP_RANGE.max} competencies that matter most for Omar's role.</span></div></div>`}
+    ${ed ? validationBlock("Competency validation", competencyValidation(r), "Every competency has an expected level and a written behavioral standard.") : ""}
   </div>`;
 }
 function selectedComp(c, i, ed, tried) {
   const L = competencyById(S.emp, c.id) || { name: "Competency" }, base = P("goals", "comps", i), noStd = tried && !(c.standard || "").trim();
-  return `<div class="card" id="comp-${c.id}"><div class="card-h"><h3>${esc(L.name)}</h3>${ed ? `<button class="btn ghost sm" data-act="compDel" data-id="${c.id}">Remove</button>` : ""}</div><div class="card-b stack" style="gap:12px">
+  return `<div class="card comp-card" id="comp-${c.id}"><div class="card-h"><h3>${esc(L.name)}</h3>${ed ? `<button class="icon-btn" data-act="compDel" data-id="${c.id}" aria-label="Remove ${esc(L.name)}">${icon("trash", "i-sm")}</button>` : ""}</div><div class="card-b stack" style="gap:12px">
     <div class="field"><span class="lbl">Expected proficiency level <span class="req">*</span></span>
       ${ed ? `<div class="seg ${tried && !c.level ? "err" : ""}" role="radiogroup">${LEVELS.map(l => `<button role="radio" aria-checked="${c.level === l.id}" class="${c.level === l.id ? "on" : ""}" data-act="compLevel" data-i="${i}" data-v="${l.id}">${l.l}</button>`).join("")}</div>` : `<div><span class="tag blue">${levelLabel(c.level)}</span></div>`}
     </div>
@@ -1731,7 +1892,7 @@ VIEWS.evidence = function () {
   const rows = r.evidence.filter(e => f === "all" || e.link === f);
   return pageHead(`Evidence Log / ${esc(E.name)}`, "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
   <div class="stack">
-    <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="business">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${r3Status(r) !== "locked" ? `<button class="btn ghost sm" data-act="go" data-go="yearend">${icon("calendar", "i-sm")} Year-end update</button>` : ""}</div>
+    <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${r3Status(r) !== "locked" ? `<button class="btn ghost sm" data-act="go" data-go="yearend">${icon("calendar", "i-sm")} Year-end update</button>` : ""}</div>
     <div class="row between">
       <div class="row nowrap" style="gap:8px">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by KPI or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:260px"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>
       <span class="xs muted">${plural(rows.length, "entry", "entries")} shown</span>
@@ -1765,104 +1926,142 @@ MODALS.evidence = function (m) {
 function evMissing(d) { const m = []; if (!d.period.trim()) m.push("Date / Period"); if (!d.link) m.push("KPI / Competency"); if (!d.text.trim()) m.push("Evidence / Observation"); if (!d.source) m.push("Source"); else if (d.source === "Other" && !d.sourceOther.trim()) m.push("Other source"); return m; }
 
 
-/* ---------- Commercial dashboard (shared by Home and Business Dashboard) ---------- */
-function dashStage(r = rec()) { return r.r3.dataset && r.r3.dataset.company && r.r3.dataset.company.metrics ? "yearend" : S.released.r2 ? "disruption" : "baseline"; }
-function dashSeries(r = rec()) {
-  const m = { months: [...DASHBOARD.months], win: [...DASHBOARD.win], objections: [...DASHBOARD.objections] };
-  if (dashStage(r) === "yearend") { const y = r.r3.dataset.company.metrics; m.months.push(y.month); m.win.push(y.win); m.objections.push(y.objections); }
-  return m;
-}
+/* =========================================================
+   COMMERCIAL DASHBOARD (Home) — one source of truth for business figures
+   Periods follow the facilitator's releases: Start of Year → Mid-Year → Year-End.
+   Only figures defined in the scenario are shown; year-end company figures
+   arrive from the server with the year-end update.
+   ========================================================= */
+const PERIODS_DASH = [
+  { id: "start", l: "Start of Year", sub: "January 2027" },
+  { id: "mid", l: "Mid-Year", sub: "June / July 2027" },
+  { id: "year", l: "Year-End", sub: "December 2027" }
+];
 const ceo = (id) => CEO_OBJECTIVES.find(o => o.id === id);
-function dashKpis(r = rec()) {
-  const st = dashStage(r), y = st === "yearend" ? r.r3.dataset.company.metrics : null;
-  if (st === "baseline") return [
-    { id: "growth", label: "Commercial revenue growth", value: ceo("growth").target, sub: "2027 target vs 2026", note: "First results after Q1", tone: "target", obj: "growth", def: "Annual commercial revenue growth compared with 2026.", source: "Finance revenue reports" },
-    { id: "win", label: "Proposal win rate", value: ceo("conversion").target, sub: "2027 average target", note: "Baseline not yet published", tone: "target", obj: "conversion", def: DASHBOARD_INFO.win.def, source: DASHBOARD_INFO.win.source },
-    { id: "opps", label: "Qualified opportunities", value: ceo("pipeline").target, sub: "2027 target vs 2026 baseline", note: "2026 baseline to be confirmed", tone: "target", obj: "pipeline", def: DASHBOARD_INFO.opps.def, source: DASHBOARD_INFO.opps.source },
-    { id: "mi", label: "Market intelligence reporting", value: "12", sub: "monthly reports scheduled in 2027", note: "Reporting starts in January", tone: "target", obj: "responsiveness", def: "Scheduled monthly market intelligence reports for the Commercial Department.", source: "Reporting tracker" }
-  ];
-  const K = Object.fromEntries(DASHBOARD.kpis.map(k => [k.id, k]));
+function periodAvailable(id, r = rec()) { return id === "start" || (id === "mid" && S.released.r2) || (id === "year" && !!(r.r3.dataset && r.r3.dataset.company && r.r3.dataset.company.metrics)); }
+function currentPeriod(r = rec()) {
+  if (UI.period && periodAvailable(UI.period, r)) return UI.period;
+  return periodAvailable("year", r) ? "year" : periodAvailable("mid", r) ? "mid" : "start";
+}
+/* The business figures by period (the single data source). null = not defined for that period. */
+function bizData(r = rec()) {
+  const y = periodAvailable("year", r) ? r.r3.dataset.company.metrics : null;
+  return {
+    winRate: { start: null, preLaunch: 32, mid: 24, year: y ? y.win : null, target: 35 },
+    objections: { start: null, preLaunch: 18, mid: 29, year: y ? y.objections : null },
+    opps: { start: null, mid: -12, year: y ? y.opps : null, target: 20 },
+    valtora: { mid: 35, year: null },
+    growth: { target: 15 },
+    months: y ? [...DASHBOARD.months, y.month] : [...DASHBOARD.months],
+    win: y ? [...DASHBOARD.win, y.win] : [...DASHBOARD.win],
+    objectionSeries: y ? [...DASHBOARD.objections, y.objections] : [...DASHBOARD.objections]
+  };
+}
+const fmtPct = (v, sign) => v == null ? "—" : `${sign && v > 0 ? "+" : ""}${v}%`;
+function kpisFor(period, r = rec()) {
+  const d = bizData(r);
+  const val = (o) => period === "start" ? null : period === "mid" ? o.mid : o.year;
   return [
-    { id: "opps", label: K.opps.label, value: y ? `${y.opps}%` : K.opps.value, sub: y ? "vs pre-launch baseline · December" : K.opps.sub, note: y ? "June: −12%" : `Target ${ceo("pipeline").target} vs 2026`, tone: "bad", obj: "pipeline", ...DASHBOARD_INFO.opps },
-    { id: "obj", label: K.obj.label, value: `${y ? y.objections : 29}%`, sub: y ? "of recorded objections · December" : K.obj.sub, note: y ? "June: 29% · pre-launch: 18%" : "Pre-launch: 18%", tone: "bad", obj: "conversion", ...DASHBOARD_INFO.obj },
-    { id: "win", label: K.win.label, value: `${y ? y.win : 24}%`, sub: y ? "December" : K.win.sub, note: `Target ${ceo("conversion").target} average`, tone: "bad", obj: "conversion", ...DASHBOARD_INFO.win },
-    { id: "val", label: K.val.label, value: K.val.value, sub: K.val.sub, note: y ? "No year-end update reported" : "New competitor pressure", tone: "warn", obj: "responsiveness", ...DASHBOARD_INFO.val }
+    { id: "growth", focus: "growth", label: "Commercial revenue growth", icon: "trend", value: null, target: `≥ ${d.growth.target}%`, note: period === "start" ? "First results after Q1" : "Not published in this update", obj: "growth", def: "Annual commercial revenue growth compared with 2026.", source: "Finance revenue reports", series: [] },
+    { id: "win", focus: "conversion", label: "Proposal win rate", icon: "target", value: val(d.winRate), target: `≥ ${d.winRate.target}% avg`, note: period === "start" ? "Baseline not yet published" : period === "mid" ? "Pre-launch: 32%" : "June: 24% · pre-launch: 32%", tone: "bad", obj: "conversion", def: DASHBOARD_INFO.win.def, source: DASHBOARD_INFO.win.source, series: [["Pre-launch", 32], ["Mid-Year (June)", 24], ...(d.winRate.year != null ? [["Year-End (Dec)", d.winRate.year]] : [])] },
+    { id: "opps", focus: "pipeline", label: "Qualified opportunities", icon: "layers", value: val(d.opps), sign: true, target: `+${d.opps.target}% vs 2026`, note: period === "start" ? "2026 baseline to be confirmed" : "vs pre-launch baseline", tone: "bad", obj: "pipeline", def: DASHBOARD_INFO.opps.def, source: DASHBOARD_INFO.opps.source, series: [["Mid-Year (June)", -12], ...(d.opps.year != null ? [["Year-End (Dec)", d.opps.year]] : [])] },
+    { id: "obj", focus: "conversion", label: "Price-related objections", icon: "alert", value: val(d.objections), target: null, sub: "Share of recorded customer objections", note: period === "start" ? "Tracking from Q1" : period === "mid" ? "Pre-launch: 18%" : "June: 29% · pre-launch: 18%", tone: "bad", obj: "conversion", def: DASHBOARD_INFO.obj.def, source: DASHBOARD_INFO.obj.source, series: [["Pre-launch", 18], ["Mid-Year (June)", 29], ...(d.objections.year != null ? [["Year-End (Dec)", d.objections.year]] : [])] },
+    { id: "mi", focus: "market", label: "Market intelligence reporting", icon: "log", value: period === "start" ? "12" : null, raw: true, target: null, sub: period === "start" ? "Monthly reports scheduled" : "Reported in Business insights", note: period === "start" ? "January – December 2027" : "Individual work evidence", obj: "responsiveness", def: "Scheduled monthly market intelligence reports for the Commercial Department.", source: "Reporting tracker", series: [] }
   ];
 }
-function kpiCard(k) {
-  const open = UI.kpiOpen === k.id, o = ceo(k.obj);
-  return `<div class="kpi ${k.tone} ${open ? "open" : ""}"><button class="kpi-btn" data-act="kpi" data-id="${k.id}" aria-expanded="${open}"><span class="row between nowrap"><span class="xs muted">${esc(k.label)}</span><span class="kpi-i" title="${esc(k.def)}">${icon(open ? "chevdown" : "info", "i-xs")}</span></span><b class="kpi-v num">${esc(k.value)}</b><span class="xs t2">${esc(k.sub)}</span><span class="xs kpi-note">${esc(k.note)}</span></button>
-    ${open ? `<div class="kpi-more xs"><div><b>What it measures:</b> ${esc(k.def)}</div><div><b>Source:</b> ${esc(k.source)}</div>${o ? `<div><b>Linked CEO objective:</b> ${esc(o.title)} (${esc(o.target)})</div>` : ""}</div>` : ""}</div>`;
+const FOCUS = [["all", "All"], ["conversion", "Conversion"], ["pipeline", "Pipeline"], ["market", "Market"], ["growth", "Growth"]];
+function kpiCard(k, period) {
+  const open = UI.kpiOpen === k.id, o = ceo(k.obj), dim = UI.focus && UI.focus !== "all" && k.focus !== UI.focus;
+  const shown = k.value == null ? "—" : k.raw ? k.value : fmtPct(k.value, k.sign);
+  return `<div class="kpi ${k.value == null ? "na" : k.tone || "target"} ${open ? "open" : ""} ${dim ? "dim" : ""}"><button class="kpi-btn" data-act="kpi" data-id="${k.id}" aria-expanded="${open}" title="${esc(k.def)}"><span class="row between nowrap"><span class="kpi-l">${icon(k.icon, "i-xs")} ${esc(k.label)}</span><span class="kpi-i">${icon(open ? "chevdown" : "info", "i-xs")}</span></span><b class="kpi-v num">${esc(shown)}</b><span class="xs kpi-t">${k.target ? `Target ${esc(k.target)}` : esc(k.sub || "")}</span><span class="xs kpi-note">${esc(k.note)}</span></button>
+    ${open ? `<div class="kpi-more xs"><div><b>What it measures:</b> ${esc(k.def)}</div><div><b>Source:</b> ${esc(k.source)}</div>${o ? `<div><b>CEO objective:</b> ${esc(o.title)} (${esc(o.target)})</div>` : ""}${k.series.length ? `<div class="kpi-series">${k.series.map(([l, v]) => `<span><span class="muted">${l}</span><b class="num">${fmtPct(v, k.sign)}</b></span>`).join("")}</div>` : ""}</div>` : ""}</div>`;
 }
-function lineChart(m) {
-  const vw = window.innerWidth || 1200, W = Math.round(Math.max(300, Math.min(860, vw > 1100 ? vw - 400 : vw - 80))), H = W < 480 ? 220 : 260, pad = { l: 44, r: 16, t: 22, b: 34 }, small = W < 480, max = 40, n = m.months.length, xs = (i) => pad.l + i * ((W - pad.l - pad.r) / (n - 1)), ys = (v) => H - pad.b - (v / max) * (H - pad.t - pad.b);
+function chartWidth(full) { const vw = window.innerWidth || 1200, main = vw > 1100 ? vw - 330 : vw - 60; return Math.round(Math.max(290, Math.min(full ? 1100 : 760, full ? main : (vw > 1100 ? main * 0.6 : main)))); }
+function lineChart(d) {
+  const show = UI.series || { win: true, obj: true };
+  const W = chartWidth(false), small = W < 480, H = small ? 220 : 260, pad = { l: 42, r: 16, t: 22, b: 34 }, max = 40, n = d.months.length;
+  const xs = (i) => pad.l + i * ((W - pad.l - pad.r) / Math.max(1, n - 1)), ys = (v) => H - pad.b - (v / max) * (H - pad.t - pad.b);
   const path = (arr) => arr.map((v, i) => `${i ? "L" : "M"}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join("");
-  const grid = [0, 10, 20, 30, 40].map(v => `<line x1="${pad.l}" x2="${W - pad.r}" y1="${ys(v)}" y2="${ys(v)}" class="gl"/><text x="${pad.l - 8}" y="${ys(v) + 4}" text-anchor="end" class="ax">${v}%</text>`).join("");
-  const sel = UI.month;
-  const pts = (arr, cls) => arr.map((v, i) => `<circle cx="${xs(i)}" cy="${ys(v)}" r="${sel === i ? 6 : 4}" class="${cls}"/>${small && sel !== i ? "" : `<text x="${xs(i)}" y="${ys(v) - 10}" text-anchor="middle" class="lab ${cls}">${v}%</text>`}`).join("");
-  const hits = m.months.map((mo, i) => `<rect x="${xs(i) - 24}" y="${pad.t}" width="48" height="${H - pad.t - pad.b}" class="hit ${sel === i ? "sel" : ""}" data-act="month" data-i="${i}"><title>${mo}: win rate ${m.win[i]}%, price objections ${m.objections[i]}%</title></rect>`).join("");
-  const launch = Math.min(3, n - 1) - 0.5;
-  return `<svg class="chart" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Proposal win rate and price-related objections by month">
-    ${grid}${hits}${m.months.map((mo, i) => `<text x="${xs(i)}" y="${H - 12}" text-anchor="middle" class="ax ${sel === i ? "axsel" : ""}">${mo}</text>`).join("")}
+  const sel = UI.month != null && UI.month < n ? UI.month : null;
+  const pts = (arr, cls, name) => arr.map((v, i) => `<circle cx="${xs(i)}" cy="${ys(v)}" r="${sel === i ? 6 : 4}" class="${cls}"><title>${d.months[i]} · ${name}: ${v}%</title></circle>${small && sel !== i ? "" : `<text x="${xs(i)}" y="${ys(v) - 10}" text-anchor="middle" class="lab ${cls}">${v}%</text>`}`).join("");
+  const launch = 2.5;
+  return `<svg class="chart" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly proposal win rate and price-related objections">
+    ${[0, 10, 20, 30, 40].map(v => `<line x1="${pad.l}" x2="${W - pad.r}" y1="${ys(v)}" y2="${ys(v)}" class="gl"/><text x="${pad.l - 8}" y="${ys(v) + 4}" text-anchor="end" class="ax">${v}%</text>`).join("")}
+    ${d.months.map((mo, i) => `<rect x="${xs(i) - 24}" y="${pad.t}" width="48" height="${H - pad.t - pad.b}" class="hit ${sel === i ? "sel" : ""}" data-act="month" data-i="${i}"><title>${mo}: win rate ${d.win[i]}%, price objections ${d.objectionSeries[i]}%</title></rect><text x="${xs(i)}" y="${H - 12}" text-anchor="${i === n - 1 ? "end" : i === 0 ? "start" : "middle"}" class="ax ${sel === i ? "axsel" : ""}">${mo.slice(0, 3)}</text>`).join("")}
     <line x1="${xs(launch)}" x2="${xs(launch)}" y1="${pad.t}" y2="${H - pad.b}" class="ev"/><text x="${xs(launch) - 4}" y="${H - pad.b - 8}" text-anchor="end" class="ax evl">Valtora launch</text>
-    <line x1="${pad.l}" x2="${W - pad.r}" y1="${ys(35)}" y2="${ys(35)}" class="tg"/><text x="${((xs(0) + xs(1)) / 2).toFixed(1)}" y="${ys(35) - 6}" text-anchor="middle" class="ax tgl">Win-rate target 35%</text>
-    <path d="${path(m.win)}" class="s1"/><path d="${path(m.objections)}" class="s2"/>${pts(m.win, "s1")}${pts(m.objections, "s2")}
-  </svg><div class="legend"><span><i class="s1"></i>Proposal win rate</span><span><i class="s2"></i>Price-related objections</span><span class="muted">Select a month for details</span></div>`;
+    ${show.win ? `<line x1="${pad.l}" x2="${W - pad.r}" y1="${ys(35)}" y2="${ys(35)}" class="tg"/><text x="${((xs(0) + xs(1)) / 2).toFixed(1)}" y="${ys(35) - 6}" text-anchor="middle" class="ax tgl">Win-rate target 35%</text>` : ""}
+    ${show.win ? `<path d="${path(d.win)}" class="s1"/>${pts(d.win, "s1", "Proposal win rate")}` : ""}${show.obj ? `<path d="${path(d.objectionSeries)}" class="s2"/>${pts(d.objectionSeries, "s2", "Price-related objections")}` : ""}
+  </svg><div class="legend"><button class="lg ${show.win ? "on" : ""}" data-act="series" data-k="win" aria-pressed="${show.win}"><i class="s1"></i>Proposal win rate</button><button class="lg ${show.obj ? "on" : ""}" data-act="series" data-k="obj" aria-pressed="${show.obj}"><i class="s2"></i>Price-related objections</button><span class="muted">Hover for values · select a month</span></div>${monthDetail(d)}`;
 }
-function monthDetail(m) {
-  const i = UI.month; if (i == null || i >= m.months.length) return "";
-  const prev = i > 0 ? i - 1 : null, d = (a) => prev == null ? "" : ` <span class="${a[i] - a[prev] < 0 ? "neg" : a[i] - a[prev] > 0 ? "pos" : "muted"}">(${a[i] - a[prev] > 0 ? "+" : ""}${a[i] - a[prev]} pts vs ${m.months[prev]})</span>`;
-  return `<div class="month-detail"><b>${m.months[i]}</b><span>Proposal win rate <b class="num">${m.win[i]}%</b>${d(m.win)}</span><span>Price-related objections <b class="num">${m.objections[i]}%</b>${d(m.objections)}</span><button class="btn ghost sm" data-act="month" data-i="${i}">Clear</button></div>`;
+function monthDetail(d) {
+  const i = UI.month; if (i == null || i >= d.months.length) return "";
+  const prev = i > 0 ? i - 1 : null, df = (a) => prev == null ? "" : ` <span class="${a[i] - a[prev] < 0 ? "neg" : a[i] - a[prev] > 0 ? "pos" : "muted"}">(${a[i] - a[prev] > 0 ? "+" : ""}${a[i] - a[prev]} pts vs ${d.months[prev]})</span>`;
+  return `<div class="month-detail"><b>${d.months[i]}</b><span>Proposal win rate <b class="num">${d.win[i]}%</b>${df(d.win)}</span><span>Price-related objections <b class="num">${d.objectionSeries[i]}%</b>${df(d.objectionSeries)}</span><button class="btn ghost sm" data-act="month" data-i="${i}">Clear</button></div>`;
 }
-function compareBars(m) {
-  const last = m.months.length - 1, rows = [["Proposal win rate", 32, 24, m.win[last]], ["Price-related objections", 18, 29, m.objections[last]]];
-  const yr = dashStage() === "yearend";
-  return rows.map(([l, a, b, c]) => `<div class="cmp"><div class="row between small"><b>${l}</b><span class="num">${a}% → ${b}%${yr ? ` → <b>${c}%</b>` : ""}</span></div>
-    ${[["Pre-launch", a, "c0"], ["June", b, "c1"], ...(yr ? [["December", c, "c2"]] : [])].map(([lb, v, cls]) => `<div class="cmp-row"><span class="xs muted">${lb}</span><span class="cbar"><i class="${cls}" style="width:${v * 2.5}%"></i></span><span class="num xs">${v}%</span></div>`).join("")}</div>`).join("");
+function compareBars(d, period) {
+  const rows = [["Proposal win rate", [["Pre-launch", 32], ["June", 24], ...(period === "year" ? [["December", d.winRate.year]] : [])], 35], ["Price-related objections", [["Pre-launch", 18], ["June", 29], ...(period === "year" ? [["December", d.objections.year]] : [])], null]];
+  return rows.map(([l, vals, tg]) => `<div class="cmp"><div class="row between small"><b>${l}</b><span class="num">${vals.map(v => `${v[1]}%`).join(" → ")}</span></div>
+    ${vals.map(([lb, v], i) => `<div class="cmp-row"><span class="xs muted">${lb}</span><span class="cbar" title="${lb}: ${v}%"><i class="c${i}" style="width:${v * 2.5}%"></i>${tg ? `<b class="cbar-tg" style="left:${tg * 2.5}%" title="Target ${tg}%"></b>` : ""}</span><span class="num xs">${v}%</span></div>`).join("")}</div>`).join("");
 }
-function commercialOverview(r, compact) {
-  const st = dashStage(r), kp = dashKpis(r);
-  const stamp = st === "baseline" ? `Start of year · ${APP.cycleYear} targets` : st === "yearend" ? "Updated December 2027" : `Updated ${SIM_DATES.alert}`;
-  const head = `<div class="row between"><div><h2>Commercial overview</h2><div class="xs muted">${stamp}</div></div>${compact ? `<button class="btn" data-act="go" data-go="business">${icon("bars", "i-sm")} Detailed analysis</button>` : ""}</div>`;
-  const alert = st !== "baseline" ? `<button class="alert-bar" data-act="kpiAlert" aria-expanded="${!!UI.alertOpen}">${icon("alert")}<span class="grow"><b>Business alert:</b> Valtora has introduced a lower-priced alternative to Customer360 and launched an aggressive campaign targeting NextWave's existing and potential customers.${UI.alertOpen ? `<span class="alert-more">Department indicators changed in June: qualified opportunities −12%, price-related objections 18% → 29%, proposal win rate 32% → 24%. Valtora is mentioned in 35% of active customer discussions.</span>` : ""}</span>${icon(UI.alertOpen ? "chevdown" : "chev", "i-sm")}</button>` : "";
-  if (st === "baseline") return `<section class="stack">${head}
-    <div class="grid4 kpi-grid">${kp.map(kpiCard).join("")}</div>
-    <div class="card"><div class="card-h"><div><h3>${APP.cycleYear} commercial objectives</h3><div class="xs muted">Set by the CEO for the Commercial Department</div></div><button class="btn ghost sm" data-act="go" data-go="profile">My objectives</button></div><div class="card-b stack-sm">
-      ${CEO_OBJECTIVES.map(o => `<div class="target-row"><span class="grow"><b class="small">${esc(o.title)}</b><span class="xs muted">${esc(o.kpi)}</span></span><span class="tag blue">${esc(o.target)}</span><span class="xs muted">Tracking from Q1</span></div>`).join("")}
-    </div></div></section>`;
-  const m = dashSeries(r), view = UI.dashView;
-  return `<section class="stack">${head}${alert}
-    <div><div class="eyebrow" style="margin-bottom:8px">Department indicators</div><div class="grid4 kpi-grid">${kp.map(kpiCard).join("")}</div></div>
-    <div class="card"><div class="card-h"><h3>${view === "compare" ? "Before and after the launch" : "Monthly trend"}</h3><div class="seg" role="tablist"><button class="${view !== "compare" ? "on" : ""}" data-act="dashView" data-v="trend">Monthly trend</button><button class="${view === "compare" ? "on" : ""}" data-act="dashView" data-v="compare">Period comparison</button></div></div><div class="card-b stack">
-      ${view === "compare" ? compareBars(m) : lineChart(m) + monthDetail(m)}
-    </div></div></section>`;
+function donut(value, label, cls, sub) {
+  const R = 42, c = 2 * Math.PI * R, off = c * (1 - value / 100);
+  return `<div class="donut ${cls}" title="${esc(label)}: ${value}%"><svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="${R}" class="d-bg"/><circle cx="55" cy="55" r="${R}" class="d-fg" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 55 55)"/><text x="55" y="60" text-anchor="middle" class="d-v">${value}%</text></svg><b class="small">${esc(label)}</b><span class="xs muted">${esc(sub)}</span></div>`;
+}
+function gauge(value, target, label) {
+  const pct = Math.min(1, value / target), a = Math.PI * (1 - pct), x = 60 + 46 * Math.cos(a), y = 60 - 46 * Math.sin(a);
+  return `<div class="gauge" title="${esc(label)}: ${value}% of a ${target}% target"><svg width="120" height="74" viewBox="0 0 120 74" aria-hidden="true"><path d="M14 60 A46 46 0 0 1 106 60" class="g-bg"/><path d="M14 60 A46 46 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" class="g-fg"/><text x="60" y="58" text-anchor="middle" class="d-v">${value}%</text></svg><b class="small">${esc(label)}</b><span class="xs muted">Target ${target}% · gap ${target - value} pts</span></div>`;
+}
+function commercialOverview(r) {
+  const period = currentPeriod(r), d = bizData(r), kp = kpisFor(period, r);
+  if (period === "mid" && !r.r2.seenDashboard) { r.r2.seenDashboard = true; save(); }
+  const pinfo = PERIODS_DASH.find(p => p.id === period);
+  const filter = `<div class="period-filter" role="tablist" aria-label="Period">${PERIODS_DASH.map(p => { const ok = periodAvailable(p.id, r); return `<button role="tab" class="${period === p.id ? "on" : ""}" data-act="period" data-v="${p.id}" aria-selected="${period === p.id}" ${ok ? "" : `disabled title="Not yet available"`}>${ok ? "" : icon("lock", "i-xs")}${p.l}</button>`; }).join("")}</div>`;
+  const focus = `<div class="focus-chips" role="group" aria-label="Focus">${FOCUS.map(([id, l]) => `<button class="${(UI.focus || "all") === id ? "on" : ""}" data-act="focus" data-v="${id}">${l}</button>`).join("")}</div>`;
+  const head = `<div class="dash-bar"><div><h2>Commercial Performance</h2><span class="xs">${pinfo.l} · ${pinfo.sub}</span></div>${filter}</div>`;
+  const alert = period !== "start" ? `<button class="alert-bar" data-act="kpiAlert" aria-expanded="${!!UI.alertOpen}">${icon("alert")}<span class="grow"><b>Business alert:</b> Valtora has introduced a lower-priced alternative to Customer360 and launched an aggressive campaign targeting NextWave's existing and potential customers.${UI.alertOpen ? `<span class="alert-more">Department indicators changed in June: qualified opportunities −12%, price-related objections 18% → 29%, proposal win rate 32% → 24%. Valtora is mentioned in 35% of active customer discussions.</span>` : ""}</span>${icon(UI.alertOpen ? "chevdown" : "chev", "i-sm")}</button>` : "";
+  const kpis = `<div class="kpi-row">${kp.map(k => kpiCard(k, period)).join("")}</div>`;
+  if (period === "start") return `<section class="dash">${head}<div class="dash-body stack">${focus}${kpis}
+    <div class="dash-grid"><div class="card"><div class="card-h"><div><h3>${APP.cycleYear} commercial targets</h3><div class="xs muted">Set by the CEO for the Commercial Department</div></div><button class="btn ghost sm" data-act="go" data-go="profile/objectives">My objectives</button></div><div class="card-b stack-sm">
+      ${CEO_OBJECTIVES.map(o => `<div class="target-row ${UI.focus && UI.focus !== "all" && !kp.some(k => k.obj === o.id && k.focus === UI.focus) ? "dim" : ""}"><span class="grow"><b class="small">${esc(o.title)}</b><span class="xs muted">${esc(o.kpi)}</span></span><span class="tag blue">${esc(o.target)}</span></div>`).join("")}
+    </div></div>
+    <div class="card"><div class="card-h"><h3>What happens next</h3></div><div class="card-b stack-sm small t2"><p>Results are published through the year. Actual figures appear here when they become available.</p><p class="xs muted">Company and department results describe the business. They are not evidence of any one employee's performance.</p></div></div></div>
+  </div></section>`;
+  const showConv = !UI.focus || ["all", "conversion"].includes(UI.focus), showMarket = !UI.focus || ["all", "market"].includes(UI.focus);
+  const yr = period === "year";
+  return `<section class="dash">${head}<div class="dash-body stack">${focus}${alert}${kpis}
+    <div class="dash-grid">
+      ${showConv ? `<div class="card"><div class="card-h"><h3>${UI.dashView === "compare" ? "Before and after the Valtora launch" : "Monthly trend"}</h3><div class="seg" role="tablist"><button class="${UI.dashView !== "compare" ? "on" : ""}" data-act="dashView" data-v="trend">Trend</button><button class="${UI.dashView === "compare" ? "on" : ""}" data-act="dashView" data-v="compare">Compare periods</button></div></div><div class="card-b stack">${UI.dashView === "compare" ? compareBars(d, period) : lineChart(d)}</div></div>` : ""}
+      <div class="card"><div class="card-h"><h3>Against target</h3></div><div class="card-b vis-row">
+        ${showConv ? gauge(yr ? d.winRate.year : d.winRate.mid, 35, `Win rate · ${yr ? "December" : "June"}`) : ""}
+        ${showConv ? donut(yr ? d.objections.year : d.objections.mid, "Price-related objections", "dn-orange", "Share of recorded objections") : ""}
+        ${showMarket && !yr ? donut(d.valtora.mid, "Valtora mentions", "dn-purple", "Share of active discussions") : ""}
+        ${(UI.focus === "pipeline" || UI.focus === "all" || !UI.focus) ? `<div class="stat-tile"><span class="xs muted">Qualified opportunities</span><b class="num">${fmtPct(yr ? d.opps.year : d.opps.mid, true)}</b><span class="xs muted">vs pre-launch · target +20% vs 2026</span></div>` : ""}
+        ${UI.focus === "growth" ? `<div class="stat-tile"><span class="xs muted">Revenue growth</span><b class="num">—</b><span class="xs muted">Not published in this update · target ≥ 15%</span></div>` : ""}
+      </div></div>
+    </div>
+    <div class="card"><div class="card-h"><h3>Business insights</h3><span class="xs muted">${pinfo.sub}</span></div><div class="card-b insights">
+      <div class="insight">${icon("alert", "i-sm")}<span><b>Competitive pressure.</b> Valtora's lower-priced Customer360 alternative coincides with the June drop in win rate and the rise in price-related objections.</span></div>
+      ${yr ? `<div class="insight good">${icon("trend", "i-sm")}<span><b>Partial recovery by December.</b> Win rate ${d.winRate.year}% (June 24%), price-related objections ${d.objections.year}% (June 29%), qualified opportunities ${fmtPct(d.opps.year, true)} vs pre-launch (June −12%). ${esc((r.r3.dataset.company.rows.find(x => /response/i.test(x[0])) || [, ""])[1])}.</span></div>` : ""}
+      ${!yr && showMarket ? `<div class="insight neutral">${icon("log", "i-sm")}<span><b>Market intelligence (individual work evidence · Omar Hassan).</b> ${DASHBOARD.mi.map(x => esc(x.t)).join("; ")}.</span></div>` : ""}
+      <div class="insight neutral">${icon("info", "i-sm")}<span>Company and department results reflect many factors. A drop in sales or win rate is not, on its own, evidence of an individual's performance.</span></div>
+    </div></div>
+  </div></section>`;
 }
 
-VIEWS.business = function () {
-  const r = rec(), st = dashStage(r);
-  if (st !== "baseline" && !r.r2.seenDashboard) { r.r2.seenDashboard = true; save(); }
-  const m = dashSeries(r);
-  return pageHead("Business Dashboard", "Business Dashboard", "", "Company and department results. Business outcomes are not the same as individual performance evidence.") + `
-  <div class="stack-lg">
-    ${commercialOverview(r, false)}
-    ${st !== "baseline" ? `<div class="card"><div class="card-h"><h3>Monthly figures</h3></div><div class="card-b"><div class="table-wrap"><table class="tbl" style="min-width:0"><thead><tr><th>Month</th><th>Proposal win rate</th><th>Price-related objections</th></tr></thead><tbody>${m.months.map((mo, i) => `<tr><td>${mo}</td><td class="num">${m.win[i]}%</td><td class="num">${m.objections[i]}%</td></tr>`).join("")}</tbody></table></div></div></div>
-    <div class="card"><div class="card-h"><div><h3>Market intelligence indicators</h3><div class="xs muted">Individual work evidence · Omar Hassan</div></div></div><div class="card-b checklist">
-      ${DASHBOARD.mi.map(x => `<div class="ck ${x.st === "ok" ? "ok" : x.st === "late" ? "no" : "info"}">${icon(x.st === "ok" ? "check" : x.st === "late" ? "clock" : "info", "i-sm")}<span>${esc(x.t)}</span></div>`).join("")}
-    </div></div>
-    <div class="card"><div class="card-h"><div><h3>Your interpretation of the business data</h3><div class="xs muted">Included in your mid-year performance review</div></div></div><div class="card-b stack">
-      ${r.r2.submitted ? `<div class="small t2" style="white-space:pre-line">${esc(r.r2.interpretation) || "<span class='muted'>None written</span>"}</div>` : `<textarea class="ta" rows="4" id="${P("r2", "interpretation")}" ${bind(P("r2", "interpretation"))} maxlength="3000" placeholder="What does the data show? What does it suggest, and what does it not tell you?">${esc(r.r2.interpretation)}</textarea>`}
-    </div></div>` : ""}
-  </div>`;
-};
+/* The detailed dashboard now lives on Home; keep the old route working. */
+VIEWS.business = function () { setTimeout(() => go("home"), 0); return ""; };
 
 /* ---------- Round 2 checklist & submission ---------- */
 VIEWS.round2 = function () {
   const r = rec();
   if (r2Status(r) === "locked") return pageHead("Mid-year review", "Mid-year performance review") + lockedPanel("Not available yet", "The mid-year review opens at the mid-year checkpoint.");
-  const items = [["Reviewed the business dashboard", r.r2.seenDashboard, "business"], ["Wrote your interpretation of the business data", r.r2.interpretation.trim().length >= 15, "business"], ["Talked with Omar about what has been happening", managerCount(r.r2.diag.log) >= CHAT_LIMITS.diagnosticMin, "chat"], ["Recorded evidence in the Evidence Log", r.evidence.length > 0, "evidence"]];
+  const items = [["Reviewed the mid-year business results on Home", r.r2.seenDashboard, "home"], ["Wrote your interpretation of the business data (below)", r.r2.interpretation.trim().length >= 15, "round2"], ["Talked with Omar about what has been happening", managerCount(r.r2.diag.log) >= CHAT_LIMITS.diagnosticMin, "chat"], ["Recorded evidence in the Evidence Log", r.evidence.length > 0, "evidence"]];
   const ok = items.every(x => x[1]), a = r.r2.assessment;
   return pageHead("Performance Management / Mid-year review", "Mid-year performance review", statusChip(r2Status(r)), "Omar Hassan · July 2027") + `<div class="stack-lg">
     <div class="card"><div class="card-h"><h3>Checklist</h3></div><div class="card-b checklist">${items.map(([l, done, goTo]) => `<button class="ck-row ${done ? "ok" : ""}" ${goTo === "chat" ? `data-act="openChat"` : `data-act="go" data-go="${goTo}"`}>${icon(done ? "check" : "info", "i-sm")}<span class="grow">${l}</span>${icon("chev", "i-sm")}</button>`).join("")}</div></div>
+    <div class="card"><div class="card-h"><div><h3>Your interpretation of the business data</h3><div class="xs muted">What do the mid-year results show, and what do they not tell you?</div></div></div><div class="card-b">
+      ${r.r2.submitted ? `<div class="small t2" style="white-space:pre-line">${esc(r.r2.interpretation) || "<span class='muted'>None written</span>"}</div>` : `<textarea class="ta" rows="4" id="${P("r2", "interpretation")}" ${bind(P("r2", "interpretation"))} maxlength="3000" placeholder="Summarise what the mid-year business results show, what may explain them, and what you still need to find out.">${esc(r.r2.interpretation)}</textarea>`}
+    </div></div>
     ${r.r2.submitted ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Mid-year review submitted.</span></div>${r.r2.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r2.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round2">Retry assessment</button>` : ""}</div>` : ""}`
     : `<div class="card pad row between"><span class="small t2">${ok ? "Everything is ready. Submitting records your interpretation, the conversation with Omar and your Evidence Log." : "Complete the checklist to submit the mid-year review."}</span><button class="btn primary" data-act="submitR2" id="submit-r2" ${!ok || UI.busy ? "disabled" : ""}>${UI.busy === "round2" ? "Submitting…" : "Submit mid-year review"}</button></div>`}
   </div>`;
@@ -2120,7 +2319,7 @@ function ensureChatOpenings(r = rec()) {
 }
 function releaseRound(k) {
   if (S.released[k]) return;
-  S.released[k] = true;
+  S.released[k] = true; UI.period = null;
   const r = rec();
   if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora's lower-priced Customer360 alternative put the Commercial Department under pressure.");
   ensureChatOpenings(r);
@@ -2134,7 +2333,7 @@ async function loadYearEnd() {
   UI.busy = "yearend"; r.r3.error = null;
   try {
     const res = await api("/api/yearend", { pathway: r.r2.pathway });
-    r.r3.dataset = res.dataset; r.r3.tag = res.tag;
+    r.r3.dataset = res.dataset; r.r3.tag = res.tag; UI.period = null;   /* show the newest period when results arrive */
     if (r.r2.pathway === "A") applyPulse(r, "intervention_followthrough", "The development plan agreed at mid-year was followed through (year-end outcomes).");
     else pulseNote(r, "intervention", "No development intervention with follow-through", r.r2.pathway === "B" ? "Limited coaching and follow-up after mid-year: no Pulse change." : "No constructive development support after mid-year: no Pulse change.", 3);
   } catch (e) { r.r3.error = `The year-end update could not be loaded: ${e.message}`; }
@@ -2188,8 +2387,14 @@ const ACTIONS = {
   closeDrawer() { UI.drawer = null; render(); },
   undo() { if (_undo) { _undo(); _undo = null; UI.toast = null; save(); render(); } },
   libOpen(el) { UI.libOpen = UI.libOpen === el.dataset.id ? null : el.dataset.id; render(); },
+  orgToggle() { UI.orgOpen = UI.orgOpen === false; render(); },
+  respToggle(el) { UI.respOpen = UI.respOpen || { strategy: true }; UI.respOpen[el.dataset.id] = !UI.respOpen[el.dataset.id]; render(); },
+  ceoToggle(el) { UI.ceoOpen = UI.ceoOpen === el.dataset.id ? null : el.dataset.id; render(); },
   pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },
   kpi(el) { UI.kpiOpen = UI.kpiOpen === el.dataset.id ? null : el.dataset.id; render(); },
+  period(el) { if (!periodAvailable(el.dataset.v)) return; UI.period = el.dataset.v; UI.month = null; UI.kpiOpen = null; render(); },
+  focus(el) { UI.focus = el.dataset.v; render(); },
+  series(el) { UI.series = UI.series || { win: true, obj: true }; const k = el.dataset.k, other = k === "win" ? "obj" : "win"; if (UI.series[k] && !UI.series[other]) return; UI.series[k] = !UI.series[k]; render(); },
   kpiAlert() { UI.alertOpen = !UI.alertOpen; render(); },
   month(el) { const i = +el.dataset.i; UI.month = UI.month === i ? null : i; render(); },
   dashView(el) { UI.dashView = el.dataset.v; render(); },
@@ -2224,6 +2429,10 @@ const ACTIONS = {
     UI.chatOpen = false; save(); toast("Performance contract confirmed."); go("inbox", "approved");
     await assessRound1();
   },
+
+  /* --- email notifications --- */
+  openMailPop(el) { const id = el.dataset.id; clearTimeout(UI.mailHide); UI.mailPop = null; markRead(id); go("inbox", id); pumpMailQueue(); },
+  closeMailPop() { dismissMailPop(); },
 
   /* --- chat --- */
   openChat() { UI.chatOpen = true; UI.dd = null; UI.side = false; markChatSeen(); render(); const t = document.querySelector(".chat-win textarea"); if (t) t.focus({ preventScroll: true }); },
@@ -2328,6 +2537,7 @@ document.addEventListener("change", (ev) => {
   if (el.dataset.bind && el.tagName === "SELECT") { handleBind(el); render(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) { UI.modal.d[el.dataset.ev] = el.value; if (el.tagName === "SELECT") render(); return; }
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
+  if (el.dataset.actChange === "compPick") { if (el.value) ACTIONS.compAdd({ dataset: { id: el.value } }); return; }
   if (el.dataset.fac) { const r = rec(), id = el.dataset.fac, max = +el.max; if (el.value === "") delete r.fac[id]; else r.fac[id] = Math.max(0, Math.min(max, Math.round(+el.value))); save(); render(); }
 });
 

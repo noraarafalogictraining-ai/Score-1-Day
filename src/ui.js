@@ -39,6 +39,7 @@ const ICONS = {
   building: '<path d="M5 21V5l7-2v18M12 21h7V9l-7-2"/><path d="M8 8h1M8 12h1M8 16h1M15 12h1M15 16h1"/>',
   clip: '<path d="m20 11-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7"/>',
   pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>',
+  compass: '<circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z"/>',
   trend: '<path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/>',
   sprout: '<path d="M12 20v-8"/><path d="M12 12c0-4 3-6 7-6 0 4-3 6-7 6Z"/><path d="M12 14c0-3-2-5-6-5 0 3 2 5 6 5Z"/>',
   chevdown: '<path d="m6 9 6 6 6-6"/>',
@@ -68,7 +69,7 @@ const val = (path) => { const v = getPath(S, path); return v == null ? "" : v; }
 const P = (...parts) => ["recs", S.emp, ...parts].join(".");
 
 /* ---------- UI state (not saved) ---------- */
-const UI = { signedIn: (() => { try { return sessionStorage.getItem("hub-signed-in") === "1"; } catch (e) { return false; } })(), route: "login", sub: null, modal: null, toast: null, dd: null, side: false, edit: null, evFilter: "all", drawer: null, facOK: false, codeErr: null, flash: null, busy: null, chatErr: null, libOpen: null, pmOpen: true, kpiOpen: null, month: null, dashView: "trend" };
+const UI = { signedIn: (() => { try { return sessionStorage.getItem("hub-signed-in") === "1"; } catch (e) { return false; } })(), route: "login", sub: null, modal: null, toast: null, dd: null, side: false, edit: null, evFilter: "all", drawer: null, facOK: false, codeErr: null, flash: null, busy: null, chatErr: null, libOpen: null, mailQueue: [], mailPop: null, mailTimer: null, mailHide: null, mailGap: 1400, pmOpen: true, kpiOpen: null, month: null, dashView: "trend" };
 function parseHash() {
   const h = (location.hash || "").replace(/^#\/?/, "");
   const [route, sub] = h.split("/");
@@ -94,14 +95,51 @@ function mailList() {
   if (!S.session) return [];
   const r = rec(), M = hrMessages(), out = [{ id: "start", kind: "hr", ...M.start }];
   if (goalsApproved(r)) out.unshift({ id: "approved", kind: "hr", ...M.approved });
-  if (r2Status(r) !== "locked") STAKEHOLDER_EMAILS.forEach(e => out.unshift({ id: "sh-" + e.id, kind: "stakeholder", ...e }));
+  if (S.released.r2) STAKEHOLDER_EMAILS.forEach(e => out.unshift({ ...e, id: "sh-" + e.id, kind: "stakeholder" }));   /* newest first */
   if (r3Status(r) !== "locked") out.unshift({ id: "yearend", kind: "hr", attach: true, ...M.yearend });
   if (r.r3.done) out.unshift({ id: "closed", kind: "hr", ...M.closed });
   return out.map(m => ({ ...m, unread: !S.read[m.id] }));
 }
 function markRead(id) { S.read[id] = true; save(); }
-const senderOf = (m) => m.kind === "stakeholder" ? STAKEHOLDERS[m.from] : { name: HR_SENDER.name, title: "Human Resources", initials: "HR" };
-function senderAvatar(m, size = "") { const s = senderOf(m); return s.emp ? avatar(s.emp, size) : `<span class="hr-av ${size}">${esc(s.initials)}</span>`; }
+const senderOf = (m) => m.kind === "stakeholder" ? STAKEHOLDERS[m.from] : STAKEHOLDERS.hr;
+function senderAvatar(m, size = "") {
+  const s = senderOf(m);
+  if (s.emp) return avatar(s.emp, size);
+  if (s.img) return `<img class="sender-img ${size} ${s.logo ? "logo" : ""}" src="${s.img}" alt="${esc(s.name)}">`;
+  return `<span class="hr-av ${size}">${esc(s.initials)}</span>`;
+}
+const recipient = (x) => x === "me" ? `${S.session.name} (${DIRECTOR.title})` : x;
+
+/* ---------- Incoming email notifications (Outlook/Gmail-style) ----------
+   Event-driven: any email that becomes available and has not been announced is queued once.
+   "Announced" ids are saved, so a refresh never repeats a notification. */
+function queueNewMail() {
+  if (!S.session || !UI.signedIn) return;
+  S.notified = S.notified || {};
+  const fresh = mailList().filter(m => !S.notified[m.id]).reverse();   /* oldest first */
+  if (!fresh.length) return;
+  fresh.forEach(m => { S.notified[m.id] = true; if (m.unread) UI.mailQueue.push(m.id); });
+  save();
+  pumpMailQueue();
+}
+function pumpMailQueue() {
+  if (UI.mailPop || UI.mailTimer || !UI.mailQueue.length) return;
+  UI.mailTimer = setTimeout(() => {
+    UI.mailTimer = null;
+    while (UI.mailQueue.length && S.read[UI.mailQueue[0]]) UI.mailQueue.shift();   /* already opened */
+    const id = UI.mailQueue.shift(); if (!id) return;
+    UI.mailPop = id; render();
+    clearTimeout(UI.mailHide); UI.mailHide = setTimeout(() => dismissMailPop(), 6500);
+  }, UI.mailGap);
+}
+function dismissMailPop() { clearTimeout(UI.mailHide); UI.mailPop = null; render(); pumpMailQueue(); }
+function mailPopHTML() {
+  if (!UI.mailPop || !S.session || !UI.signedIn) return "";
+  const m = mailList().find(x => x.id === UI.mailPop); if (!m) return "";
+  const s = senderOf(m), text = m.body.filter(p => p !== "__LIST__" && !/^(hi|dear)\b/i.test(p))[0] || "";
+  const waiting = UI.mailQueue.filter(id => !S.read[id]).length;
+  return `<div class="mail-pop" role="status" aria-live="polite"><button class="mp-body" data-act="openMailPop" data-id="${m.id}">${senderAvatar(m)}<span class="grow"><span class="row between nowrap"><b class="small">${esc(s.name)}</b>${m.unread ? `<span class="mp-dot" aria-label="Unread"></span>` : ""}</span><span class="mp-subj">${esc(m.subject)}</span><span class="mp-prev">${esc(text.slice(0, 110))}${text.length > 110 ? "…" : ""}</span>${waiting ? `<span class="xs muted">+${waiting} more new</span>` : ""}</span></button><button class="icon-btn mp-x" data-act="closeMailPop" aria-label="Dismiss">${icon("x", "i-sm")}</button></div>`;
+}
 
 function notifications() {
   const out = [], r = rec();
@@ -150,9 +188,8 @@ const PM_ROUTES = ["goals", "evidence", "appraisal"];
 function navItems() {
   const r = rec(), unreadMail = mailList().filter(m => m.unread).length + chatUnread(r);
   return [
-    { id: "home", l: "Home", icon: "home" },
+    { id: "home", l: "Home", icon: "home", dot: S.released.r2 && !r.r2.seenDashboard },
     { id: "inbox", l: "My Inbox", icon: "mail", cnt: unreadMail },
-    { id: "business", l: "Business Dashboard", icon: "bars", dot: r2Status(r) !== "locked" && !r.r2.seenDashboard },
     { id: "pm", l: "Performance Management", icon: "layers", children: [
       { id: "goals", l: "Objectives", icon: "target" },
       { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) },
@@ -203,6 +240,7 @@ function lockedPanel(title, text) { return `<div class="card"><div class="empty"
 
 /* ---------- render ---------- */
 function render() {
+  if (S.session && UI.signedIn) queueNewMail();
   const app = document.getElementById("app");
   const ae = document.activeElement, key = ae && (ae.getAttribute("data-bind") || ae.id), selS = ae && ae.selectionStart, selE = ae && ae.selectionEnd;
   const chat = document.getElementById("chat-log"), chatScroll = chat ? chat.scrollTop : null, chatBottom = chat ? chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40 : true;
@@ -213,7 +251,7 @@ function render() {
     html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}</main></div>`;
   }
   if (UI.chatOpen && S.session && UI.signedIn) markChatSeen();
-  if (S.session && UI.signedIn) html += chatBubble() + chatPanel();
+  if (S.session && UI.signedIn) html += chatBubble() + chatPanel() + mailPopHTML();
   html += modalHTML() + drawerHTML() + (UI.toast ? `<div class="toast" role="status">${esc(UI.toast.text)}${UI.toast.undo ? `<button data-act="undo">Undo</button>` : ""}</div>` : "");
   app.innerHTML = html;
   if (key) {

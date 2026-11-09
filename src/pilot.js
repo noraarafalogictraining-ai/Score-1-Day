@@ -45,10 +45,12 @@ Object.assign(EMPLOYEES.omar, {
   ]
 });
 const STAKEHOLDERS = {
-  nadine: { name: "Nadine Farouk", title: "Operations Director", initials: "NF" },
+  nadine: { name: "Nadine Farouk", title: "Operations Director", initials: "NF", img: "assets/people/nadine.jpg" },
+  nour: { name: "Nour", title: "Account Manager", initials: "N", img: "assets/people/nour.jpg" },
   youssef: { name: "Youssef Ali", title: "Business Development Manager", emp: "youssef" },
   salma: { name: "Salma Tarek", title: "Sales Executive", emp: "salma" },
-  mariam: { name: "Mariam Adel", title: "Proposal Designer", emp: "mariam" }
+  mariam: { name: "Mariam Adel", title: "Proposal Designer", emp: "mariam" },
+  hr: { name: "NextWave HR", title: "Human Resources", initials: "HR", img: "assets/brand/hr-team.png", logo: true }
 };
 
 /* ---------- Competency library ----------
@@ -100,11 +102,18 @@ const DASHBOARD = {
     { t: "NextWave's commercial response is still being evaluated", st: "open" }
   ]
 };
+/* Released with the Valtora business event. "me" = the participant (Commercial Director). */
 const STAKEHOLDER_EMAILS = [
-  { id: "nadine", from: "nadine", subject: "Urgent Commercial Response to Valtora", date: "Mon 5 Jul 2027", body: ["Following Valtora's launch, we need a practical response to the increased pricing pressure.", "Omar's analysis raises valid concerns about matching competitor prices. However, during our meeting, I felt that the discussion focused heavily on defending the analysis rather than identifying what we could implement immediately.", "We need clearer options and a faster way forward."] },
-  { id: "youssef", from: "youssef", subject: "Sales Team Concerns — Valtora", date: "Mon 5 Jul 2027", body: ["The team is facing increasing pressure from customers comparing our prices with Valtora.", "Omar's analysis helped us understand why an immediate price reduction could be risky. However, we still need practical alternatives that the sales team can use in customer discussions.", "I believe a joint discussion between Market Intelligence and Sales would help."] },
-  { id: "salma", from: "salma", subject: "Customer Objections and Competitive Offers", date: "Tue 6 Jul 2027", body: ["Several customers have recently asked why they should choose Customer360 when Valtora is offering a lower price.", "Omar's findings are useful, especially the risks of competing only on price. But we need a simpler explanation of our value and clearer alternatives to share with customers.", "Could we arrange a discussion to align on our response?"] },
-  { id: "mariam", from: "mariam", subject: "Concern Regarding Omar", date: "Tue 6 Jul 2027", secondhand: true, body: ["I wanted to share something I noticed after the recent Valtora discussions.", "Omar and I were reviewing some of the information needed for the updated commercial proposals. He seemed quite frustrated and mentioned that he had spent a lot of time validating the competitor analysis but felt his recommendations weren't being given a fair chance.", "He also mentioned that he was struggling to keep up with his regular reporting alongside the urgent requests.", "I thought you should know because he doesn't seem like his usual self. I haven't discussed this with anyone else."] }
+  { id: "nadine", from: "nadine", to: ["me"], subject: "Valtora Response — Need for Faster Decisions", date: "Mon 5 Jul 2027",
+    body: ["Hi,", "Following our meeting about Valtora, I'm concerned that we're taking too long to agree on a response.", "Omar's analysis raised valid points about the risks of matching Valtora's prices. However, when I asked how we could respond quickly, he focused mainly on explaining the data rather than discussing practical options.", "We need recommendations that balance commercial risks with the urgency of the situation.", "Let's agree on the next steps soon.", "Best,\nNadine\nOperations Director"] },
+  { id: "youssef", from: "youssef", to: ["me"], subject: "Valtora — Commercial Team Needs Direction", date: "Mon 5 Jul 2027",
+    body: ["Hi,", "The team is facing more customer questions about Valtora's pricing, and we're finding it difficult to respond consistently.", "Omar's analysis helped us understand why matching their prices across the board could be risky. However, we still need clearer alternatives that the team can discuss with customers.", "I think it would help if we could work together on a few practical options.", "Thanks,\nYoussef"] },
+  { id: "salma", from: "salma", to: ["Youssef Ali — Business Development Manager"], cc: ["me"], subject: "Customer Updates — Valtora Pricing Objections", date: "Tue 6 Jul 2027",
+    body: ["Hi Youssef,", "A few customers have been comparing our Customer360 offering with Valtora's lower prices.", "Some are asking whether we can provide better offers, and a few opportunities are becoming harder to close.", "Omar's findings helped us understand the risks of simply matching their prices, but we still need guidance on what alternatives we can offer.", "Could we align on a response before the next customer meetings?", "Thanks,\nSalma"] },
+  { id: "mariam", from: "mariam", to: ["me"], subject: "Concern About Omar", date: "Tue 6 Jul 2027", secondhand: true,
+    body: ["Hi,", "I wanted to flag something following a conversation I had with Omar.", "He seemed quite frustrated about the Valtora discussions. He feels that his analysis was challenged before everyone had properly considered the evidence, and that the pressure to provide quick answers is affecting his work.", "He also mentioned spending additional time checking the competitor analysis, which contributed to his latest scheduled report being submitted late.", "I thought you should know because he seemed more frustrated than usual.", "Best,\nMariam"] },
+  { id: "nour", from: "nour", to: ["Sales Team", "Account Management Team", "Operations Team", "HR Team"], cc: ["Chief Executive Officer (CEO)", "Chief Human Resources Officer (CHRO)", "Nadine Farouk — Operations Director", "me"], subject: "Great Customer Feedback — Well Done, Team!", date: "Wed 7 Jul 2027",
+    body: ["Hi everyone,", "I wanted to share some great feedback we received from one of our customers!", "The customer recently launched a new product and told us that the insights provided by NextWave helped them better understand their target market and make more confident launch decisions.", "They particularly appreciated the quality of our analysis and how useful the findings were in shaping their launch approach.", "It's great to see our work making a real difference for customers.", "Well done to everyone involved!", "Best,\nNour\nAccount Manager"] }
 ];
 
 /* ---------- Employee Pulse (deterministic rules engine; configurable pilot values) ---------- */
@@ -134,7 +143,7 @@ const PULSE = {
 const DIRECTOR = {
   title: "Commercial Director", department: "Commercial", company: "NextWave",
   joined: "December 2026", reportsTo: "Chief Executive Officer (CEO)", status: "Active",
-  location: "Corporate Office", directReports: 4, year: "January – December 2027",
+  location: "Corporate Office", directReports: 3, year: "January – December 2027",
   leave: "Leave information not available in pilot",
   purpose: "Lead NextWave's commercial strategy and performance, ensuring sustainable revenue growth, effective market positioning, strong customer relationships, and alignment between commercial priorities and organizational objectives.",
   responsibilities: [
@@ -148,7 +157,10 @@ const DIRECTOR = {
     "Collaborate with other departments to respond to market and customer needs.",
     "Report commercial performance and strategic recommendations to the CEO."
   ],
-  team: ["omar", "youssef", "salma", "mariam"]
+  team: ["omar", "youssef", "salma", "mariam"],
+  /* reporting lines inside the Commercial Department */
+  directs: ["omar", "youssef", "mariam"],
+  indirect: { youssef: ["salma"] }
 };
 const CEO_OBJECTIVES = [
   { id: "growth", title: "Drive Commercial Growth", kpi: "Achieve at least 15% annual commercial revenue growth compared with 2026.", target: "≥ 15%", short: "Revenue growth vs 2026" },

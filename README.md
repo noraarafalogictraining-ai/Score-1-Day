@@ -67,6 +67,32 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 - **Internally** each message still belongs to its own context (alignment, diagnostic, appraisal). Only that context's messages go to the AI and to its assessment, with earlier agreements passed as background. The mid-year conversation closes when the mid-year review is submitted. The appraisal conversation closes with *Continue to bias reflection* on the appraisal page.
 - **Omar's style:** natural workplace chat, usually 1–3 short sentences, concrete when asked, no theory, no coaching the manager, no automatic agreement. In January he says only that he has a concern; he explains it when asked.
 
+## Phase 3: communications, dashboard and profile
+
+- **Mid-year emails (5)** arrive in My Inbox as soon as the business event is released (`STAKEHOLDER_EMAILS` in `src/pilot.js`):
+  - Nadine Farouk, Operations Director;
+  - Youssef Ali;
+  - Salma Tarek, addressed to Youssef with the Commercial Director in Cc;
+  - Mariam Adel, labelled secondhand and unverified;
+  - Nour, Account Manager, a company-wide email with To and Cc in hierarchy order.
+
+  Each email shows From, To and Cc. Nour's positive customer feedback is not attributed to Omar and does not change the Pulse.
+- **Sender images** are stored in `public/assets/`: `people/nadine.jpg`, `people/nour.jpg` and `brand/hr-team.png` (the approved HR TEAM logo, transparent outside the circle). Employees keep their existing photos. To swap Nadine's and Nour's photos, edit `img` in `STAKEHOLDERS`.
+- **Email notifications:** each new email shows an Outlook-style pop-up (top right) with the sender's photo, name, subject, preview and an unread dot. They appear one at a time, about 1.4 s apart, and close after 6.5 s or when dismissed. Clicking one opens the email and marks it read. Announced emails are saved, so a refresh never repeats them. Omar's chat message arrives independently: "Hi, do you have a few minutes? Things have been quite difficult since the Valtora announcement, and I'd appreciate your support."
+- **Competencies** are added from an *Add Competency* dropdown that hides the ones already selected. Each one becomes a compact card with level, written standard and remove.
+- **My Profile** has three tabs:
+  - **Overview:** information cards and an interactive organisation chart. There are 3 direct reports, and Salma reports to Youssef in a branch that can be opened and closed.
+  - **My Responsibilities:** the job purpose and expandable responsibility groups.
+  - **My Performance Objectives:** clickable, read-only cards for the CEO's objectives.
+- **Sidebar:** Home · My Inbox · Performance Management (Objectives, Evidence Log, Final Appraisal). The old Business Dashboard link opens Home. The interpretation of the business data is now written on the **Mid-year review** page.
+- **Home dashboard (Power BI style):**
+  - title bar, a period filter (Start of Year / Mid-Year / Year-End) and focus chips (All / Conversion / Pipeline / Market / Growth);
+  - five KPI cards that expand to show definition, source, CEO objective and values by period;
+  - a trend chart with hover values, month selection and series toggles, and a period comparison with target markers;
+  - a win-rate gauge, donut charts and business insights.
+
+  A period unlocks only after its release, and the dashboard switches to the newest period when results arrive. All figures come from one source (`bizData` in `src/views_monitor.js`, using `DASHBOARD` and the server's year-end company figures). Figures the scenario doesn't define (for example revenue growth actuals) show "—" with "Not published".
+
 ## The three-round experience (facilitator view of the structure)
 
 | Round | What happens | Facilitator |

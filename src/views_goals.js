@@ -63,21 +63,18 @@ function objCard(o, i, ed, tried) {
 }
 
 function compTab(r, ed) {
-  const g = r.goals, lib = competencyLibrary(), selIds = g.comps.map(c => c.id), full = g.comps.length >= COMP_RANGE.max;
-  return `<div class="comp-layout">
-    <div class="card"><div class="card-h"><div><h3>Competency library</h3><div class="xs muted">Select ${COMP_RANGE.min}–${COMP_RANGE.max}. Use your printed competency dictionary for the level descriptions.</div></div></div><div class="card-b stack" style="gap:8px">
-      ${lib.map(c => { const on = selIds.includes(c.id); return `<div class="lib-item ${on ? "sel" : ""}"><div class="row between nowrap"><b class="small">${esc(c.name)}</b>${ed ? (on ? `<button class="btn sm" data-act="compDel" data-id="${c.id}">Remove</button>` : `<button class="btn sm ${full ? "disabled" : "primary"}" data-act="compAdd" data-id="${c.id}" ${full ? "disabled" : ""}>${icon("plus", "i-sm")} Add</button>`) : on ? `<span class="chip st-approved">Selected</span>` : ""}</div></div>`; }).join("")}
-    </div></div>
-    <div class="stack">
-      <div class="summary-bar"><div class="sb-item"><span class="xs muted">Selected competencies</span><b class="num">${g.comps.length} / ${COMP_RANGE.max}</b></div><div class="sb-item"><span class="xs muted">Note</span><span class="xs t2">The expected level is what the role requires. It is not a performance rating.</span></div></div>
-      ${g.comps.length ? g.comps.map((c, i) => selectedComp(c, i, ed, g.tried)).join("") : `<div class="card"><div class="empty">${icon("layers")}<b>No competencies selected yet</b><span class="small">Add ${COMP_RANGE.min}–${COMP_RANGE.max} competencies that matter most for Omar's role.</span></div></div>`}
-      ${ed ? validationBlock("Competency validation", competencyValidation(r), "Every competency has an expected level and a written behavioral standard.") : ""}
-    </div>
+  const g = r.goals, selIds = g.comps.map(c => c.id), avail = competencyLibrary().filter(c => !selIds.includes(c.id)), full = g.comps.length >= COMP_RANGE.max;
+  return `<div class="stack">
+    <div class="row between"><div><h2>Competencies</h2><div class="xs muted">Select ${COMP_RANGE.min}–${COMP_RANGE.max}. Use your printed competency dictionary to write the expected behaviors.</div></div>
+      ${ed ? `<div class="comp-add"><label class="sr" for="comp-add">Add competency</label><span class="comp-add-ic">${icon("plus", "i-sm")}</span><select class="sel" id="comp-add" data-act-change="compPick" ${full || !avail.length ? "disabled" : ""}><option value="">${full ? `Maximum of ${COMP_RANGE.max} selected` : "Add Competency"}</option>${avail.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select></div>` : ""}</div>
+    <div class="summary-bar"><div class="sb-item"><span class="xs muted">Selected competencies</span><b class="num">${g.comps.length} / ${COMP_RANGE.max}</b></div><div class="sb-item"><span class="xs muted">Note</span><span class="xs t2">The expected level is what the role requires. It is not a performance rating.</span></div></div>
+    ${g.comps.length ? `<div class="comp-grid">${g.comps.map((c, i) => selectedComp(c, i, ed, g.tried)).join("")}</div>` : `<div class="card"><div class="empty">${icon("layers")}<b>No competencies selected yet</b><span class="small">Use Add Competency to choose ${COMP_RANGE.min}–${COMP_RANGE.max} competencies that matter most for Omar's role.</span></div></div>`}
+    ${ed ? validationBlock("Competency validation", competencyValidation(r), "Every competency has an expected level and a written behavioral standard.") : ""}
   </div>`;
 }
 function selectedComp(c, i, ed, tried) {
   const L = competencyById(S.emp, c.id) || { name: "Competency" }, base = P("goals", "comps", i), noStd = tried && !(c.standard || "").trim();
-  return `<div class="card" id="comp-${c.id}"><div class="card-h"><h3>${esc(L.name)}</h3>${ed ? `<button class="btn ghost sm" data-act="compDel" data-id="${c.id}">Remove</button>` : ""}</div><div class="card-b stack" style="gap:12px">
+  return `<div class="card comp-card" id="comp-${c.id}"><div class="card-h"><h3>${esc(L.name)}</h3>${ed ? `<button class="icon-btn" data-act="compDel" data-id="${c.id}" aria-label="Remove ${esc(L.name)}">${icon("trash", "i-sm")}</button>` : ""}</div><div class="card-b stack" style="gap:12px">
     <div class="field"><span class="lbl">Expected proficiency level <span class="req">*</span></span>
       ${ed ? `<div class="seg ${tried && !c.level ? "err" : ""}" role="radiogroup">${LEVELS.map(l => `<button role="radio" aria-checked="${c.level === l.id}" class="${c.level === l.id ? "on" : ""}" data-act="compLevel" data-i="${i}" data-v="${l.id}">${l.l}</button>`).join("")}</div>` : `<div><span class="tag blue">${levelLabel(c.level)}</span></div>`}
     </div>
