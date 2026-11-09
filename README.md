@@ -1,157 +1,170 @@
-# NextWave | SCORE Performance Hub
+# NextWave | SCORE Performance Hub — Omar Hassan pilot (Version 1)
 
-The SCORE one-day performance management simulation, redesigned as a corporate performance management platform. Participants manage one NextWave Digital employee (Omar Hassan, Youssef Ali, Salma Tarek or Mariam Adel) through a full performance year: goal setting, alignment, monitoring, a mid-year check-in and the year-end appraisal.
+A three-round performance management simulation for senior managers. The participant is NextWave's **Commercial Director** and manages **Omar Hassan, Market Intelligence Analyst**, across a simulated year. Omar's journey is the only active one; Youssef Ali, Salma Tarek and Mariam Adel appear as colleagues and stakeholders.
 
-- **Format:** one self-contained HTML page (plain JavaScript, no framework, no server). Images are embedded.
-- **Hosting:** Vercel serves `index.html` as-is (no build step on Vercel).
-- **Progress:** saved in each participant's browser (localStorage key `score-hub-nextwave-v1`).
-- **Classic version:** the previous three-round simulation is preserved unchanged at `/classic` (source in `legacy/`). Rollback branch: `rollback/v1-classic`.
-
----
-
-## Workflow (login → final appraisal)
-
-| # | Screen | What happens | SCORE |
-|---|---|---|---|
-| 1 | **Login** | Manager name + password field (training mode: nothing is stored). Resume a saved session on this device. | |
-| 2 | **HR email** “Annual Performance Goal Setting — Action Required” | Opens automatically after sign-in. Button: *Open Performance Goal Plan*. | |
-| 3 | **Home** | Select the employee (facilitator assigns one per table). Stage tiles with status, pending actions, HR inbox. | |
-| 4 | **Performance Goals** | Objectives & KPIs · Competencies & Behavioral Expectations · Review & Submit. | Round 1 |
-| 5 | **Employee alignment** pop-up | Status *Pending Employee Alignment*. Structured conversation: respond, revise the plan, or reach agreement and *Confirm alignment*. | Round 1 |
-| 6 | **HR email** “Performance Contract Confirmed — Monitoring Begins” | Contract approved and locked. Evidence Log opens. | |
-| 7 | **Evidence Log** | Managers record evidence from the printed handouts. | |
-| 8 | Offline: business event | Facilitator releases the mid-year check-in (code **4826**, or from the Facilitator view). | |
-| 9 | **Mid-Year Check-In** chat | “Mid-Year Performance Check-In Required”. Manager picks 2–4 diagnostic questions in any order, then closes the check-in. | |
-| 10 | Offline: intervention | Facilitator runs the intervention activity, hands out year-end evidence, then releases the appraisal (code **7319**). | |
-| 11 | **Final Appraisal** | Section A WHAT, Section B HOW, Section C Overall, all pre-filled from Round 1. | Round 2 |
-| 12 | **Employee reaction** pop-up | Employee responds; manager reflects on possible biases, keeps or revises the evaluation, and records a justification. | Round 2 |
-| 13 | **SCORE Review** | Guided self-assessment per criterion, Application Score, SCORE Practice Check. | Assessment |
-
-Facilitator view (user menu → *Facilitator view*, code **5050**): round structure and status, stage releases, criterion validation, game indicator, employee content status, reset.
-
-Codes are a local gate on each device and are visible in the page source.
-
-### Status values
-
-| Area | Statuses |
-|---|---|
-| Performance Goals | Not Started → Draft → Pending Employee Alignment → Approved (a revision returns it to Draft) |
-| Evidence Log | Not Yet Open → Not Started → In Progress |
-| Mid-Year Check-In | Not Yet Open → Action Required → In Progress → Completed |
-| Final Appraisal | Not Yet Open → Not Started → Draft → Submitted → Completed |
+- **Front end:** one static page (`public/index.html`, plain JavaScript), built from `src/` by `build.py`.
+- **Server:** Vercel serverless functions in `api/` (Node 20+, Anthropic SDK). Omar's conversations and all assessments run here, so hidden facts, rubrics and the API key never reach the browser.
+- **Progress:** saved in the participant's browser (`localStorage` key `score-pilot-omar-v1`); survives refresh.
+- **Classic version:** unchanged at `/classic` (source in `legacy/`). Rollback branch: `rollback/v1-classic`.
 
 ---
 
-## Form fields
+## Running the pilot
 
-**Performance objective** (3–5 recommended, up to 8; weights must total 100%)
-Objective* · KPI / Performance measure* · Weight (%)* · Evidence source* (list + Other → name it) · Review frequency*.
-Removed on purpose: linked business objective, separate target, due date, competency inside the objective.
+### On Vercel
+1. In the Vercel project, open **Settings → Environment Variables** and add `ANTHROPIC_API_KEY` (your Anthropic API key) for Production and Preview. Optional: `SCORE_MODEL` (default `claude-opus-5-5`).
+2. `vercel.json` already sets the install command (`npm install`), the output folder (`public`) and the function timeout. Leave the dashboard's Build Command empty.
+3. Push the branch; Vercel builds a preview. Open it, sign in, and check the yellow/red banner at the top: no banner means live AI is working.
 
-**Competency plan** (3–5 required)
-Competency (from the employee's library) · Expected proficiency level* (Basic / Intermediate / Advanced) · observable behaviours for that level (shown) · Expected behavioral standard (optional).
-
-**Evidence Log entry**
-Date / Period* · KPI / Competency* (linked to the plan) · Evidence / Observation* · Source* · Impact · Manager action / Follow-up · Status (Open / Ongoing / Completed). Add, edit, delete (with undo), filter by objective or competency.
-
-**Final Appraisal**
-- A · per objective: objective, KPI, weight (from Round 1) · Actual performance* · Rating 1–5* · Supporting evidence / justification*.
-- B · per competency: name, description, expected level, expected behaviours, agreed standard (from Round 1) · Observed behaviours* · Rating 1–5* · Supporting justification*.
-- C · Overall WHAT rating* · Overall HOW rating* · Final overall rating 1–5* · Final justification* · Key strengths* · Development priorities*. No fixed WHAT/HOW formula.
-
-**Post-appraisal reflection**
-Response choice · optional bias checklist (recency, halo, horn, leniency/severity, similarity, results over behaviours) · Decision (keep / revise)* · Short justification*.
-
-Rating scale: 5 Exceptional · 4 Exceeds Expectations · 3 Meets Expectations · 2 Below Expectations · 1 Unsatisfactory.
-
----
-
-## Assessment (SCORE layer)
-
-**Application Score = (Round 1 /10 + Round 2 /10) × 5 → out of 100.** Each criterion: 2 Applied effectively · 1 Partially applied · 0 Not demonstrated.
-
-| Round | Criteria |
-|---|---|
-| 1 · Setting Performance Expectations | Strategic Alignment · Role Relevance · KPI Quality · WHAT & HOW Balance · Performance Clarity |
-| 2 · Final Performance Appraisal | Evidence Coverage · Facts vs. Interpretation · Standards-Based Evaluation · Evidence-Based Justification · Fair Evaluation |
-
-- **Automated checks** verify structure only (weights, completeness, evidence linked to each objective/competency, consistency of the final rating with WHAT/HOW, reflection completed). They set the highest level a group can self-assess.
-- **Guided self-assessment**: the group picks a rubric level and gives a one-line reason.
-- **Facilitator validation** overrides any criterion.
-- Free text is never scored automatically; a number in a KPI is not treated as proof of quality; which competencies are chosen is not scored automatically.
-- Reference ratings and rating ranges are **not configured** until the employee scenarios are approved (`EMP_CONTENT[emp].yearEndGuidance.ratingRange`).
-- The star-rating game indicator (internally “Black Mirror”, starts at 3.00, moves ±0.50 per fully assessed round) appears only in the Facilitator view.
-
-Rules: `src/score.js`.
-
----
-
-## Employee content configuration
-
-All content lives in `src/content.js`. Each employee has a package of 16 sections in `EMP_CONTENT[emp]`, each with a **status** (`approved` · `provisional` · `pending`) and a **channel** (`digital` · `offline` · `facilitator`):
-
-| # | Section | Status now | Channel |
-|---|---|---|---|
-| 1 | Employee story | approved (classic) | offline |
-| 2 | Job description and strengths | approved | digital (profile) |
-| 3 | Underlying employee need | approved (classic Round 1) | offline |
-| 4 | Previous-year evidence | approved | digital (profile) |
-| 5 | Recommended objectives and KPI guidance | provisional | facilitator |
-| 6 | Role-relevant competencies | **pending** | digital |
-| 7 | Three proficiency levels per competency | **pending** | digital |
-| 8 | Employee reaction to the performance contract | **pending** | digital |
-| 9 | Mid-year business event and impact | **pending** | offline |
-| 10 | Stakeholder feedback | **pending** | offline |
-| 11 | Diagnostic conversation | **pending** | digital |
-| 12 | Constructive and unhelpful intervention references | **pending** | offline |
-| 13 | Intervention consequences | **pending** | offline |
-| 14 | Year-end evaluation guidance | **pending** | facilitator |
-| 15 | SBI feedback scenario | **pending** | offline |
-| 16 | Post-appraisal bias reflection | **pending** | digital |
-
-### Adding approved content
-
-- **Competencies**: add entries to `ROLE_COMPETENCIES[emp]` (`{ id, name, description, levels: { basic: [...], intermediate: [...], advanced: [...] } }`). Core NextWave competencies are in `CORE_COMPETENCIES`; replace their `pending(...)` descriptions and levels with approved text.
-- **Contract reaction**: set `EMP_CONTENT[emp].contractReaction.script` to a script with the same shape as `ALIGNMENT_DEFAULT` (nodes with employee text and 2–3 manager options; `outcome: "align"` or `"revise"`).
-- **Diagnostic conversation**: set `EMP_CONTENT[emp].diagnostic.script` (shape of `DIAGNOSTIC_DEFAULT`: opening + question bank with purpose, question and employee answer).
-- **Post-appraisal reaction**: set `EMP_CONTENT[emp].biasReflection.script` (shape of `REACTION_DEFAULT`).
-- Text objects written as `{ ph: true, text }` or created with `pending(...)` display with a yellow **Pending content approval** label. Approved text is plain strings (or `{ text }` without `ph`).
-- Then set the section's `status` to `"approved"`. The Facilitator view shows the status of every section for every employee.
-
----
-
-## Source files
-
-`build.py` assembles `src/` in this order into `index.html` and `artifact.html`, and rebuilds `classic.html` from `legacy/`:
-
-| File | Contents |
-|---|---|
-| `head.html` | Page head and styles (SCORE navy chrome, light workspace, responsive rules) |
-| `assets.js` | Embedded images (`IMG`: logos, portraits), unchanged from the classic version |
-| `employees.js` | Approved company and employee data, unchanged copy of the classic `p_data.js` |
-| `content.js` | Content configuration: vocabularies, competency library, conversation scripts, HR emails, employee packages, codes |
-| `state.js` | Saved state, migration from the classic version, workflow status, validation |
-| `score.js` | SCORE assessment layer |
-| `ui.js` | Icons, routing, header, sidebar, rendering |
-| `views_core.js` | Login, Home, HR Inbox, Facilitator view |
-| `views_goals.js` | Performance Goals, alignment conversation |
-| `views_monitor.js` | Evidence Log, mid-year check-in, release gates |
-| `views_appraisal.js` | Final Appraisal, employee reaction and bias reflection |
-| `views_review.js` | SCORE Review |
-| `events.js` | Actions and event handling |
-
-### Building and testing
-
+### On a laptop
+```bash
+npm install
+```
 ```bash
 python3 build.py
 ```
-
 ```bash
-python3 tests/test_hub.py --shots
+ANTHROPIC_API_KEY=your-key node server/dev.js
 ```
+Open http://localhost:3000. Without a key the app runs but clearly states that live AI conversations are unavailable. `SCORE_AI_PROVIDER=mock node server/dev.js` starts the **scripted test mode** used by the automated tests (labelled on screen; it is not AI).
 
-The test (Python Playwright + Chromium; set `CHROMIUM_PATH` if Playwright's own browser is not installed) walks the whole workflow (86 checks) and saves screenshots to `tests/shots/`. Classic tests: `legacy/tests/`.
+### Tests
+```bash
+python3 tests/test_pilot.py --shots
+```
+Walks the full Omar journey in Chromium against the local server (test mode and no-AI mode) and checks the API. Screenshots go to `tests/shots/`. Set `CHROMIUM_PATH` if Playwright's own browser is not installed. Classic tests: `legacy/tests/`.
 
-### Migration from the classic version
+---
 
-The classic version saved under `score-oneday-nextwave-v3`. On sign-in the hub offers to bring in that group's employee and objectives as a draft goal plan; the classic data is never modified or deleted.
+## The three-round experience
+
+| Round | What happens | Facilitator |
+|---|---|---|
+| **1 · Setting Performance Expectations** | HR email → Goal Plan (objective, KPI with target, weight, evidence source, review frequency; weights must total 100%) → 3–5 competencies with expected proficiency levels (three observable levels shown) → *Submit for Employee Alignment* → status **Pending Employee Alignment** → **open-text AI conversation** with Omar, who opens with his fairness concern → *Confirm alignment* appears only when Omar's concern has been meaningfully addressed → HR "Contract Confirmed" email | — |
+| **2 · Performance Gaps, Diagnosis & Coaching** | Business alert → **Business Dashboard** (KPI cards, March–June trend chart, before/after bars, market intelligence indicators kept separate from business outcomes) → four stakeholder emails (Mariam's marked *secondhand, unverified*) → Omar's chat request → **open-text diagnostic and coaching conversation** (dashboard and inbox stay one click away) → participant writes their interpretation of the data and completes the Evidence Log → *Submit Round 2* | Announces Valtora (script in the Facilitator view), then releases Round 2 (code **4826**) |
+| **3 · Final-Year Performance Evaluation** | Year-end performance update (dataset depends on the Round 2 pathway) → appraisal pre-filled with the Round 1 objectives, KPIs, weights and competencies (WHAT, HOW, overall) → Omar responds in an **open-text appraisal conversation** → **bias reflection** grounded in the participant's own reasoning → reconsider or finalise → final SCORE assessment and Employee Pulse outcome | Releases Round 3 (code **7319**) |
+
+The **Employee Pulse** (Performance, Trust, Development; 0–100) is always visible in the header, with a full event history. The **SCORE Review** shows each round's criteria with the score, evidence quotes, reason, confidence and missing information.
+
+Facilitator view: user menu → *Facilitator view* (code **5050**). It shows the AI status, round releases, the Valtora announcement, the Round 2 pathway, the Pulse history, per-criterion score overrides, and manual controls for when AI is unavailable (confirm alignment, end conversations, set pathway A/B/C, finalise the appraisal). Codes are a local gate on each device and are visible in the page source.
+
+---
+
+## Configuration (for the instructional design team)
+
+| What | File | Visible to participants? |
+|---|---|---|
+| Omar's profile, previous-year evidence and feedback, products, competency library and levels, dashboard numbers, stakeholder emails, Valtora announcement, **Pulse rules and baseline** | `src/pilot.js` | Yes |
+| HR emails, dates, codes, form vocabularies | `src/content.js` | Yes |
+| Omar's character, hidden scenario facts, conversation openings and behaviour rules, **reference model answers**, strong-diagnosis reference, **year-end evidence datasets** | `api/_lib/scenario_omar.js` | **No** (server only) |
+| **Assessment rubrics and point weights**, pathway and Pulse-event rules | `api/_lib/rubrics.js` | **No** (server only) |
+| Assessment and character prompts | `api/_lib/prompts.js` | **No** (server only) |
+
+After editing `src/`, run `python3 build.py`. Server files take effect on the next deploy.
+
+---
+
+## AI conversation engine
+
+Three separate responsibilities:
+
+1. **Employee simulation model** (`api/converse.js`): generates Omar's replies from his profile, fairness need, the submitted plan, the manager's messages, the conversation so far, earlier decisions and the current Pulse (Trust sets his openness). Hidden facts are revealed progressively when the manager asks relevant questions. Plain text, 2–5 sentences, no multiple choice.
+2. **Assessment model** (`api/assess.js`): evaluates the participant's demonstrated behaviour against the rubric and returns structured JSON for each criterion: `id`, `score`, `max`, `evidence` (verbatim quotes), `reason`, `confidence`, `missing`. In Round 1 a short assessment after each manager message decides whether Omar's concern has been meaningfully addressed; empathy alone ("I understand") is not enough.
+3. **Rules engine**: deterministic code applies scores, Round 2 pathway, Pulse changes and progression (`RULES` in `api/_lib/rubrics.js`; Pulse values in `src/pilot.js`, applied by `applyPulse` in `src/state.js`).
+
+Safeguards: the API key, hidden facts, rubrics and datasets stay on the server; Vercel serves only `public/`. Inputs are validated (types, lengths, history size). The conversation history must start with the real scenario opening. Participant text is treated as data: attempts to make Omar reveal facts or scores, or to award full marks, are ignored. Evidence quotes are checked against what the participant actually wrote, and fabricated quotes are removed. Inputs that are empty earn zero (no conversation, no log, no interpretation). With no AI provider configured, the server answers `503 ai_unavailable` and the app says so plainly; it never substitutes scripted replies. Refusal fallback is enabled (`fallbacks: "default"`), so a safety refusal is retried on another model by Anthropic.
+
+Model: `claude-opus-5-5` (change with `SCORE_MODEL`). Omar replies use low effort for speed; assessments use medium effort.
+
+---
+
+## Scoring (provisional pilot weights, total 100)
+
+| Round | Group | Points |
+|---|---|---|
+| 1 (35) | Objectives and KPI quality (relevance, clarity, measurability, target, controllability, evidence, review frequency, balance) | 20 |
+| | Competency selection and expectations | 10 |
+| | Employee alignment conversation | 5 |
+| 2 (40) | Business data interpretation | 5 |
+| | Performance gap diagnosis (four causes + evidence-based conclusions) | 15 |
+| | Coaching and intervention | 15 |
+| | Evidence Log | 5 |
+| 3 (25) | WHAT evaluation | 10 |
+| | HOW evaluation | 5 |
+| | Overall rating and justification | 5 |
+| | Appraisal conversation and bias reflection | 5 |
+
+Change the `max` values in `api/_lib/rubrics.js`. The Learning Score is separate from the Employee Pulse.
+
+**Round 2 pathway** (from diagnosis D and coaching C scores plus behaviour flags): blaming, or D + C < 12 → **C**; D ≥ 10 and C ≥ 10 → **A**; otherwise **B**.
+
+## Employee Pulse rules (configurable in `src/pilot.js`)
+
+Baseline: Performance 80, Trust 60, Development 55 (fictional). Each event belongs to a slot that can be applied only once.
+
+| Event | When | Perf. | Trust | Dev. |
+|---|---|---|---|---|
+| Fair and clear alignment | Round 1 alignment assessed "fair" | +2 | +6 | +3 |
+| Dismissive alignment | assessed "dismissive" | 0 | −8 | −2 |
+| Mid-year business disruption | Round 2 released | −5 | 0 | 0 |
+| Constructive diagnosis and coaching | not blaming, constructive, coaching ≥ 9/15 | 0 | +5 | +4 |
+| Punitive or blaming conversation | blaming | 0 | −9 | −4 |
+| Development intervention with follow-through | pathway A, when year-end outcomes are revealed | +3 | +3 | +8 |
+| Unfair final appraisal | appraisal assessed "unfair" | 0 | −10 | −4 |
+| Fair, evidence-based appraisal | assessed "fair" | 0 | +5 | +4 |
+
+"Mixed" outcomes are recorded in the history with no change. Values are clamped to 0–100.
+
+## Year-end evidence datasets (fictional pilot test data)
+
+Fixed, internally consistent datasets in `api/_lib/scenario_omar.js`. Company-level results are identical in all three, so business outcomes are never attributed to Omar.
+
+| | A · Effective | B · Partially effective | C · Ineffective |
+|---|---|---|---|
+| Reports on time | 11/12 (June late only) | 10/12 | 9/12 |
+| Quality review passed | 12/12 | 12/12 | 11/12 |
+| Deadline conflicts escalated | 3 of 3 | 1 of 2 | 0 of 3 |
+| Recommendations (with action) | 7 (all) · 3 adopted | 6 (5) · 2 adopted | 5 (3) · 1 adopted |
+| Stakeholder feedback Q3 / Q4 | 3.9 / 4.3 | 3.6 / 3.8 | 3.2 / 3.3 |
+| Consultations in H2 | 4, documented | 2 | 1, undocumented |
+| Development | 2 coaching sessions, monthly checkpoints | 1 session, no follow-up | none |
+
+Each dataset also has stakeholder comments, observed behaviours per competency and Omar's own view. Company results (all pathways): win rate 24% (June) → 28% (Dec); price objections 29% → 24%; value-based response approved in September, no general price cut.
+
+---
+
+## Pilot assumptions (to review after the first test)
+
+1. **Products and Omar's profile** follow the pilot brief (FlowOps, Customer360, InsightIQ; new profile and previous-year evidence). They replace the classic content for this pilot only; the classic version is unchanged.
+2. **Competency library**: the four brief competencies use the approved level descriptors. Five other NextWave competencies (Problem Solving, Time Management & Prioritization, Accountability & Ownership, Adaptability & Flexibility, Coaching) have **draft** level descriptors written for the pilot so that every competency shows three levels. Review them.
+3. **Year-end datasets, stakeholder comments and observed behaviours** were written for the pilot (the brief asked for fixed, consistent datasets). Dates: Valtora launch June, emails 5–6 July, mid-year conversation 7 July, year-end December 2027.
+4. **Nadine Farouk** is shown with initials (no portrait available).
+5. **Pathway thresholds** (above) and the **"constructive" threshold** (coaching ≥ 9/15) are pilot values.
+6. Round 2 assessment uses everything submitted at *Submit Round 2*; Evidence Log edits after that are not re-scored.
+7. Participants may reconsider the appraisal once or more after the bias reflection; the appraisal conversation is not repeated.
+8. The participant sees the Pulse and the SCORE scores after each round; the pathway label is shown only to the facilitator.
+9. Previous SCORE Hub features replaced in this pilot: the 0–2 self-assessment layer (replaced by rubric-based AI assessment with facilitator override), scripted multiple-choice conversations (replaced by open-text AI), employee selection (Omar only), and placeholder content (replaced by the pilot brief's content).
+
+## Testing results
+
+`tests/test_pilot.py`: 84 checks pass in scripted test mode and no-AI mode. They cover:
+- the API (methods, invalid JSON, oversized or tampered input, unknown pathway, no-AI 503s);
+- that confidential files are not downloadable and the page source contains no hidden facts, model answers or datasets;
+- the scoring total (100 = 35/40/25) and the blaming → pathway C → punitive rule;
+- removal of fabricated quotes;
+- the full UI journey: weights validation, the three-level competency display, the "I understand" check, a double-click guard, refresh persistence, the Pulse values at every event, the dashboard values, four emails, Mariam labelled secondhand, Omar initiating both conversations, unexpected and injection-style messages, the Evidence Log starting empty, carry-forward into the appraisal, grounded bias flags, reconsider, finalise and Pulse history consistency;
+- the facilitator overrides and the tablet layout.
+
+**Not yet verified:** the quality of live AI conversations and assessments. No AI key was available while building this pilot, so the live path has only been exercised up to the authentication check. Run a live test session (see the checklist below) before the workshop.
+
+### Live-AI checklist for the first test session
+- Round 1: "I understand your concern" alone should not unlock *Confirm alignment*; a clear explanation of how recommendations are judged should.
+- Round 2: open questions should reveal facts gradually; blaming should make Omar guarded and lead to pathway C; a strong coaching conversation should lead to pathway A.
+- Round 3: a low rating justified by "recommendations were not adopted" should make Omar challenge it and should produce a severity/unfair flag.
+- Check typical response time (expect a few seconds per message) and cost on the Anthropic console.
+
+## Unresolved dependencies
+
+- `ANTHROPIC_API_KEY` must be set in Vercel (Production and Preview) for live conversations.
+- Vercel must run `npm install` (set in `vercel.json`) so the functions can load the Anthropic SDK.
+- Progress is stored per browser; a participant who switches device starts again.

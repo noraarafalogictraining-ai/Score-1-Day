@@ -1,0 +1,13 @@
+{
+  "name": "score-performance-hub",
+  "private": true,
+  "description": "NextWave | SCORE Performance Hub — Omar Hassan pilot",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "node server/dev.js",
+    "rebuild": "python3 build.py"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0"
+  }
+}

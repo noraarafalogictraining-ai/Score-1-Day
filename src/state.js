@@ -1,6 +1,6 @@
 /* =========================================================
-   SCORE PERFORMANCE HUB — STATE, PERSISTENCE, WORKFLOW STATUS
-   Saved in the browser (localStorage) on every change.
+   SCORE PILOT — STATE, PERSISTENCE, WORKFLOW STATUS, PULSE ENGINE
+   Saved in the browser (localStorage) on every change; survives refresh.
    ========================================================= */
 let _uid = 0;
 const uid = (p = "x") => p + Date.now().toString(36) + (_uid++).toString(36);
@@ -8,25 +8,24 @@ const uid = (p = "x") => p + Date.now().toString(36) + (_uid++).toString(36);
 function blankObjective() { return { id: uid("o"), objective: "", kpi: "", weight: "", evidence: "", evidenceOther: "", freq: "" }; }
 function freshRecord() {
   return {
-    goals: { status: "not_started", objectives: [], comps: [], submits: 0, revisions: 0, tried: false },
-    align: { log: [], node: null, outcome: null, popup: false },
+    goals: { status: "not_started", objectives: [], comps: [], tried: false, submits: 0 },
+    align: { log: [], ready: false, confirmed: false, assessment: null, error: null, manual: false },
+    plan: { assessment: null, error: null },
     evidence: [],
-    midyear: { log: [], asked: [], closed: false, note: "", started: false },
-    appraisal: { status: "not_started", what: {}, how: {}, overall: { what: null, how: null, final: null, just: "", strengths: "", dev: "" }, tried: false, revising: false, history: [] },
-    reflection: { log: [], choice: null, biases: [], decision: null, just: "", done: false, popup: false },
-    sa: {}, fac: {}, read: {}, pc: {}
+    r2: { seenDashboard: false, interpretation: "", diag: { log: [], ended: false }, submitted: false, assessment: null, error: null, pathway: null, manual: false },
+    r3: {
+      dataset: null, error: null,
+      appraisal: { status: "not_started", what: {}, how: {}, overall: { what: null, how: null, final: null, just: "", strengths: "", dev: "" }, tried: false, revisions: 0 },
+      conv: { log: [], ended: false },
+      bias: { result: null, error: null, reflection: "", tried: false },
+      final: { assessment: null, error: null }, done: false
+    },
+    pulse: { values: { ...PULSE.baseline }, history: [], slots: {} },
+    fac: {}, pc: {}
   };
 }
 function freshState() {
-  return {
-    v: 1,
-    session: null, /* { name, started, legacyImported } */
-    emp: null,
-    released: { midyear: false, yearend: false },
-    read: {},
-    recs: Object.fromEntries(EMP_ORDER.map(e => [e, freshRecord()])),
-    saved: null
-  };
+  return { v: 2, session: null, emp: PILOT.employee, released: { r2: false, r3: false }, read: {}, recs: Object.fromEntries(PILOT.active.map(e => [e, freshRecord()])), saved: null };
 }
 function deepMerge(base, over) {
   if (Array.isArray(over)) return over;
@@ -41,7 +40,7 @@ function storageGet(k) { try { return localStorage.getItem(k); } catch (e) { ret
 function storageSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
 function loadState() {
   const raw = storageGet(APP.storeKey);
-  if (raw) { try { const s = JSON.parse(raw); if (s && s.v === 1) return deepMerge(freshState(), s); } catch (e) { /* corrupted: start fresh */ } }
+  if (raw) { try { const s = JSON.parse(raw); if (s && s.v === 2) return deepMerge(freshState(), s); } catch (e) { /* unreadable: start fresh */ } }
   return freshState();
 }
 let S = loadState();
@@ -54,67 +53,47 @@ function save(now) {
 window.addEventListener("beforeunload", () => save(true));
 window.addEventListener("pagehide", () => save(true));
 
-/* ---------- Classic version data (never deleted) ---------- */
-function legacyData() {
-  const raw = storageGet(APP.legacyKey);
-  if (!raw) return null;
-  try {
-    const s = JSON.parse(raw), g = s.group ? GROUPS.find(x => x.n === s.group) : null;
-    if (!g) return { emp: null, objectives: [] };
-    const c = s.begins && s.begins.contracts && s.begins.contracts[g.emp];
-    const ms = (c && c.measures || []).filter(m => (m.measure || "").trim());
-    return { emp: g.emp, objectives: ms.map(m => ({ id: uid("o"), objective: m.measure || "", kpi: m.target || "", weight: m.weight === "" || m.weight == null ? "" : Number(m.weight), evidence: m.evidence || "", evidenceOther: "", freq: m.freq || "" })) };
-  } catch (e) { return null; }
-}
-function importLegacy() {
-  const L = legacyData();
-  if (!L || !L.emp) return false;
-  S.emp = L.emp;
-  const g = S.recs[L.emp].goals;
-  if (L.objectives.length) { g.objectives = L.objectives; g.status = "draft"; }
-  S.session.legacyImported = true;
-  return true;
-}
-
-/* ---------- Session ---------- */
-function startSession(name, withLegacy) {
+function startSession(name) {
   S = freshState();
-  S.session = { name: (name || "").trim() || "Manager", started: Date.now(), legacyImported: false };
-  if (withLegacy) importLegacy();
+  S.session = { name: (name || "").trim() || "Commercial Director", started: Date.now() };
   save(true);
 }
-const rec = (emp = S.emp) => emp ? S.recs[emp] : null;
-const EMP = (emp = S.emp) => emp ? EMPLOYEES[emp] : null;
+const rec = (emp = S.emp) => S.recs[emp];
+const EMP = (emp = S.emp) => EMPLOYEES[emp];
 
-/* ---------- Derived workflow status ---------- */
-const STATUS_LABEL = {
-  not_started: "Not Started", draft: "Draft", pending_alignment: "Pending Employee Alignment", approved: "Approved",
-  in_progress: "In Progress", completed: "Completed", locked: "Not Yet Open", submitted: "Submitted", action: "Action Required"
-};
-const goalsApproved = (r = rec()) => !!r && r.goals.status === "approved";
-function evidenceStatus(r = rec()) { if (!r || !goalsApproved(r)) return "locked"; return r.evidence.length ? "in_progress" : "not_started"; }
-function midyearStatus(r = rec()) {
-  if (!r || !goalsApproved(r) || !S.released.midyear) return "locked";
-  if (r.midyear.closed) return "completed";
-  return r.midyear.log.length > 1 ? "in_progress" : "action";
+/* ---------- Employee Pulse: deterministic rules engine ---------- */
+function applyPulse(r, key, reason) {
+  const ev = PULSE.events[key];
+  if (!ev || r.pulse.slots[ev.slot]) return false;          /* each slot counts once */
+  const before = { ...r.pulse.values }, delta = {};
+  for (const d of PULSE.dims) {
+    const v = Math.max(0, Math.min(100, before[d.id] + (ev.d[d.id] || 0)));
+    delta[d.id] = v - before[d.id]; r.pulse.values[d.id] = v;
+  }
+  r.pulse.slots[ev.slot] = key;
+  r.pulse.history.push({ key, label: ev.label, round: ev.round, delta, after: { ...r.pulse.values }, reason: reason || "", at: Date.now() });
+  return true;
 }
-function appraisalStatus(r = rec()) {
-  if (!r || !goalsApproved(r) || !S.released.yearend) return "locked";
-  if (r.reflection.done) return "completed";
-  if (r.appraisal.status === "submitted") return "submitted";
-  return r.appraisal.status; /* not_started | draft */
+function pulseNote(r, slot, label, reason, round) { /* records a "no change" decision transparently */
+  if (r.pulse.slots[slot]) return;
+  r.pulse.slots[slot] = "none";
+  r.pulse.history.push({ key: "none", label, round, delta: { performance: 0, trust: 0, development: 0 }, after: { ...r.pulse.values }, reason, at: Date.now() });
 }
+
+/* ---------- Workflow status ---------- */
+const STATUS_LABEL = { not_started: "Not Started", draft: "Draft", pending_alignment: "Pending Employee Alignment", approved: "Approved", in_progress: "In Progress", completed: "Completed", locked: "Not Yet Open", submitted: "Submitted", action: "Action Required" };
+const goalsApproved = (r = rec()) => r.goals.status === "approved";
+function currentRound() { return S.released.r3 ? 3 : S.released.r2 ? 2 : 1; }
+function r2Status(r = rec()) { if (!S.released.r2 || !goalsApproved(r)) return "locked"; if (r.r2.submitted) return "completed"; return r.r2.diag.log.length > 1 || r.r2.interpretation ? "in_progress" : "action"; }
+function r3Status(r = rec()) { if (!S.released.r3 || !r.r2.submitted) return "locked"; if (r.r3.done) return "completed"; return r.r3.appraisal.status === "not_started" ? "action" : "in_progress"; }
+function appraisalStatus(r = rec()) { if (r3Status(r) === "locked" || !r.r3.dataset) return "locked"; if (r.r3.done) return "completed"; return r.r3.appraisal.status; }
+function evidenceStatus(r = rec()) { if (!goalsApproved(r)) return "locked"; return r.evidence.length ? "in_progress" : "not_started"; }
 function conversationsStatus(r = rec()) {
-  if (!r) return "locked";
-  const g = r.goals.status;
-  if (g === "pending_alignment") return "action";
-  if (midyearStatus(r) === "action" || midyearStatus(r) === "in_progress") return "action";
-  if (r.appraisal.status === "submitted" && !r.reflection.done) return "action";
-  if (r.align.log.length || r.midyear.log.length) return "in_progress";
-  return "not_started";
+  if (r.goals.status === "pending_alignment") return "action";
+  if (r2Status(r) !== "locked" && !r.r2.diag.ended) return "action";
+  if (r.r3.appraisal.status === "submitted" && !r.r3.conv.ended) return "action";
+  return r.align.log.length ? "in_progress" : "not_started";
 }
-function roundOneDone(r = rec()) { return goalsApproved(r); }
-function roundTwoDone(r = rec()) { return !!r && r.reflection.done; }
 
 /* ---------- Plan helpers ---------- */
 const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
@@ -132,8 +111,7 @@ function objMissing(o) {
 }
 const evidenceLabel = (o) => o.evidence === "Other" ? (o.evidenceOther.trim() || "Other") : o.evidence;
 function planValidation(r = rec()) {
-  const g = r.goals, errors = [], notes = [];
-  const n = g.objectives.length;
+  const g = r.goals, errors = [], notes = [], n = g.objectives.length;
   if (!n) errors.push("Add at least one performance objective.");
   g.objectives.forEach((o, i) => { const m = objMissing(o); if (m.length) errors.push(`Objective ${i + 1}: ${m.join(", ")}.`); });
   const wt = weightTotal(r);
@@ -141,43 +119,53 @@ function planValidation(r = rec()) {
   if (n && (n < OBJ_RANGE.min || n > OBJ_RANGE.max)) notes.push(`You have ${n} objective${n === 1 ? "" : "s"}. ${OBJ_RANGE.min}–${OBJ_RANGE.max} is the recommended range.`);
   const c = g.comps.length;
   if (c < COMP_RANGE.min || c > COMP_RANGE.max) errors.push(`Select ${COMP_RANGE.min}–${COMP_RANGE.max} competencies (currently ${c}).`);
-  g.comps.forEach(k => { if (!k.level) errors.push(`${(competencyById(S.emp, k.id) || {}).name || "Competency"}: choose the expected proficiency level.`); });
+  g.comps.forEach(k => { if (!k.level) errors.push(`${compName(k.id)}: choose the expected proficiency level.`); });
   return { errors, notes, ok: errors.length === 0 };
 }
-function compName(id, emp = S.emp) { return (competencyById(emp, id) || {}).name || "Competency"; }
-function planItems(r = rec(), emp = S.emp) {
+function compName(id) { return (competencyById(S.emp, id) || {}).name || "Competency"; }
+function planItems(r = rec()) {
   return [
     ...r.goals.objectives.map((o, i) => ({ id: o.id, kind: "obj", l: `Objective ${i + 1}: ${o.objective || "Untitled"}`, short: o.objective || `Objective ${i + 1}` })),
-    ...r.goals.comps.map(c => ({ id: c.id, kind: "comp", l: `Competency: ${compName(c.id, emp)}`, short: compName(c.id, emp) }))
+    ...r.goals.comps.map(c => ({ id: c.id, kind: "comp", l: `Competency: ${compName(c.id)}`, short: compName(c.id) }))
   ];
 }
 function linkLabel(id, r = rec()) { if (id === "general") return "General / other"; const it = planItems(r).find(x => x.id === id); return it ? it.short : "Removed item"; }
+const levelLabel = (id) => (LEVELS.find(l => l.id === id) || {}).l || "Not set";
 
-/* ---------- Appraisal helpers ---------- */
+/* ---------- Payloads for the server ---------- */
+function planPayload(r = rec()) {
+  return {
+    objectives: r.goals.objectives.map(o => ({ objective: o.objective, kpi: o.kpi, weight: num(o.weight), evidence: evidenceLabel(o), freq: o.freq })),
+    comps: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "" }))
+  };
+}
+function evidencePayload(r = rec()) { return r.evidence.map(e => ({ period: e.period, link: linkLabel(e.link, r), text: e.text, source: e.source === "Other" ? e.sourceOther : e.source, impact: e.impact, action: e.action, status: e.status })); }
+function appraisalPayload(r = rec()) {
+  const a = r.r3.appraisal;
+  return {
+    what: r.goals.objectives.map(o => ({ objective: o.objective, kpi: o.kpi, weight: num(o.weight), actual: (a.what[o.id] || {}).actual || "", rating: (a.what[o.id] || {}).rating || null, just: (a.what[o.id] || {}).just || "" })),
+    how: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "", observed: (a.how[c.id] || {}).observed || "", rating: (a.how[c.id] || {}).rating || null, just: (a.how[c.id] || {}).just || "" })),
+    overall: { ...a.overall }
+  };
+}
+const managerWords = (log, max) => { const t = log.filter(m => m.from === "manager").map(m => m.text).join(" / "); return t.length > max ? "…" + t.slice(-max) : t; };
+function priorPayload(r = rec()) {
+  const al = r.align.assessment, a2 = r.r2.assessment;
+  return {
+    alignment: al && al.classification ? al.classification.behaviour : null,
+    alignmentSummary: managerWords(r.align.log, 1400),
+    coaching: a2 ? (r.pulse.slots.coaching === "constructive" ? "constructive" : r.pulse.slots.coaching === "punitive" ? "punitive" : "neutral") : null,
+    coachingSummary: managerWords(r.r2.diag.log, 2400)
+  };
+}
 function appraisalValidation(r = rec()) {
-  const a = r.appraisal, errors = [];
-  r.goals.objectives.forEach((o, i) => {
-    const x = a.what[o.id] || {}, miss = [];
-    if (!(x.actual || "").trim()) miss.push("actual performance");
-    if (!x.rating) miss.push("rating");
-    if (!(x.just || "").trim()) miss.push("evidence / justification");
-    if (miss.length) errors.push(`Objective ${i + 1}: ${miss.join(", ")}.`);
-  });
-  r.goals.comps.forEach(c => {
-    const x = a.how[c.id] || {}, miss = [];
-    if (!(x.observed || "").trim()) miss.push("observed behaviours");
-    if (!x.rating) miss.push("rating");
-    if (!(x.just || "").trim()) miss.push("justification");
-    if (miss.length) errors.push(`${compName(c.id)}: ${miss.join(", ")}.`);
-  });
+  const a = r.r3.appraisal, errors = [];
+  r.goals.objectives.forEach((o, i) => { const x = a.what[o.id] || {}, miss = []; if (!(x.actual || "").trim()) miss.push("actual result / evidence"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`Objective ${i + 1}: ${miss.join(", ")}.`); });
+  r.goals.comps.forEach(c => { const x = a.how[c.id] || {}, miss = []; if (!(x.observed || "").trim()) miss.push("observed behaviour"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`${compName(c.id)}: ${miss.join(", ")}.`); });
   const o = a.overall, miss = [];
-  if (!o.what) miss.push("overall WHAT rating");
-  if (!o.how) miss.push("overall HOW rating");
-  if (!o.final) miss.push("final overall rating");
-  if (!o.just.trim()) miss.push("final justification");
-  if (!o.strengths.trim()) miss.push("key strengths");
-  if (!o.dev.trim()) miss.push("development priorities");
-  if (miss.length) errors.push(`Overall evaluation: ${miss.join(", ")}.`);
+  if (!o.what) miss.push("overall WHAT rating"); if (!o.how) miss.push("overall HOW rating"); if (!o.final) miss.push("overall performance rating");
+  if (!o.just.trim()) miss.push("evidence-based justification"); if (!o.strengths.trim()) miss.push("key strengths"); if (!o.dev.trim()) miss.push("development priorities");
+  if (miss.length) errors.push(`Overall appraisal: ${miss.join(", ")}.`);
   return { errors, ok: errors.length === 0 };
 }
 const ratingLabel = (v) => { const r = RATING_SCALE.find(x => x.v === v); return r ? `${r.v} · ${r.l}` : "Not rated"; };

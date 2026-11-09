@@ -5,3 +5,4 @@ app_only.js
 .vercel
 s_*.png
 tests/shots/
+node_modules/

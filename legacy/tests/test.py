@@ -2,7 +2,7 @@ import re
 import sys, json
 from playwright.sync_api import sync_playwright
 import pathlib
-URL=(pathlib.Path(__file__).resolve().parent.parent.parent/"classic.html").as_uri()
+URL=(pathlib.Path(__file__).resolve().parent.parent.parent/"public"/"classic.html").as_uri()
 CONTRACTS={
  "omar":[("Competitor and market reports delivered on schedule and accurate","100% of scheduled reports on time; accuracy confirmed quarterly",35,"Stakeholder feedback","Monthly"),
          ("Leadership decisions informed by his recommendations","At least 3 recommendations adopted by leadership per half",35,"Stakeholder feedback","Quarterly"),

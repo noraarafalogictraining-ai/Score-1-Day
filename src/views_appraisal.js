@@ -1,97 +1,110 @@
 /* =========================================================
-   FINAL PERFORMANCE APPRAISAL (SCORE Round 2) + POST-APPRAISAL REFLECTION
+   ROUND 3 — YEAR-END UPDATE · FINAL APPRAISAL · BIAS REFLECTION
    ========================================================= */
+function kvTable(rows) { return `<div class="table-wrap"><table class="tbl" style="min-width:0"><tbody>${rows.map(([k, v]) => `<tr><td style="width:38%"><b class="small">${esc(k)}</b></td><td class="small">${esc(v)}</td></tr>`).join("")}</tbody></table></div>`; }
+function yearEndBody(d) {
+  return `<div class="stack-lg">
+    <div class="notice">${icon("info", "i-sm")}<span>Fictional training data for the SCORE simulation.</span></div>
+    <div class="card"><div class="card-h"><h3>Market intelligence reporting</h3></div><div class="card-b">${kvTable(d.reporting)}</div></div>
+    <div class="card"><div class="card-h"><h3>Commercial recommendations</h3></div><div class="card-b">${kvTable(d.recommendations)}</div></div>
+    <div class="card"><div class="card-h"><h3>Stakeholder communication and collaboration</h3></div><div class="card-b stack">${kvTable(d.stakeholder)}
+      <div class="stack-sm"><h4>Stakeholder comments</h4>${d.comments.map(([w, t]) => `<div class="small"><b>${esc(w)}:</b> <span class="t2">“${esc(t)}”</span></div>`).join("")}</div></div></div>
+    <div class="card"><div class="card-h"><h3>Observed behaviours</h3></div><div class="card-b">${kvTable(d.behaviours)}</div></div>
+    <div class="card"><div class="card-h"><h3>Development and Omar's view</h3></div><div class="card-b stack-sm"><p class="small t2">${esc(d.development)}</p><p class="small t2">${esc(d.own)}</p></div></div>
+    <div class="card"><div class="card-h"><div><h3>Company-level results</h3><div class="xs muted">${esc(d.company.label)}</div></div></div><div class="card-b">${kvTable(d.company.rows)}</div></div>
+  </div>`;
+}
+VIEWS.yearend = function () {
+  const r = rec();
+  if (r3Status(r) === "locked") return pageHead("Year-End Update", "Year-End Performance Update") + lockedPanel("Not available yet", "The year-end update is published in December.") + (r.r2.submitted && !S.released.r3 ? releaseGate("r3", "Facilitator release", "Enter the release code your facilitator gives you.") : "");
+  if (!r.r3.dataset) return pageHead("Year-End Update", "Year-End Performance Update") + `<div class="card pad stack">${r.r3.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span>${esc(r.r3.error)}</span></div>` : `<p class="small t2">Loading the year-end update…</p>`}<div><button class="btn primary" data-act="loadYearEnd" id="load-yearend">Load year-end update</button></div></div>`;
+  return pageHead("Year-End Update", "Year-End Performance Update", `${empChip()}<button class="btn primary" data-act="go" data-go="appraisal">${icon("clipboard", "i-sm")} Open appraisal</button>`, `Omar Hassan · ${APP.cycleLabel} · Compare these results with the objectives and competencies you agreed in January.`) + yearEndBody(r.r3.dataset);
+};
+
 function rateSeg(path, cur, err) {
   return `<div class="rate ${err ? "err" : ""}" role="radiogroup">${[...RATING_SCALE].reverse().map(x => `<button role="radio" aria-checked="${cur === x.v}" class="${cur === x.v ? "on" : ""}" data-act="rate" data-path="${path}" data-v="${x.v}"><b>${x.v}</b>${x.l}</button>`).join("")}</div>`;
 }
 function rateRO(v) { return v ? `<div><span class="tag blue">${esc(ratingLabel(v))}</span></div>` : `<span class="muted small">Not rated</span>`; }
-const apEditable = (r = rec()) => r.appraisal.status === "not_started" || r.appraisal.status === "draft";
+const apEditable = (r = rec()) => ["not_started", "draft"].includes(r.r3.appraisal.status) && !r.r3.done;
 
 VIEWS.appraisal = function () {
-  if (!S.emp) return pageHead("Final Appraisal", "Final Appraisal") + needEmp();
   const r = rec(), E = EMP(), st = appraisalStatus(r);
-  if (!goalsApproved(r)) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Not yet open", "The appraisal is built from the approved performance contract.");
-  if (st === "locked") return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + releaseGate("yearend", "The year-end appraisal opens after the intervention activity", "Your facilitator will run the intervention discussion and hand out the year-end evidence in the room, then open the appraisal.");
-  const a = r.appraisal, ed = apEditable(r), t = a.tried, g = r.goals;
-  const wE = (o, k) => t && !((a.what[o.id] || {})[k] || "").toString().trim();
-  const hE = (c, k) => t && !((a.how[c.id] || {})[k] || "").toString().trim();
+  if (r3Status(r) === "locked") return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Not yet open", "The year-end appraisal opens in December, together with the year-end performance update.");
+  if (!r.r3.dataset) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Open the year-end update first", "The appraisal uses the year-end performance update.") + `<div style="margin-top:12px"><button class="btn primary" data-act="go" data-go="yearend">Open year-end update</button></div>`;
+  const a = r.r3.appraisal, ed = apEditable(r), t = a.tried, g = r.goals;
+  const wE = (o, k) => t && !String((a.what[o.id] || {})[k] || "").trim();
+  const hE = (c, k) => t && !String((a.how[c.id] || {})[k] || "").trim();
   const ta = (path, v, ph, err, rows = 2) => ed ? `<textarea class="ta ${err ? "err" : ""}" rows="${rows}" id="${path}" ${bind(path)} placeholder="${ph}">${esc(v || "")}</textarea>` : `<div class="small t2">${v ? esc(v) : "<span class='muted'>—</span>"}</div>`;
-  const evBtn = (id) => { const n = r.evidence.filter(e => e.link === id).length; return `<button class="btn ghost sm" data-act="evDrawer" data-id="${id}">${icon("log", "i-sm")} Evidence (${n})</button>`; };
   const v = appraisalValidation(r);
-  return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence Log (${r.evidence.length})</button>`, `${APP.cycleLabel} · <span class="round-tag">SCORE Round 2</span> · Evaluate against the expectations agreed at the start of the year.`) + `
+  return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence</button>`, `${APP.cycleLabel} · <span class="round-tag">Round 3</span> · Evaluate against the plan agreed in January.`) + `
   <div class="stack-lg">
-    ${a.revising && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You chose to revise the evaluation after ${esc(E.first)}'s feedback. Update it, then submit again.</span></div>` : ""}
-    ${!ed ? `<div class="notice ${r.reflection.done ? "good" : ""}">${icon(r.reflection.done ? "check" : "info", "i-sm")}<span>${r.reflection.done ? "The appraisal is complete and recorded." : `Appraisal submitted. ${esc(E.first)} has responded: <button class="btn ghost sm" data-act="go" data-go="conversations/appraisal">open the conversation</button>`}</span></div>` : ""}
-    <div class="tabs">${[["sec-a", "A · WHAT: Performance Results"], ["sec-b", "B · HOW: Competencies"], ["sec-c", "C · Overall Evaluation"]].map(([id, l]) => `<button class="tab" data-act="jump" data-id="${id}">${l}</button>`).join("")}</div>
-    <section class="stack ap-sec" id="sec-a"><div class="row between"><h2>Section A · WHAT: Performance Results</h2><span class="xs muted">${plural(g.objectives.length, "objective", "objectives")} from the approved plan</span></div>
-      ${g.objectives.map((o, i) => { const x = a.what[o.id] || {}, base = P("appraisal", "what", o.id); return `<div class="ap-item" id="ap-${o.id}">
-        <div class="ap-item-h"><div class="grow"><div class="xs muted">Objective ${i + 1} · Weight ${num(o.weight)}%</div><b>${esc(o.objective)}</b><div class="small t2" style="margin-top:3px"><span class="muted">KPI:</span> ${esc(o.kpi)}</div></div>${evBtn(o.id)}</div>
+    ${a.revisions && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You are reconsidering the appraisal. Update it, then submit the revision.</span></div>` : ""}
+    ${!ed ? `<div class="notice ${r.r3.done ? "good" : ""}">${icon(r.r3.done ? "check" : "info", "i-sm")}<span>${r.r3.done ? "The appraisal is final and recorded." : "Appraisal submitted to Omar."}</span></div>` : ""}
+    <section class="stack ap-sec" id="sec-a"><div class="row between"><h2>WHAT · Results</h2><span class="xs muted">${plural(g.objectives.length, "objective", "objectives")} from your Round 1 plan</span></div>
+      ${g.objectives.map((o, i) => { const x = a.what[o.id] || {}, base = P("r3", "appraisal", "what", o.id); return `<div class="ap-item">
+        <div class="ap-item-h"><div class="grow"><div class="xs muted">Objective ${i + 1} · Weight ${num(o.weight)}%</div><b>${esc(o.objective)}</b><div class="small t2" style="margin-top:3px"><span class="muted">KPI:</span> ${esc(o.kpi)}</div></div></div>
         <div class="ap-item-b">
-          <div class="field full"><label class="lbl" for="${base}.actual">Actual performance <span class="req">*</span></label>${ta(base + ".actual", x.actual, "What was actually achieved against the KPI, from your evidence.", wE(o, "actual"))}</div>
-          <div class="field full"><span class="lbl">Performance rating <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, t && !x.rating) : rateRO(x.rating)}</div>
-          <div class="field full"><label class="lbl" for="${base}.just">Supporting evidence / justification <span class="req">*</span></label>${ta(base + ".just", x.just, "Which documented evidence supports this rating?", wE(o, "just"))}</div>
+          <div class="field full"><label class="lbl" for="${base}.actual">Actual result / relevant evidence <span class="req">*</span></label>${ta(base + ".actual", x.actual, "What the year-end evidence shows for this KPI. Note any limitation or missing information.", wE(o, "actual"))}</div>
+          <div class="field full"><span class="lbl">Manager rating (1–5) <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, t && !x.rating) : rateRO(x.rating)}</div>
+          <div class="field full"><label class="lbl" for="${base}.just">Justification <span class="req">*</span></label>${ta(base + ".just", x.just, "Why this rating, based on the evidence?", wE(o, "just"))}</div>
         </div></div>`; }).join("")}
     </section>
-    <section class="stack ap-sec" id="sec-b"><div class="row between"><h2>Section B · HOW: Competency Evaluation</h2><span class="xs muted">${plural(g.comps.length, "competency", "competencies")} from the approved plan</span></div>
-      ${g.comps.map(c => { const L = competencyById(S.emp, c.id) || { name: "Competency", description: "", levels: {} }, x = a.how[c.id] || {}, base = P("appraisal", "how", c.id), lv = LEVELS.find(l => l.id === c.level); return `<div class="ap-item" id="ap-${c.id}">
-        <div class="ap-item-h"><div class="grow stack-sm" style="gap:4px"><div class="row" style="gap:8px"><b>${esc(L.name)}</b><span class="tag blue">Expected: ${lv ? lv.l : "—"}</span></div><div class="small">${phBlock(L.description)}</div>
-          <div class="small"><span class="muted">Expected behaviours:</span> ${(L.levels[c.level] || []).map(phBlock).join("")}</div>
-          <div class="small t2"><span class="muted">Agreed standard:</span> ${c.standard ? esc(c.standard) : "<span class='muted'>None added</span>"}</div></div>${evBtn(c.id)}</div>
+    <section class="stack ap-sec" id="sec-b"><div class="row between"><h2>HOW · Competencies</h2><span class="xs muted">${plural(g.comps.length, "competency", "competencies")} from your Round 1 plan</span></div>
+      ${g.comps.map(c => { const L = competencyById(S.emp, c.id) || { name: "Competency", levels: {} }, x = a.how[c.id] || {}, base = P("r3", "appraisal", "how", c.id); return `<div class="ap-item">
+        <div class="ap-item-h"><div class="grow stack-sm" style="gap:4px"><div class="row" style="gap:8px"><b>${esc(L.name)}</b><span class="tag blue">Expected level: ${levelLabel(c.level)}</span></div>
+          <div class="small t2"><span class="muted">Behavioural standard:</span> ${esc(L.levels[c.level] || "")}${c.standard ? ` <span class="muted">· Your addition:</span> ${esc(c.standard)}` : ""}</div></div></div>
         <div class="ap-item-b">
-          <div class="field full"><label class="lbl" for="${base}.observed">Observed behaviours <span class="req">*</span></label>${ta(base + ".observed", x.observed, "What did you see or hear during the year?", hE(c, "observed"))}</div>
-          <div class="field full"><span class="lbl">Performance rating <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, t && !x.rating) : rateRO(x.rating)}</div>
-          <div class="field full"><label class="lbl" for="${base}.just">Supporting justification <span class="req">*</span></label>${ta(base + ".just", x.just, "How do the observed behaviours compare with the expected level and standard?", hE(c, "just"))}</div>
+          <div class="field full"><label class="lbl" for="${base}.observed">Observed behaviour <span class="req">*</span></label>${ta(base + ".observed", x.observed, "What did Omar do that you or others observed?", hE(c, "observed"))}</div>
+          <div class="field full"><span class="lbl">Manager rating (1–5) <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, t && !x.rating) : rateRO(x.rating)}<span class="hint">The rating is how well Omar performed against the expected level, not the level itself.</span></div>
+          <div class="field full"><label class="lbl" for="${base}.just">Justification <span class="req">*</span></label>${ta(base + ".just", x.just, "How does the observed behaviour compare with the expected standard?", hE(c, "just"))}</div>
         </div></div>`; }).join("")}
     </section>
-    <section class="stack ap-sec" id="sec-c"><h2>Section C · Overall Performance Evaluation</h2>
+    <section class="stack ap-sec" id="sec-c"><h2>Overall appraisal</h2>
       <div class="card"><div class="card-b stack">
         <div class="grid2">
-          <div class="field"><span class="lbl">Overall WHAT rating <span class="req">*</span></span>${ed ? rateSeg(P("appraisal", "overall", "what"), a.overall.what, t && !a.overall.what) : rateRO(a.overall.what)}</div>
-          <div class="field"><span class="lbl">Overall HOW rating <span class="req">*</span></span>${ed ? rateSeg(P("appraisal", "overall", "how"), a.overall.how, t && !a.overall.how) : rateRO(a.overall.how)}</div>
+          <div class="field"><span class="lbl">Overall WHAT rating <span class="req">*</span></span>${ed ? rateSeg(P("r3", "appraisal", "overall", "what"), a.overall.what, t && !a.overall.what) : rateRO(a.overall.what)}</div>
+          <div class="field"><span class="lbl">Overall HOW rating <span class="req">*</span></span>${ed ? rateSeg(P("r3", "appraisal", "overall", "how"), a.overall.how, t && !a.overall.how) : rateRO(a.overall.how)}</div>
         </div>
-        <div class="field"><span class="lbl">Final overall performance rating <span class="req">*</span></span>${ed ? rateSeg(P("appraisal", "overall", "final"), a.overall.final, t && !a.overall.final) : rateRO(a.overall.final)}<span class="hint">Use your professional judgment based on the evidence. No fixed WHAT/HOW formula is applied.</span></div>
-        <div class="field"><label class="lbl" for="${P("appraisal", "overall", "just")}">Manager's final justification <span class="req">*</span></label>${ta(P("appraisal", "overall", "just"), a.overall.just, "Why is this the right overall rating?", t && !a.overall.just.trim(), 3)}</div>
+        <div class="field"><span class="lbl">Overall performance rating <span class="req">*</span></span>${ed ? rateSeg(P("r3", "appraisal", "overall", "final"), a.overall.final, t && !a.overall.final) : rateRO(a.overall.final)}</div>
         <div class="grid2">
-          <div class="field"><label class="lbl" for="${P("appraisal", "overall", "strengths")}">Key strengths <span class="req">*</span></label>${ta(P("appraisal", "overall", "strengths"), a.overall.strengths, "", t && !a.overall.strengths.trim())}</div>
-          <div class="field"><label class="lbl" for="${P("appraisal", "overall", "dev")}">Development priorities <span class="req">*</span></label>${ta(P("appraisal", "overall", "dev"), a.overall.dev, "", t && !a.overall.dev.trim())}</div>
+          <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "strengths")}">Key strengths <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "strengths"), a.overall.strengths, "", t && !a.overall.strengths.trim())}</div>
+          <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "dev")}">Development priorities <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "dev"), a.overall.dev, "", t && !a.overall.dev.trim())}</div>
         </div>
+        <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "just")}">Evidence-based justification <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "just"), a.overall.just, "Why is this the right overall rating? Cite the evidence that decided it.", t && !a.overall.just.trim(), 3)}</div>
       </div></div>
     </section>
     ${ed ? `<div class="card"><div class="card-b stack">
       ${t && !v.ok ? `<div class="notice risk">${icon("alert", "i-sm")}<div class="stack-sm"><b>Complete the following before submitting:</b><ul class="list-plain">${v.errors.map(e => `<li>${esc(e)}</li>`).join("")}</ul></div></div>` : ""}
-      <div class="row between"><span class="xs muted">Your draft saves automatically. Submitting sends the appraisal to ${esc(E.first)}.</span><button class="btn primary" data-act="submitAppraisal" id="submit-appraisal">${icon("send", "i-sm")} Submit final appraisal</button></div>
+      <div class="row between"><span class="xs muted">Your draft saves automatically. ${a.revisions ? "Submitting records the revised appraisal." : "Submitting shares the appraisal with Omar."}</span><button class="btn primary" data-act="submitAppraisal" id="submit-appraisal" ${UI.busy ? "disabled" : ""}>${icon("send", "i-sm")} ${a.revisions ? "Submit revised appraisal" : "Submit appraisal"}</button></div>
     </div></div>` : ""}
   </div>`;
 };
 DRAWERS.evidence = function (d) {
   const r = rec(), list = r.evidence.filter(e => d.id === "all" || e.link === d.id);
-  return `<div class="drawer-scrim" data-act="closeDrawer"></div><aside class="drawer" role="dialog" aria-label="Evidence Log"><div class="drawer-h"><div><h3>Evidence Log</h3><div class="xs muted">${d.id === "all" ? "All entries" : esc(linkLabel(d.id))} · ${plural(list.length, "entry", "entries")}</div></div><button class="icon-btn" data-act="closeDrawer" aria-label="Close">${icon("x")}</button></div>
-    <div class="drawer-b">${list.length ? list.map(e => `<div class="ev-card"><div class="row between"><span class="tag">${esc(e.period)}</span><span class="xs muted">${esc(e.source === "Other" ? e.sourceOther : e.source)} · ${esc(e.status)}</span></div>${d.id === "all" ? `<div class="xs muted">${esc(linkLabel(e.link))}</div>` : ""}<div>${esc(e.text)}</div>${e.impact ? `<div class="xs"><span class="muted">Impact:</span> ${esc(e.impact)}</div>` : ""}${e.action ? `<div class="xs"><span class="muted">Action:</span> ${esc(e.action)}</div>` : ""}</div>`).join("") : `<div class="empty">${icon("log")}<span class="small">No entries linked here. You can add evidence in the Evidence Log.</span></div>`}
-    <button class="btn" data-act="go" data-go="evidence">Open Evidence Log</button></div></aside>`;
+  return `<div class="drawer-scrim" data-act="closeDrawer"></div><aside class="drawer wide" role="dialog" aria-label="Evidence"><div class="drawer-h"><h3>Evidence</h3><button class="icon-btn" data-act="closeDrawer" aria-label="Close">${icon("x")}</button></div>
+    <div class="drawer-b"><h4>Your Evidence Log (${list.length})</h4>${list.length ? list.map(e => `<div class="ev-card"><div class="row between"><span class="tag">${esc(e.period)}</span><span class="xs muted">${esc(e.source === "Other" ? e.sourceOther : e.source)} · ${esc(e.status)}</span></div><div class="xs muted">${esc(linkLabel(e.link))}</div><div>${esc(e.text)}</div>${e.impact ? `<div class="xs"><span class="muted">Impact:</span> ${esc(e.impact)}</div>` : ""}${e.action ? `<div class="xs"><span class="muted">Action:</span> ${esc(e.action)}</div>` : ""}</div>`).join("") : `<p class="small muted">No entries.</p>`}
+    ${r.r3.dataset ? `<h4 style="margin-top:10px">Year-end performance update</h4>${yearEndBody(r.r3.dataset)}` : ""}</div></aside>`;
 };
 
-/* ---------- Employee reaction & bias reflection ---------- */
-function reactionChat(inModal) {
-  const r = rec(), rf = r.reflection, sc = reactionScript(S.emp);
-  if (r.appraisal.status !== "submitted" && !rf.done && !rf.log.length) return `<div class="empty">${icon("chat")}<b>No conversation yet</b><span class="small">${esc(EMP().first)} will respond after you submit the final appraisal.</span></div>`;
-  let foot = "";
-  if (rf.done) foot = `<div class="small t2">${icon("check", "i-sm")} Reflection recorded: you chose to <b>${rf.decision === "revise" ? "revise" : "keep"}</b> the evaluation.${rf.just ? ` “${esc(rf.just)}”` : ""}</div>`;
-  else if (r.appraisal.status === "draft" && rf.decision === "revise") foot = `<div class="row between"><span class="small t2">You are revising the appraisal.</span><button class="btn primary sm" data-act="go" data-go="appraisal">Open appraisal</button></div>`;
-  else if (!rf.choice) foot = `<div class="xs muted">Choose your response</div>${sc.options.map(o => `<button class="reply-opt" data-act="reactOpt" data-id="${o.id}">${icon("send", "i-sm")}<span>${esc(o.l)}</span></button>`).join("")}`;
-  else foot = reflectionForm(r);
-  return `<div class="chat">${inModal ? "" : chatHead("Year-end appraisal feedback", SIM_DATES.yearend)}<div class="chat-log" id="chat-log">${bubbles(rf.log)}</div><div class="chat-foot">${foot}</div></div>`;
-}
-function reflectionForm(r) {
-  const rf = r.reflection, a = r.appraisal.overall, t = rf.tried;
-  return `<div class="stack" style="gap:12px">
-    <div class="row between"><b class="small">Reflect before you decide</b><button class="btn ghost sm" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Reconsider the evidence</button></div>
-    <div class="small t2">Your submitted ratings: WHAT ${a.what || "–"} · HOW ${a.how || "–"} · Final <b>${esc(ratingLabel(a.final))}</b></div>
-    <div class="field"><span class="lbl">Could any of these have shaped your evaluation? (optional, private)</span><div class="grid2" style="gap:6px">${BIASES.map(b => `<label class="row nowrap small" style="gap:8px;align-items:flex-start"><input type="checkbox" data-act-change="bias" value="${b.id}" ${rf.biases.includes(b.id) ? "checked" : ""} style="margin-top:3px"><span><b>${b.l}</b> <span class="muted">· ${b.d}</span></span></label>`).join("")}</div></div>
-    <div class="field"><span class="lbl">Decision <span class="req">*</span></span><div class="seg ${t && !rf.decision ? "err" : ""}"><button class="${rf.decision === "keep" ? "on" : ""}" data-act="reflDecision" data-v="keep">Keep the evaluation</button><button class="${rf.decision === "revise" ? "on" : ""}" data-act="reflDecision" data-v="revise">Revise the evaluation</button></div></div>
-    <div class="field"><label class="lbl" for="${P("reflection", "just")}">Short justification <span class="req">*</span></label><textarea class="ta ${t && !rf.just.trim() ? "err" : ""}" rows="2" id="${P("reflection", "just")}" ${bind(P("reflection", "just"))} placeholder="Why are you keeping or revising the evaluation?">${esc(rf.just)}</textarea></div>
-    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="reflSave" id="refl-save">${rf.decision === "revise" ? "Record and reopen appraisal" : "Record decision"}</button></div>
+/* ---------- Bias reflection ---------- */
+VIEWS.reflection = function () {
+  const r = rec(), b = r.r3.bias;
+  if (!r.r3.conv.ended) return pageHead("Final Appraisal", "Bias reflection") + lockedPanel("Not yet", "The bias reflection follows the appraisal conversation with Omar.");
+  const res = b.result, busy = UI.busy === "bias" || UI.busy === "round3";
+  return pageHead("Final Appraisal / Bias reflection", "Appraisal bias reflection", empChip(), "A short check on possible rating biases before your appraisal is final.") + `<div class="stack-lg">
+    <div class="card"><div class="card-h"><h3>What your reasoning suggests</h3>${res && aiReady() && !r.r3.done ? `<button class="btn ghost sm" data-act="runBias">Check again</button>` : ""}</div><div class="card-b stack">
+      ${busy && !res ? `<p class="small t2">Reviewing your appraisal…</p>` : ""}
+      ${b.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(b.error)}</span>${aiReady() ? `<button class="btn sm" data-act="runBias">Retry</button>` : ""}</div>` : ""}
+      ${res ? `${res.flags.length ? res.flags.map(f => `<div class="bias"><b>${esc(BIAS_LABEL[f.bias] || f.bias)}</b><div class="small">Your reasoning: <q>${esc(f.evidence)}</q></div><div class="small t2">${esc(f.explanation)}</div></div>`).join("") : `<div class="notice good">${icon("check", "i-sm")}<span>Your reasoning does not show clear signs of a rating bias.</span></div>`}
+        ${res.overlooked.length ? `<div class="stack-sm"><h4>Evidence that may have been overlooked</h4><ul class="list-plain small t2">${res.overlooked.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+        ${res.overemphasized.length ? `<div class="stack-sm"><h4>Evidence that may have been overemphasised</h4><ul class="list-plain small t2">${res.overemphasized.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+        ${res.summary ? `<p class="small t2">${esc(res.summary)}</p>` : ""}` : !busy && !b.error ? `<p class="small muted">${aiReady() ? "Not checked yet." : "The AI bias check is unavailable without an AI provider. Write your own reflection below."}</p>${aiReady() ? `<div><button class="btn" data-act="runBias">Run bias check</button></div>` : ""}` : ""}
+      <p class="xs muted">Biases considered: recency, halo, horn, confirmation, leniency or severity, and anchoring on the previous-year rating. A bias is flagged only when your own reasoning points to it.</p>
+    </div></div>
+    <div class="card"><div class="card-h"><h3>Your reflection</h3></div><div class="card-b stack">
+      ${r.r3.done ? `<div class="small t2" style="white-space:pre-line">${esc(b.reflection)}</div>` : `<textarea class="ta ${b.tried && b.reflection.trim().length < 15 ? "err" : ""}" rows="4" id="${P("r3", "bias", "reflection")}" ${bind(P("r3", "bias", "reflection"))} placeholder="Which biases could have influenced your ratings? What did you check, and what, if anything, would you change?">${esc(b.reflection)}</textarea>`}
+      ${r.r3.final.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.final.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round3">Retry assessment</button>` : ""}</div>` : ""}
+      ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review/3">SCORE results</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalise appraisal"}</button></div>`}
+    </div></div>
   </div>`;
-}
-MODALS.reaction = function () {
-  return modalWrap(`Message from ${esc(EMP().name)}`, reactionChat(true), `<button class="btn" data-act="closeModal">Reply later</button>`, true, avatar(S.emp, "sm"));
 };

@@ -18,5 +18,5 @@ assert 'firstcall' not in comp
 js='\n'.join(open(f).read() for f in ['p_data.js','n_data.js','n_state.js','p_engine.js']) + '\n' + r2 + '\n' + comp + '\n' + open('p_profile.js').read() + '\n' + open('n_app.js').read()+'\n'+open('n_score.js').read()+'\n'+open('n_views.js').read()
 out=head+'\n'+js+'\n</script>\n'
 doc = '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n<meta name="description" content="SCORE: one-day performance management simulation by LOGIC, set at NextWave Digital.">\n</head>\n<body>\n' + out + '</body>\n</html>\n'
-open('../../classic.html','w').write(doc)
+open('../../public/classic.html','w').write(doc)
 print(len(out))
