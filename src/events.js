@@ -98,20 +98,20 @@ function releaseRound(k) {
 }
 async function loadYearEnd() {
   const r = rec();
-  if (r.r3.dataset || UI.busy === "yearend") return;
-  if (!r.r2.pathway) { r.r3.error = "The year-end update is not available yet. Please contact your facilitator."; save(); return render(); }
+  if (r.r3.dataset && r.r3.dataset.registers) return;   /* older saves held a per-pathway dataset: reload the canonical record */
+  if (UI.busy === "yearend") return;
   UI.busy = "yearend"; r.r3.error = null;
   try {
-    const res = await api("/api/yearend", { pathway: r.r2.pathway });
+    const res = await api("/api/yearend", {});
     r.r3.dataset = res.dataset; r.r3.tag = res.tag; UI.period = null;   /* show the newest period when results arrive */
-    if (r.r2.pathway === "A") applyPulse(r, "intervention_followthrough", "The development plan agreed at mid-year was followed through (year-end outcomes).");
+    if (r.r2.pathway === "A") applyPulse(r, "intervention_followthrough", "Constructive mid-year development plan (assessed in July).");
     else pulseNote(r, "intervention", "No development intervention with follow-through", r.r2.pathway === "B" ? "Limited coaching and follow-up after mid-year: no Pulse change." : "No constructive development support after mid-year: no Pulse change.", 3);
   } catch (e) { r.r3.error = `The year-end update could not be loaded: ${e.message}`; }
   UI.busy = null; save(); render();
 }
 function afterRoute() {
   const r = rec();
-  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !r.r3.dataset && !r.r3.error) loadYearEnd();
+  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !(r.r3.dataset && r.r3.dataset.registers) && !r.r3.error) loadYearEnd();
 }
 
 /* ---------- conversation ---------- */
@@ -239,6 +239,7 @@ const ACTIONS = {
     UI.modal = null; save(); render();
   },
   evDel(el) { const r = rec(), i = r.evidence.findIndex(e => e.id === el.dataset.id); if (i < 0) return; const [e] = r.evidence.splice(i, 1); _undo = () => rec().evidence.splice(i, 0, e); save(); toast("Evidence entry deleted.", true); render(); },
+  evRef(el) { const sec = evSectionOf(el.dataset.ref); UI.drawer = { type: "evidence", id: "all", sec }; render(); setTimeout(() => { const n = document.getElementById("ev-" + sec); if (n) n.scrollIntoView({ block: "start" }); }, 30); },
   evDrawer(el) { UI.drawer = { type: "evidence", id: el.dataset.id }; render(); },
 
   /* --- rounds --- */

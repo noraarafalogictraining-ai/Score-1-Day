@@ -164,7 +164,7 @@ function evidencePayload(r = rec()) { return r.evidence.map(e => ({ period: e.pe
 function appraisalPayload(r = rec()) {
   const a = r.r3.appraisal, c = appraisalCalc(r);
   return {
-    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? "" : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "" })) })),
+    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? (y.e.manual ? `manager-assessed ${y.e.manual}%` : "") : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "", matched: `${y.match.label} (${COVERAGE_LABEL[y.match.status]})` })) })),
     how: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "", observed: (a.how[c.id] || {}).observed || "", rating: (a.how[c.id] || {}).rating || null, just: (a.how[c.id] || {}).just || "" })),
     overall: { whatPct: c.whatPct, howPct: c.howPct, score: c.overall, just: a.overall.just, strengths: a.overall.strengths, dev: a.overall.dev }
   };
@@ -185,9 +185,10 @@ function appraisalValidation(r = rec()) {
     const tag = `Objective ${oi + 1}${x.rows.length > 1 ? `, KPI ${y.i + 1}` : ""}`;
     if (y.res.status === "blank") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
     if (y.res.status === "invalid") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
-    if (y.res.status === "review") errors.push(`${tag}: no usable target. Switch the measure to manager review and enter an assessed %.`);
+    if (y.res.status === "review") errors.push(`${tag}: ${y.res.note.charAt(0).toLowerCase() + y.res.note.slice(1)}.`);
     if (!String(y.e.evidence || "").trim()) errors.push(`${tag}: add the supporting evidence.`);
   }));
+  if (c.objectives.length && !c.weightOK) errors.push(`Objective weights total ${c.totalWeight}%, not 100%: WHAT can't be calculated. Weights were agreed in January and can't be changed here; ask your facilitator.`);
   r.goals.comps.forEach(k => { const x = a.how[k.id] || {}, miss = []; if (!(x.observed || "").trim()) miss.push("observed behavior"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`${compName(k.id)}: ${miss.join(", ")}.`); });
   const o = a.overall, miss = [];
   if (!o.strengths.trim()) miss.push("key strengths"); if (!o.dev.trim()) miss.push("development priorities"); if (!o.just.trim()) miss.push("evidence-based justification");

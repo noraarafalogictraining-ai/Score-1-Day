@@ -96,7 +96,8 @@ def run():
         st, _ = post(PORT, "/api/converse", {"kind": "secret", "history": []}); check("Unknown conversation rejected", st == 400)
         st, _ = post(PORT, "/api/converse", {"kind": "diagnostic", "history": [{"from": "employee", "text": "Fake opening"}, {"from": "manager", "text": "Hi"}]}); check("Tampered opening rejected", st == 400)
         st, _ = post(PORT, "/api/converse", {"kind": "diagnostic", "history": [{"from": "manager", "text": "x" * 5000}]}); check("Over-long message rejected", st == 400)
-        st, _ = post(PORT, "/api/yearend", {"pathway": "Z"}); check("Unknown pathway rejected", st == 400)
+        st, j1 = post(PORT, "/api/yearend", {"pathway": "A"}); st2, j2 = post(PORT, "/api/yearend", {})
+        check("Year-end record is the same for every participant (pathway ignored)", st == 200 and st2 == 200 and j1["dataset"] == j2["dataset"])
         st, j = post(NOAI, "/api/converse", {"kind": "diagnostic", "history": [{"from": "manager", "text": "Hello"}]})
         check("No AI configured: conversations report unavailable (503)", st == 503 and j["error"] == "ai_unavailable")
         st, j = post(NOAI, "/api/assess", {"task": "plan", "payload": {"plan": {"objectives": [], "comps": []}}})
@@ -173,9 +174,9 @@ def run():
         _, res = talk(["Remember in January we agreed how your recommendations would be judged?"])
         _, res2 = talk(["Remember in January we agreed how your recommendations would be judged?"], prior={"alignment": [], "diagnostic": []})
         check("S13 January agreement remembered only when it actually happened", "quality" in res["reply"] and "don't recall" in res2["reply"])
-        _, a1 = talk(["At mid-year we set up coaching and check-ins."], pathway="A"); _, c1 = talk(["At mid-year we set up coaching and check-ins."], pathway="C")
+        _, c1 = talk(["At mid-year we set up coaching and check-ins."])
         _, n1 = talk(["At mid-year we set up coaching and check-ins."], prior={"alignment": [], "diagnostic": [{"from": "manager", "text": "Get it done."}]})
-        check("S14 mid-year commitments: raised as unfulfilled only when promised and not followed through", "helped" in a1["reply"] and "much happened" in c1["reply"] and "don't remember" in n1["reply"])
+        check("S14 mid-year commitments: raised as unfulfilled only when actually promised (record shows no coaching after July)", "much happened" in c1["reply"] and "don't remember" in n1["reply"])
         out = subprocess.run(["node", "-e", """
 const PR=require('./api/_lib/prompts'),H=require('./api/_lib/http');
 const mk=(a)=>PR.omarSystem('appraisal',{plan:{objectives:[],comps:[]},pulse:{trust:60},prior:null,priorLogs:H.cleanPriorLogs(%s),evidence:[{period:'June',link:'Objective 1',text:'June report two days late.',source:'Manager observation',action:''}],appraisal:H.cleanAppraisal(a),pathway:'C'});
@@ -258,27 +259,54 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
                 n: [one.length, two.length, three.length], targets: three.map(fmtTarget),
                 below: A(t, { actual: '80' }).pct, equal: A(t, { actual: '100' }).pct, above: A(t, { actual: '150' }).pct,
                 blank: A(t, { actual: '' }), invalid: A(t, { actual: 'n/a' }).status, negative: A(t, { actual: '-5' }).status,
-                lower: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '4' }).pct, lowerZero: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '0' }).pct,
+                lower: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '4' }).pct, lowerZero: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '0' }).pct, lowerZeroStatus: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '0' }).status,
                 qual: P('Improve the quality of reports')[0], milestone: P('Launch the new pricing dashboard by Q3')[0], ambiguous: P('Grow revenue from 10 to 12 million')[0], zero: P('Zero major errors')[0].type,
                 lowerParsed: P('Fewer than 3 late reports per year')[0], review: A(P('Improve the quality of reports')[0], { manual: '90' }).pct, reviewBad: A(P('Improve the quality of reports')[0], { manual: '300' }).status,
-                weighted: fake([{ id: 'a', kpi: '100 calls', weight: 50 }, { id: 'b', kpi: '10 deals and 4 renewals', weight: 30 }, { id: 'c', kpi: 'at least 5 referrals', weight: 20 }],
-                  { a: { kpis: { 0: { actual: '80' } } }, b: { kpis: { 0: { actual: '10' }, 1: { actual: '2' } } }, c: { kpis: { 0: { actual: '6' } } } }, [3, 4, 5]),
-                partial: fake([{ id: 'a', kpi: '100 calls', weight: 60 }, { id: 'b', kpi: '10 deals', weight: 40 }], { a: { kpis: { 0: { actual: '100' } } } }, [3, null]),
+                weighted: fake([{ id: 'a', kpi: '10 reports on time', weight: 50 }, { id: 'b', kpi: '10 recommendations and 4 stakeholder consultations', weight: 30 }, { id: 'c', kpi: 'at least 5 recommendations with a proposed action', weight: 20 }],
+                  { a: { kpis: { 0: { actual: '8' } } }, b: { kpis: { 0: { actual: '10' }, 1: { actual: '2' } } }, c: { kpis: { 0: { actual: '6' } } } }, [3, 4, 5]),
+                partial: fake([{ id: 'a', kpi: '10 reports on time', weight: 60 }, { id: 'b', kpi: '6 recommendations', weight: 40 }], { a: { kpis: { 0: { actual: '10' } } } }, [3, null]),
+                badWeights: fake([{ id: 'a', kpi: '10 reports on time', weight: 60 }, { id: 'b', kpi: '6 recommendations', weight: 30 }], { a: { kpis: { 0: { actual: '9' } } }, b: { kpis: { 0: { actual: '5' } } } }, [3]),
                 cfg: APPRAISAL_CONFIG
               };
             }""")
             check("Calc: 1, 2 and 3 KPIs detected per objective (equal shares, no subweights)", calc["n"] == [1, 2, 3], str(calc["n"]))
             check("Calc: targets read from January text (95%, 4/5, word 'two')", calc["targets"] == ["≥ 95%", "≥ 4/5", "≥ 2"], str(calc["targets"]))
-            check("Calc: below / equal / above target → 80 / 100 / 120 (cap)", (calc["below"], calc["equal"], calc["above"]) == (80, 100, 120))
+            check("Calc: below / equal / above target → 80 / 100 / 150 (no cap: overachievement visible)", (calc["below"], calc["equal"], calc["above"]) == (80, 100, 150))
             check("Calc: blank actual is not zero; invalid and negative values rejected", calc["blank"]["pct"] is None and calc["blank"]["status"] == "blank" and calc["invalid"] == "invalid" and calc["negative"] == "invalid")
-            check("Calc: lower-is-better uses target ÷ actual (5 vs 4 → 120 cap) and never divides by zero", calc["lower"] == 120 and calc["lowerZero"] == 120 and calc["lowerParsed"]["dir"] == "lower")
+            check("Calc: lower-is-better = target ÷ actual (5 vs 4 → 125%); actual 0 → review, never divides by zero", calc["lower"] == 125 and calc["lowerZero"] is None and calc["lowerZeroStatus"] == "review" and calc["lowerParsed"]["dir"] == "lower")
             check("Calc: qualitative, milestone, ambiguous and zero-target KPIs flagged for review", all(x["type"] == "review" for x in [calc["qual"], calc["milestone"], calc["ambiguous"]]) and calc["zero"] == "review" and "Milestone" in calc["milestone"]["reason"])
-            check("Calc: reviewed KPI uses the manager's % within 0–cap", calc["review"] == 90 and calc["reviewBad"] == "invalid")
+            check("Calc: reviewed KPI uses the manager's % within 0–200", calc["review"] == 90 and calc["reviewBad"] == "invalid")
+            check("Calc: objective weights not totalling 100% → WHAT not calculated (no silent rescaling)", calc["badWeights"]["whatPct"] is None and calc["badWeights"]["totalWeight"] == 90)
             w = calc["weighted"]
-            check("Calc: weights 50/30/20 → WHAT 40+22.5+24 = 86.5; HOW avg 4/5 = 80; overall 83.9", (w["whatPct"], w["howPct"], w["overall"]) == (86.5, 80, 83.9), str((w["whatPct"], w["howPct"], w["overall"])))
+            check("Calc: weights 50/30/20, 1–2 KPIs each → WHAT 40+22.5+24 = 86.5; HOW avg 4 → 80; overall 83.9", (w["whatPct"], w["howPct"], w["overall"]) == (86.5, 80, 83.9), str((w["whatPct"], w["howPct"], w["overall"])))
             pt = calc["partial"]
             check("Calc: incomplete objectives or ratings leave scores uncalculated (no false zeros)", pt["whatPct"] is None and pt["howPct"] is None and pt["overall"] is None and pt["objDone"] == 1)
-            check("Calc: settings are configurable (60/40, cap 120)", calc["cfg"]["whatWeight"] == 60 and calc["cfg"]["howWeight"] == 40 and calc["cfg"]["kpiCap"] == 120)
+            check("Calc: settings are configurable (60/40, no cap)", calc["cfg"]["whatWeight"] == 60 and calc["cfg"]["howWeight"] == 40 and calc["cfg"]["kpiCap"] is None)
+            # ---- Dynamic KPI → evidence matching: same evidence, different participant KPIs ----
+            dm = pg.evaluate("""() => {
+              const one = (t, actual) => { const k = parseKpis(t)[0], m = matchKpi(k); return { measure: m.measure, status: m.status, notes: m.notes, refs: m.refs, dir: m.dir, pct: actual == null ? null : kpiAchievement({ ...k, dir: m.dir }, { actual }).pct, target: fmtTarget(k) }; };
+              const legacy = appraisalCalc({ goals: { objectives: [{ id: 'x', kpi: 'At least 95% of reports on time', weight: 100 }], comps: [{ id: 'c' }] }, r3: { appraisal: { what: { x: { actual: '11 of 12', rating: 4, just: 'old' } }, how: { c: { rating: 4 } } } } });
+              return {
+                A: one('Submit at least 10 monthly reports on time', '9'), B: one('Achieve 90% on-time monthly reporting', '75%'), C: one('Submit all 12 monthly reports on time', '9'),
+                quality: one('Maintain a 95% quality pass rate', '91.7%'), recs: one('Submit six commercial recommendations', '5'), action: one('Ensure 80% of recommendations contain clear actions', '60%'),
+                fb: one('Achieve stakeholder satisfaction of at least 4/5', '3.25/5'), fbPct: one('80% stakeholder satisfaction'), late: one('No more than 2 late reports', '3'),
+                over: one('Deliver 8 reports on time', '9'), noTarget: one('Improve report quality'), unsupported: one('Increase the win rate to 35%'), unknown: one('Attend 4 industry conferences'),
+                ambiguous: one('Grow the number of recommendations from 4 to 6'), quarterly: one('At least one stakeholder consultation per quarter'), tooMany: one('Submit 14 reports on time'),
+                adopt: one('At least 60% of recommendations adopted by management', '20%'),
+                janMsgs: [...['Submit at least 10 monthly reports on time', 'Increase the win rate to 35%', 'Improve report quality', 'Achieve stakeholder satisfaction of at least 4/5', 'At least 60% of recommendations adopted by management'].map(t => kpiCoverageJanuary(parseKpis(t)[0]).message)].join(' '),
+                legacy: { what: legacy.whatPct, done: legacy.objDone, status: legacy.objectives[0].rows[0].res.status }
+              };
+            }""")
+            check("Same evidence (9 of 12 on time), different targets → 90% / 83.3% / 75%", (dm["A"]["pct"], dm["B"]["pct"], dm["C"]["pct"]) == (90, 83.3, 75) and dm["A"]["measure"] == dm["B"]["measure"] == dm["C"]["measure"] == "rep_ontime", str((dm["A"]["pct"], dm["B"]["pct"], dm["C"]["pct"])))
+            check("Quality, recommendation, actionability and feedback KPIs map to their records", (dm["quality"]["measure"], dm["recs"]["measure"], dm["action"]["measure"], dm["fb"]["measure"]) == ("rep_quality", "rec_count", "rec_action", "feedback") and (dm["quality"]["pct"], dm["recs"]["pct"], dm["action"]["pct"], dm["fb"]["pct"]) == (96.5, 83.3, 75, 81.3))
+            check("Lower-is-better KPI (≤ 2 late reports, actual 3) → 66.7%", dm["late"]["dir"] == "lower" and dm["late"]["pct"] == 66.7)
+            check("Overachievement above 100% kept (8 target, 9 actual → 112.5%)", dm["over"]["pct"] == 112.5)
+            check("Coverage: missing target / ambiguous / % on a 1–5 scale / >12 reports → Needs clarification", all(dm[k]["status"] == "clarify" for k in ["noTarget", "ambiguous", "fbPct", "tooMany"]))
+            check("Coverage: department results and unrecorded measures → Evidence unavailable", dm["unsupported"]["status"] == "unavailable" and dm["unknown"]["status"] == "unavailable")
+            check("Quarterly target flagged against H2-only records", any("per quarter" in n for n in dm["quarterly"]["notes"]) and any("July – December" in n for n in dm["quarterly"]["notes"]))
+            check("Adoption KPI is measurable but marked as a management decision", dm["adopt"]["status"] == "supported" and dm["adopt"]["pct"] == 33.3 and any("management" in n for n in dm["adopt"]["notes"]))
+            check("January feedback never reveals year-end results or events", not re.search(r"\d+ of 12|75%|3\.25|Valtora|\blate\b|October|adopted", dm["janMsgs"].replace("adopted by management", "")), dm["janMsgs"][:200])
+            check("Legacy plan / old appraisal entries (before multi-KPI) load without errors and are not counted as zero", dm["legacy"]["what"] is None and dm["legacy"]["status"] == "blank")
             # ---- Objectives (two tabs) ----
             pg.goto(U + "#goals"); pg.wait_for_timeout(200)
             tabs = [t.strip() for t in pg.locator(".tabs .tab").all_inner_texts()]
@@ -294,6 +322,7 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             check("Weights must total 100% (90% shown in validation)", "must total 100%" in pg.inner_text(".validation") and pg.locator("#submit-goals").is_disabled())
             pg.locator('[data-act="editObj"]').nth(3).click(); pg.wait_for_timeout(100); fill_bind(pg, ".objectives.3.weight", 20); act(pg, "doneObj")
             check("Objective validation complete at 100%", "All objectives are complete" in pg.inner_text(".validation"))
+            check("January KPI evidence check shown per KPI (advisory, does not block)", pg.locator(".goal .cov").count() >= 5 and pg.locator("#kpi-coverage").count() == 1 and "Supported" in pg.inner_text("#kpi-coverage") and pg.evaluate("objectiveValidation().errors.length") == 0)
             shot(pg, "v01_objectives")
             pg.goto(U + "#goals/competencies"); pg.wait_for_timeout(150)
             check("No proficiency descriptions or View levels shown", pg.locator('[data-act="libOpen"]').count() == 0 and not any(t in pg.inner_text("main") for t in ["Organizes data", "Independently analyzes", "Interprets complex"]))
@@ -447,7 +476,7 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             check("Year-end update arrives by email with the evidence attached", r["r3"]["dataset"] and "Year-End Performance Update and Appraisal" in pg.inner_text("main") and pg.locator(".attach").count() == 1)
             shot(pg, "u05_yearend_email")
             pg.locator('.attach [data-go="yearend"]').click(); pg.wait_for_timeout(300)
-            check("Year-end evidence opens from the email", "Market intelligence reporting" in pg.inner_text("main"))
+            check("Year-end evidence opens from the email as a four-section HR record", all(x in pg.inner_text("main") for x in ["Performance Results", "Stakeholder Feedback", "Business Contributions", "Development & Follow-Up"]) and pg.locator(".ev-sec").count() == 4)
             pg.goto(U + "#home"); pg.wait_for_timeout(300)
             check("Year-End period shows company year-end figures from the same data", "Year-End · December 2027" in pg.inner_text("main") and "28%" in pg.inner_text(".kpi-row") and "24%" in pg.inner_text(".kpi-row") and not pg.locator('[data-act="period"][data-v="year"]').is_disabled())
             shot(pg, "w03_home_yearend")
@@ -466,24 +495,36 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             check("January KPI text and its target carried forward (target locked)", objs[0]["kpi"] in pg.inner_text("main") and pg.locator(".kpi-item").count() == 2 and pg.inner_text(".kpi-item >> nth=0 >> .kg-target") == "≥ 95%")
             check("Objective with two measurable targets split into 2 KPIs at 50% each", "2 KPIs · 50% each" in pg.inner_text(f"#apobj-{objs[0]['id']}"))
             check("Submit disabled while incomplete (summary tab)", (ap_tab("summary") or True) and pg.locator("#submit-appraisal").is_disabled() and "Complete before submitting" in pg.inner_text("main")); ap_tab("what")
+            O = lambda i: f"#apobj-{objs[i]['id']}"
+            check("Actual results are never pre-filled from the evidence", all(not v for v in pg.evaluate("[...document.querySelectorAll('[data-bind*=\".kpis.\"][data-bind$=\".actual\"]')].map(e => e.value)")))
+            check("Each KPI shows its evidence match (Supported → EV-REP-02 / EV-REP-04)", "Supported" in pg.inner_text(".kpi-item >> nth=0") and "EV-REP-02" in pg.inner_text(".kpi-item >> nth=0") and "EV-REP-04" in pg.inner_text(".kpi-item >> nth=1"))
+            pg.locator(".kpi-item >> nth=0 >> .ev-ref").first.click(); pg.wait_for_timeout(250)
+            check("Evidence link opens the year-end record at the right section", pg.locator(".drawer #ev-results[open]").count() == 1 and "MIR-2027-06" in pg.inner_text(".drawer")); pg.click('.drawer [data-act="closeDrawer"]'); pg.wait_for_timeout(150)
             kpi_fill(objs[0]["id"], 0, "actual", "abc"); pg.wait_for_timeout(450)
-            check("Invalid actual shows a clear error and no percentage", "Enter a number" in pg.inner_text(f"#apobj-{objs[0]['id']}") and R(pg)["r3"]["appraisal"]["status"] == "draft")
-            kpi_fill(objs[0]["id"], 0, "actual", "95"); pg.wait_for_timeout(450)
-            check("Equal to target → 100%; blank KPI keeps objective uncalculated (blank ≠ 0)", "100%" in pg.inner_text(".kpi-item >> nth=0 >> .kg-ach") and pg.inner_text(f"#apobj-{objs[0]['id']} .ap-obj-h .ap-ach") == "—")
-            kpi_fill(objs[0]["id"], 1, "actual", "120"); pg.wait_for_timeout(450)
-            check("Above target capped at 120% and objective = average of KPIs (110%)", "Capped at 120%" in pg.inner_text("main") and pg.inner_text(f"#apobj-{objs[0]['id']} .ap-obj-h .ap-ach") == "110%")
-            for i in range(2): kpi_fill(objs[0]["id"], i, "evidence", "Reporting tracker and QA records, January–December.")
-            open_obj(objs[1]["id"]); check("Expanding one objective collapses the other", pg.locator(".ap-obj.open").count() == 1 and pg.locator(f"#apobj-{objs[1]['id']}.open").count() == 1)
-            kpi_fill(objs[1]["id"], 0, "actual", "3"); kpi_fill(objs[1]["id"], 0, "evidence", "Recommendation register: three recommendations with analysis."); pg.wait_for_timeout(450)
-            check("Below target → 50%", pg.inner_text(f"#apobj-{objs[1]['id']} .ap-obj-h .ap-ach") == "50%")
-            open_obj(objs[2]["id"]); kpi_fill(objs[2]["id"], 0, "actual", "4.2/5"); kpi_fill(objs[2]["id"], 0, "evidence", "Q4 stakeholder survey average 4.2/5."); pg.wait_for_timeout(450)
-            check("Rating-scale target (4/5) handled: 4.2/5 → 105%", pg.inner_text(f"#apobj-{objs[2]['id']} .ap-obj-h .ap-ach") == "105%")
-            open_obj(objs[3]["id"]); pg.locator(f'[data-kpi-mode$="what.{objs[3]["id"]}.kpis.0"]').select_option("review"); pg.wait_for_timeout(200)
-            check("KPI can be switched to manager review (flagged, manual %)", "Flagged for review" in pg.inner_text("main") and pg.locator(f'[data-bind$="what.{objs[3]["id"]}.kpis.0.manual"]').count() == 1)
+            check("Invalid actual shows a clear error and no percentage", "Enter a number" in pg.inner_text(O(0)) and R(pg)["r3"]["appraisal"]["status"] == "draft")
+            kpi_fill(objs[0]["id"], 0, "actual", "9"); pg.wait_for_timeout(450)
+            check("Unit mismatch rejected: a count against a % target", "with a % sign" in pg.inner_text(O(0)) and pg.inner_text(".kpi-item >> nth=0 >> .kg-ach") == "—")
+            kpi_fill(objs[0]["id"], 0, "actual", "95%"); pg.wait_for_timeout(450)
+            check("Equal to target → 100%; blank KPI keeps objective uncalculated (blank ≠ 0)", "100%" in pg.inner_text(".kpi-item >> nth=0 >> .kg-ach") and pg.inner_text(f"{O(0)} .ap-obj-h .ap-ach") == "—")
+            kpi_fill(objs[0]["id"], 0, "actual", "75%"); kpi_fill(objs[0]["id"], 1, "actual", "91.7%"); pg.wait_for_timeout(450)
+            check("Evidence 9/12 (75%) vs 95% → 78.9%; 91.7% vs 95% → 96.5%; objective = average 87.7%", pg.inner_text(".kpi-item >> nth=0 >> .kg-ach") == "78.9%" and pg.inner_text(".kpi-item >> nth=1 >> .kg-ach") == "96.5%" and pg.inner_text(f"{O(0)} .ap-obj-h .ap-ach") == "87.7%")
+            for i in range(2): kpi_fill(objs[0]["id"], i, "evidence", "EV-REP-02 and EV-REP-04: 9 of 12 on time; 11 of 12 passed QA (October needed a major correction).")
+            open_obj(objs[1]["id"]); check("Expanding one objective collapses the other", pg.locator(".ap-obj.open").count() == 1 and pg.locator(f"{O(1)}.open").count() == 1)
+            check("Standard-setting KPI flagged for interpretation (recommendations with an action)", "decide which records qualify" in pg.inner_text(O(1)))
+            kpi_fill(objs[1]["id"], 0, "actual", "7"); pg.wait_for_timeout(450)
+            check("Overachievement stays visible (no cap): 7 vs 6 → 116.7%", pg.inner_text(f"{O(1)} .ap-obj-h .ap-ach") == "116.7%")
+            kpi_fill(objs[1]["id"], 0, "actual", "5"); kpi_fill(objs[1]["id"], 0, "evidence", "EV-REC-01: five recommendations submitted; three included a proposed action."); pg.wait_for_timeout(450)
+            check("Below target: 5 vs 6 → 83.3%", pg.inner_text(f"{O(1)} .ap-obj-h .ap-ach") == "83.3%")
+            open_obj(objs[2]["id"]); kpi_fill(objs[2]["id"], 0, "actual", "3.25/5"); kpi_fill(objs[2]["id"], 0, "evidence", "EV-FB-02: H2 average 3.25 (Q3 3.2, Q4 3.3)."); pg.wait_for_timeout(450)
+            check("Rating-scale target (4/5): 3.25/5 → 81.3%; quarterly-period note shown", pg.inner_text(f"{O(2)} .ap-obj-h .ap-ach") == "81.3%" and "recorded by quarter" in pg.inner_text(O(2)))
+            open_obj(objs[3]["id"]); check("Per-quarter KPI warns about matching the period", "per quarter" in pg.inner_text(O(3)) and "July – December only" in pg.inner_text(O(3)))
+            pg.locator(f'[data-kpi-mode$="what.{objs[3]["id"]}.kpis.0"]').select_option("review"); pg.wait_for_timeout(200)
+            check("KPI can be switched to manager review (requires review, manual %)", "Requires review" in pg.inner_text("main") and pg.locator(f'[data-bind$="what.{objs[3]["id"]}.kpis.0.manual"]').count() == 1)
             pg.locator(f'[data-kpi-mode$="what.{objs[3]["id"]}.kpis.0"]').select_option("higher"); pg.wait_for_timeout(200)
-            kpi_fill(objs[3]["id"], 0, "actual", "4"); kpi_fill(objs[3]["id"], 0, "evidence", "Four documented consultations, one per quarter."); pg.wait_for_timeout(450)
+            kpi_fill(objs[3]["id"], 0, "actual", "0.5"); kpi_fill(objs[3]["id"], 0, "evidence", "EV-ENG-01: one consultation in H2 (two quarters), no documented actions."); pg.wait_for_timeout(450)
             c = pg.evaluate("appraisalCalc()")
-            check("WHAT achievement = Σ achievement × weight (110×30%+50×30%+105×20%+120×20% = 93%)", c["whatPct"] == 93 and "93%" in pg.inner_text(".ap-sc.what"), str(c["whatPct"]))
+            exp_what = round(0.3 * (75 / 95 * 100 + 91.7 / 95 * 100) / 2 + 0.3 * 5 / 6 * 100 + 0.2 * 3.25 / 4 * 100 + 0.2 * 50, 1)
+            check(f"WHAT achievement = Σ objective achievement × weight = {exp_what}% (computed independently)", c["whatPct"] == exp_what and f"{exp_what}%" in pg.inner_text(".ap-sc.what"), str(c["whatPct"]))
             shot(pg, "p07b_appraisal_what")
             ap_tab("how")
             for cc in r["goals"]["comps"]:
@@ -498,13 +539,14 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             fill_bind(pg, "overall.dev", "Handling challenge in larger leadership meetings.")
             fill_bind(pg, "overall.just", "Exceeds: 11 of 12 reports on time, all passed QA, seven actionable recommendations, stakeholder feedback rose to 4.3 in Q4. Recommendations that were not adopted were not held against him.")
             pg.wait_for_timeout(450)
-            check("Overall = WHAT×60% + HOW×40% = 87.8, shown live", pg.evaluate("appraisalCalc().overall") == 87.8 and "87.8" in pg.inner_text(".ap-sc.overall") and "87.8 / 100" in pg.inner_text("main"))
+            exp_overall = round((0.3 * (75 / 95 * 100 + 91.7 / 95 * 100) / 2 + 0.3 * 5 / 6 * 100 + 0.2 * 3.25 / 4 * 100 + 0.2 * 50) * 0.6 + 80 * 0.4, 1)
+            check(f"Overall = WHAT×60% + HOW×40% = {exp_overall}, shown live", pg.evaluate("appraisalCalc().overall") == exp_overall and f"{exp_overall}%" in pg.inner_text(".ap-sc.overall") and f"{exp_overall}%" in pg.inner_text(".tbl tr.total"))
             check("Submit enabled once everything is complete", not pg.locator("#submit-appraisal").is_disabled())
             shot(pg, "p07d_appraisal_summary")
             pg.reload(); pg.wait_for_timeout(500)
-            check("Appraisal inputs autosave and survive refresh", R(pg)["r3"]["appraisal"]["what"][objs[0]["id"]]["kpis"]["1"]["actual"] == "120" and pg.evaluate("appraisalCalc().overall") == 87.8)
+            check("Appraisal inputs autosave and survive refresh", R(pg)["r3"]["appraisal"]["what"][objs[0]["id"]]["kpis"]["1"]["actual"] == "91.7%" and pg.evaluate("appraisalCalc().overall") == exp_overall)
             p = pg.evaluate("appraisalPayload()")
-            check("Payload to Omar/assessor carries KPI targets, actuals, achievements and the score", p["what"][0]["kpis"][1]["achievement"] == 120 and p["what"][0]["kpis"][0]["target"] == "≥ 95%" and p["overall"]["score"] == 87.8)
+            check("Payload to Omar/assessor carries KPI targets, actuals, achievements, evidence match and the score", p["what"][0]["kpis"][1]["achievement"] == 96.5 and p["what"][0]["kpis"][0]["target"] == "≥ 95%" and "Reports submitted on time" in p["what"][0]["kpis"][0]["matched"] and p["overall"]["score"] == exp_overall)
             ap_tab("summary")
             act(pg, "submitAppraisal"); pg.wait_for_timeout(300)
             conv = R(pg)["r3"]["conv"]["log"]; emp = [m for m in conv if m["from"] == "employee"]
@@ -513,7 +555,7 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             check("No duplicate opening after reload", [m["from"] for m in R(pg)["r3"]["conv"]["log"]].count("employee") == 1 and badge(pg) == "1")
             ctx_ = pg.evaluate("convContext('appraisal')")
             check("Omar's context holds the submitted appraisal, January and mid-year transcripts and the Evidence Log", ctx_["appraisal"]["overall"]["score"] is not None and ctx_["appraisal"]["what"][0]["kpis"][0]["actual"] and len(ctx_["priorLogs"]["alignment"]) > 1 and len(ctx_["priorLogs"]["diagnostic"]) > 1 and len(ctx_["evidence"]) == 2 and ctx_["pathway"] in "ABC")
-            say(pg, "appraisal", "Thanks for making time. Your overall score came out at 87.8. Your Valtora competitor analysis was strong: you found that the discount only applied to 12-month contracts, which helped Sales with customers.")
+            say(pg, "appraisal", "Thanks for making time. Your overall score came out at 78.5. Your Valtora competitor analysis was strong: you found that the discount only applied to 12-month contracts, which helped Sales with customers.")
             check("Discussion not completed after praise alone", not R(pg)["r3"]["conv"]["completed"])
             say(pg, "appraisal", "One gap: in the Valtora meeting, when Nadine asked about quick response options, you spent most of the time explaining the analysis. That made it harder for Operations to agree a response. What was going through your mind?")
             last = R(pg)["r3"]["conv"]["log"][-1]["text"]
@@ -522,7 +564,7 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             say(pg, "appraisal", "Let's agree this: you'll escalate deadline conflicts early and bring two or three options on one page. I'll coach you on executive summaries, and we'll review progress at our monthly check-in.")
             r = R(pg); chat = pg.inner_text(".chat-win")
             check("Strong discussion → 'Appraisal Discussion Completed' shown in the chat", r["r3"]["conv"]["completed"] and "Appraisal Discussion Completed" in chat)
-            check("No scores, SBII terms or training feedback inside the chat", not re.search(r"SBII|Situation|Behaviou?r\b.*Impact|/12|score:|rubric", chat.replace("Your overall score came out at 87.8", "")))
+            check("No scores, SBII terms or training feedback inside the chat", not re.search(r"SBII|Situation|Behaviou?r\b.*Impact|/12|score:|rubric", chat.replace("Your overall score came out at 78.5", "")))
             check("One thread holds December 2026, January, June and December 2027", all(x in chat for x in ["December 2026", "January 2027", "June 2027", "December 2027"]))
             shot(pg, "p08_appraisal_chat", False)
             act(pg, "closeChat"); pg.click("#appraisal-continue"); pg.wait_for_function("() => UI.busy === null && S.recs.omar.r3.sbii.result", timeout=15000); pg.wait_for_timeout(300)

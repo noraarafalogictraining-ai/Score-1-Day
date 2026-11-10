@@ -106,7 +106,7 @@ The Final Appraisal page is a working prototype with three tabs and three live s
 | Step | Rule |
 |---|---|
 | KPI achievement | actual ÷ target × 100 (higher is better); target ÷ actual × 100 when lower is better |
-| Cap | 120% per KPI (`kpiCap`, not yet approved) |
+| Cap | none (`kpiCap: null`): overachievement stays visible |
 | Objective achievement | equal-share average of its KPIs (no KPI subweights are added to the January plan) |
 | Contribution | objective achievement × objective weight |
 | WHAT | sum of contributions |
@@ -115,13 +115,40 @@ The Final Appraisal page is a working prototype with three tabs and three live s
 
 **Safeguards**: a blank result is never counted as zero (the score stays "—" until every KPI is filled); non-numbers and negative values are rejected with a message; no division by zero; KPIs with no number, a milestone, more than one figure, or a zero target are **flagged for manager review**, where the manager enters an assessed achievement % (0–120) instead of a formula result; the manager can also switch any KPI between Higher is better / Lower is better / Manager review.
 
-**Prototype limitation — the January plan has one free-text KPI per objective.** The prototype reads that text and splits it into separate KPIs where it contains several measurable targets (e.g. "95% on time and 95% passing review" → 2 KPIs), then reads the number as the target. It cannot understand time units, so "one consultation per quarter" is read as a target of 1, and an annual actual of 4 shows as 400% (capped at 120%). A structured January form (KPI, target, unit, direction per line) would remove this guesswork; it was deliberately not changed in this prototype.
+**Prototype limitation — the January plan has one free-text KPI per objective.** The prototype reads that text and splits it into separate KPIs where it contains several measurable targets (e.g. "95% on time and 95% passing review" → 2 KPIs), then reads the number as the target. Since Phase 5 the evidence matcher flags period mismatches (e.g. "per quarter" against H2-only records) and unit mismatches, but the manager still has to convert the actual into the same period and unit as the target. A structured January form (KPI, target, unit, direction per line) would remove this guesswork; it was deliberately not changed in this prototype.
+
+## Year-end evidence repository and KPI matching (Phase 5, experimental)
+
+**One record for everyone.** `api/_lib/evidence_omar.js` (server only, versioned `2027.1`) holds Omar's 2027 year-end evidence. Every participant receives the same record; the former per-pathway datasets (A/B/C) are retired as evidence. The mid-year result still drives the Employee Pulse, but no longer changes Omar's results. The browser receives the record only after the December event is released (`/api/yearend`). A reconciliation guard stops the server if the registers stop matching the approved totals.
+
+**Year-end record (4 expandable sections).** 1 Performance Results (summary + Register 1 monthly reporting + Register 2 recommendations) · 2 Stakeholder Feedback (Register 3 scores, H2 comments, Register 4 engagement) · 3 Business Contributions (Register 5 competitive intelligence, observed behaviours, department results marked "context, not individual performance") · 4 Development & Follow-Up (Register 6 HR records + the participant's own records: January plan, mid-year conversation, follow-up actions from their Evidence Log). No ratings or judgements are shown.
+
+**Summary records.** EV-REP-01…05 (12 scheduled; 9 of 12 on time = 75%; 3 missed = 25%; 11 of 12 passed QA = 91.7%; 0 of 3 conflicts escalated), EV-REC-01…03 (5 submitted; 3 of 5 with an action = 60%; 1 adopted, 1 under review, 3 not adopted = 20%, marked *business outcome*), EV-FB-01/02 (Q1 3.6 · Q2 3.4 · Q3 3.2 · Q4 3.3; H1 3.5, H2 3.25, year 3.375, quarters weighted equally; no respondent counts), EV-ENG-01/02 (1 structured consultation in H2, called by Youssef; 0 with documented actions), EV-CI-01 (12-month-contract condition; email; used by Sales in December), EV-DEV-01 (no formal coaching recorded after July), EV-BIZ-01…03 (department results).
+
+**New scenario content needing approval** (everything else is an established fact):
+1. Report deadline = first working day of each month; on-time reports submitted on the deadline day. Late dates follow from the established delays: June due Tue 1 Jun → Thu 3 Jun (2 days); August due Mon 2 Aug → Thu 5 Aug (3); October due Fri 1 Oct → Tue 5 Oct (2). The December report is due Wed 1 Dec, the day of the year-end update.
+2. The three missed deadlines are the three "deadline conflicts" with no advance escalation. (The old Pathway C text said "0 of 3 conflicts *after July*", which conflicts with June being one of them.)
+3. Recommendation dates, topics and findings for REC-01, 02, 04, 05, and which record has which status. REC-03 (Valtora pricing, June) is the adopted one, matching the September value-based decision. Decision owners are recorded as "Not documented".
+4. Engagement records: purpose of ENG-02 taken from Youssef's mid-year email; ENG-03 (September meeting with Nadine) comes from the former Pathway C behaviour note.
+5. Pulse: the "intervention" event for a strong mid-year plan is kept but relabelled, because the fixed record now shows no coaching after July for everyone. Please decide whether to keep it.
+
+**KPI → evidence matching** (`src/evidence_map.js`, deterministic, no AI): each KPI from the January text is matched by the first rule that fits (escalation → late reports → quality → on-time → report count → adoption → recommendations with action → recommendation count → feedback → development → consultations → competitive intelligence → department results). The result records the measure, relevant evidence IDs, unit (count / % / 1–5 scale), period (year / quarter / month / half) and direction. The file holds definitions and record IDs only, never values.
+
+| Coverage | When |
+|---|---|
+| Supported | A measure matched, the target is numeric, and the unit fits the records |
+| Needs clarification | No target, a milestone, two figures, a zero target, % for a 1–5 feedback score, or more than 12 monthly reports |
+| Evidence unavailable | Department results (win rate, revenue, pipeline…), measures that are not recorded, or counts of analyses/insights |
+
+In **January** the check is advisory (it never blocks submission) and its wording never mentions results or events. In **December** each KPI shows its coverage, links to the relevant records (opening the right section) and notes on standards and periods (e.g. "Your target is per quarter", "Consultation records cover July – December only"). Actual results are **never pre-filled**. A KPI that isn't Supported starts in manager review: the manager enters an assessed % and must justify it.
+
+**Scoring** (`src/appraisal_calc.js`): KPI = actual ÷ target × 100. Lower is better = target ÷ actual × 100, only when both are above 0 (otherwise manager review). **No cap.** The actual must use the target's unit: a % target needs a % sign, a 1–5 target must stay at or below 5, and a count target rejects %. Objective = equal-share average of its KPIs (no subweights exist in the January plan). WHAT = Σ objective × weight; it is not calculated if the weights don't total 100% (no silent rescaling). HOW = average rating × 20. Overall = WHAT × 60% + HOW × 40%; it can exceed 100. Values stay unrounded until display. Example with the same evidence (9 of 12 on time): a target of 10 reports → 90%; a target of 90% (actual 75%) → 83.3%; a target of 12 reports → 75%.
 
 ## Final appraisal discussion with Omar (SBII, experimental)
 
 **Trigger.** Submitting the final appraisal adds one fixed, neutral message from Omar to the same chat thread ("Hi, I've seen my appraisal. Do you have a few minutes to go through it together?"). The chat bubble shows a red **1**; the chat does not open by itself and the participant stays on the appraisal page. The opening is added once only (safe on refresh and on revised submissions).
 
-**What Omar's AI sees** (`api/_lib/prompts.js` → `omarSystem("appraisal")`): the submitted appraisal (each objective's weight and achievement; each KPI's target, measure type, actual, achievement and evidence; each competency's expected level, standard, observed behaviour, 1–5 rating and justification; WHAT %, HOW %, overall score out of 100, justification, strengths and development priorities), the full January and mid-year chat transcripts, the manager's Evidence Log entries, the agreed plan, the year-end evidence for the pathway reached, and Omar's hidden perspective and reactions (`api/_lib/scenario_omar.js` → `APPRAISAL`). The prompt never names SBII.
+**What Omar's AI sees** (`api/_lib/prompts.js` → `omarSystem("appraisal")`): the submitted appraisal (each objective's weight and achievement; each KPI's target, measure type, actual, achievement and evidence; each competency's expected level, standard, observed behaviour, 1–5 rating and justification; WHAT %, HOW %, overall score out of 100, justification, strengths and development priorities), the full January and mid-year chat transcripts, the manager's Evidence Log entries, the agreed plan, the canonical year-end evidence record, and Omar's hidden perspective and reactions (`api/_lib/scenario_omar.js` → `APPRAISAL`). The prompt never names SBII.
 
 **Each reply** (`api/converse.js`): a short structured reading of the manager's messages (vague feedback, personality labels, unsupported blame, ignored explanation, praise only, vague next steps, wrapping up; and, for the whole conversation, whether the appraisal, specific feedback, strengths and gaps, Omar's view and a specific development agreement have been covered). Code — not the AI — then picks Omar's stance and decides completion.
 
@@ -149,7 +176,7 @@ These slots are separate from the written appraisal's slot (fair/unfair appraisa
 |---|---|---|
 | **1 · Setting Performance Expectations** | HR email → Goal Plan (objective, KPI with target, weight, evidence source, review frequency; weights must total 100%) → 3–5 competencies with expected proficiency levels (three observable levels shown) → *Submit for Employee Alignment* → status **Pending Employee Alignment** → **open-text AI conversation** with Omar, who opens with his fairness concern → *Confirm alignment* appears only when Omar's concern has been meaningfully addressed → HR "Contract Confirmed" email | — |
 | **2 · Performance Gaps, Diagnosis & Coaching** | Business alert → **Business Dashboard** (KPI cards, March–June trend chart, before/after bars, market intelligence indicators kept separate from business outcomes) → four stakeholder emails (Mariam's marked *secondhand, unverified*) → Omar's chat request → **open-text diagnostic and coaching conversation** (dashboard and inbox stay one click away) → participant writes their interpretation of the data and completes the Evidence Log → *Submit Round 2* | Announces Valtora (script in the Facilitator view), then releases it (code **4826** in the Facilitator View code box, or the release button) |
-| **3 · Final-Year Performance Evaluation** | Year-end performance update (dataset depends on the Round 2 pathway) → appraisal pre-filled with the Round 1 objectives, KPIs, weights and competencies (WHAT, HOW, overall) → Omar responds in an **open-text appraisal conversation** → **bias reflection** grounded in the participant's own reasoning → reconsider or finalise → final SCORE assessment and Employee Pulse outcome | Releases the year-end update (code **7319**) |
+| **3 · Final-Year Performance Evaluation** | Year-end performance record (the same for every participant) → appraisal pre-filled with the Round 1 objectives, KPIs, weights and competencies (WHAT, HOW, overall) → Omar responds in an **open-text appraisal conversation** → **bias reflection** grounded in the participant's own reasoning → reconsider or finalise → final SCORE assessment and Employee Pulse outcome | Releases the year-end update (code **7319**) |
 
 The **Employee Pulse** (Performance, Trust, Development; 0–100) is always visible in the header, with a full event history. The **SCORE Review** shows each round's criteria with the score, evidence quotes, reason, confidence and missing information.
 
@@ -216,29 +243,15 @@ Baseline: Performance 80, Trust 60, Development 55 (fictional). Each event belon
 | Mid-year business disruption | Round 2 released | −5 | 0 | 0 |
 | Constructive diagnosis and coaching | not blaming, constructive, coaching ≥ 9/15 | 0 | +5 | +4 |
 | Punitive or blaming conversation | blaming | 0 | −9 | −4 |
-| Development intervention with follow-through | pathway A, when year-end outcomes are revealed | +3 | +3 | +8 |
+| Constructive mid-year development plan (year-end effect) | pathway A, when the year-end record is released | +3 | +3 | +8 |
 | Unfair final appraisal | appraisal assessed "unfair" | 0 | −10 | −4 |
 | Fair, evidence-based appraisal | assessed "fair" | 0 | +5 | +4 |
 
 "Mixed" outcomes are recorded in the history with no change. Values are clamped to 0–100.
 
-## Year-end evidence datasets (fictional pilot test data)
+## Year-end evidence (fictional pilot test data)
 
-Fixed, internally consistent datasets in `api/_lib/scenario_omar.js`. Company-level results are identical in all three, so business outcomes are never attributed to Omar.
-
-| | A · Effective | B · Partially effective | C · Ineffective |
-|---|---|---|---|
-| Reports on time | 11/12 (June late only) | 10/12 | 9/12 |
-| Quality review passed | 12/12 | 12/12 | 11/12 |
-| Deadline conflicts escalated | 3 of 3 | 1 of 2 | 0 of 3 |
-| Recommendations (with action) | 7 (all) · 3 adopted | 6 (5) · 2 adopted | 5 (3) · 1 adopted |
-| Stakeholder feedback Q3 / Q4 | 3.9 / 4.3 | 3.6 / 3.8 | 3.2 / 3.3 |
-| Consultations in H2 | 4, documented | 2 | 1, undocumented |
-| Development | 2 coaching sessions, monthly checkpoints | 1 session, no follow-up | none |
-
-Each dataset also has stakeholder comments, observed behaviours per competency and Omar's own view. Company results (all pathways): win rate 24% (June) → 28% (Dec); price objections 29% → 24%; value-based response approved in September, no general price cut.
-
----
+Since Phase 5 there is a single canonical record for every participant: see *Year-end evidence repository and KPI matching* above (`api/_lib/evidence_omar.js`). Its figures are those of the former Pathway C dataset. The former A and B datasets have been removed (they are still in the git history if needed).
 
 ## Pilot assumptions (to review after the first test)
 
@@ -255,7 +268,7 @@ Each dataset also has stakeholder comments, observed behaviours per competency a
 ## Testing results
 
 `tests/test_pilot.py`: 84 checks pass in scripted test mode and no-AI mode. They cover:
-- the API (methods, invalid JSON, oversized or tampered input, unknown pathway, no-AI 503s);
+- the API (methods, invalid JSON, oversized or tampered input, the same year-end record for everyone, no-AI 503s);
 - that confidential files are not downloadable and the page source contains no hidden facts, model answers or datasets;
 - the scoring total (100 = 35/40/25) and the blaming → pathway C → punitive rule;
 - removal of fabricated quotes;

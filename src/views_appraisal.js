@@ -2,23 +2,60 @@
    ROUND 3 — YEAR-END UPDATE · FINAL APPRAISAL · BIAS REFLECTION
    ========================================================= */
 function kvTable(rows) { return `<div class="table-wrap"><table class="tbl" style="min-width:0"><tbody>${rows.map(([k, v]) => `<tr><td style="width:38%"><b class="small">${esc(k)}</b></td><td class="small">${esc(v)}</td></tr>`).join("")}</tbody></table></div>`; }
-function yearEndBody(d) {
-  return `<div class="stack-lg">
-    
-    <div class="card"><div class="card-h"><h3>Market intelligence reporting</h3></div><div class="card-b">${kvTable(d.reporting)}</div></div>
-    <div class="card"><div class="card-h"><h3>Commercial recommendations</h3></div><div class="card-b">${kvTable(d.recommendations)}</div></div>
-    <div class="card"><div class="card-h"><h3>Stakeholder communication and collaboration</h3></div><div class="card-b stack">${kvTable(d.stakeholder)}
-      <div class="stack-sm"><h4>Stakeholder comments</h4>${d.comments.map(([w, t]) => `<div class="small"><b>${esc(w)}:</b> <span class="t2">“${esc(t)}”</span></div>`).join("")}</div></div></div>
-    <div class="card"><div class="card-h"><h3>Observed behaviours</h3></div><div class="card-b">${kvTable(d.behaviours)}</div></div>
-    <div class="card"><div class="card-h"><h3>Development and Omar's view</h3></div><div class="card-b stack-sm"><p class="small t2">${esc(d.development)}</p><p class="small t2">${esc(d.own)}</p></div></div>
-    <div class="card"><div class="card-h"><div><h3>Company-level results</h3><div class="xs muted">${esc(d.company.label)}</div></div></div><div class="card-b">${kvTable(d.company.rows)}</div></div>
+/* ---------- Year-end performance record (canonical evidence + the participant's own management records) ---------- */
+const EV_SECTIONS = [["results", "Performance Results"], ["feedback", "Stakeholder Feedback"], ["contrib", "Business Contributions"], ["dev", "Development & Follow-Up"]];
+function evSectionOf(ref) { return /REP|REC|Register [12]$/.test(ref) ? "results" : /FB|ENG|Register [34]$/.test(ref) ? "feedback" : /CI|BIZ|Register 5$/.test(ref) ? "contrib" : "dev"; }
+function regTable(head, rows, cls = "") { return `<div class="table-wrap"><table class="tbl reg ${cls}"><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
+const sumRows = (d, cats) => d.summary.filter(x => cats.includes(x.category)).map(x => [`<span class="ev-id">${esc(x.id)}</span>`, esc(x.measure), `<b class="num">${esc(x.actual)}</b>`, esc(x.period), `<span class="xs t2">${esc(x.source)}</span>`, x.scope === "business" ? `<span class="tag">Business outcome</span> <span class="xs t2">${esc(x.narrative)}</span>` : `<span class="xs t2">${esc(x.narrative)}</span>`]);
+const SUM_HEAD = ["ID", "Measure", "Result", "Period", "Source", "Note"];
+function managerRecords(r) {
+  const mgr = (log) => log.filter(m => m.from === "manager").length, acts = r.evidence.filter(e => (e.action || "").trim());
+  return [
+    ["January 2027", "Performance plan and expectations", r.align.confirmed ? "Plan agreed with Omar" : goalsApproved(r) ? "Plan approved" : "Not agreed", "Your performance plan; chat with Omar (January)"],
+    ["June 2027", "Mid-year diagnosis and coaching conversation", mgr(r.r2.diag.log) ? `Held (${plural(mgr(r.r2.diag.log), "message", "messages")} from you)` : "Not held", "Chat with Omar (June)"],
+    ...(acts.length ? acts.map(e => [esc(e.period), "Follow-up action you logged", esc(e.action), "Your Evidence Log"]) : [["2027", "Follow-up actions you logged", "None logged", "Your Evidence Log"]])
+  ];
+}
+function yearEndBody(d, r = rec(), openSec = null) {
+  if (!d || !d.registers) return `<p class="small muted">The year-end record needs to be reloaded.</p>`;
+  const R = d.registers, open = (id) => (openSec ? openSec === id : id === "results") ? "open" : "";
+  const sec = (id, title, sub, body) => `<details class="ev-sec" id="ev-${id}" ${open(id)}><summary><span class="grow"><b>${title}</b><span class="xs muted">${sub}</span></span>${icon("chevdown", "i-sm")}</summary><div class="ev-sec-b">${body}</div></details>`;
+  return `<div class="ev-record stack">
+    <div class="ev-head"><div><div class="eyebrow">NextWave · Human Resources</div><b>${esc(d.title)}</b></div><span class="xs muted">As of ${esc(d.asOf)} · Record v${esc(d.version)}</span></div>
+    ${sec("results", "1. Performance Results", "Reporting and recommendations", `
+      ${regTable(SUM_HEAD, sumRows(d, ["Reporting", "Recommendations"]))}
+      <h4>Register 1 · Monthly reporting</h4>
+      ${regTable(["Month", "Report ID", "Deadline", "Submitted", "Timeliness", "Quality review", "Revision", "Advance escalation", "Source"], R.reporting.map(x => [esc(x.month), `<span class="ev-id">${esc(x.id)}</span>`, esc(x.due), esc(x.submitted), x.timeliness === "On time" ? esc(x.timeliness) : `<b class="neg">${esc(x.timeliness)}</b>`, x.quality.startsWith("Passed") ? esc(x.quality) : `<b class="neg">${esc(x.quality)}</b>`, esc(x.revision), esc(x.escalation), `<span class="xs t2">${esc(x.source)}</span>`]))}
+      <h4>Register 2 · Commercial recommendations</h4>
+      ${regTable(["ID", "Date", "Topic", "Finding", "Proposed action", "Decision status", "Decision owner", "Evidence"], R.recommendations.map(x => [`<span class="ev-id">${esc(x.id)}</span>`, esc(x.date), esc(x.topic), esc(x.finding), esc(x.action), esc(x.status), esc(x.owner), `<span class="xs t2">${esc(x.ref)}</span>`]))}
+      <p class="xs muted">Decision status records management's decision on each recommendation.</p>`)}
+    ${sec("feedback", "2. Stakeholder Feedback", "Feedback scores, comments and engagement", `
+      ${regTable(SUM_HEAD, sumRows(d, ["Stakeholder feedback", "Collaboration"]))}
+      <h4>Register 3 · Stakeholder feedback</h4>
+      ${regTable(["Period", "Score", "Scale", "Source"], R.feedback.map(x => [esc(x.period), `<b class="num">${x.score}</b>`, esc(x.scale), `<span class="xs t2">${esc(x.source)}</span>`]))}
+      <div class="stack-sm"><h4>Stakeholder comments · H2 2027</h4>${R.comments.map(c => `<div class="small"><b>${esc(c.who)}:</b> <span class="t2">“${esc(c.text)}”</span></div>`).join("")}</div>
+      <h4>Register 4 · Stakeholder engagement</h4>
+      ${regTable(["ID", "When", "Meeting or consultation", "Participants", "Purpose", "Observed behaviour", "Outcome", "Follow-up actions"], R.engagement.map(x => [`<span class="ev-id">${esc(x.id)}</span>`, esc(x.when), esc(x.meeting), esc(x.participants), esc(x.purpose), esc(x.behaviour), esc(x.outcome), esc(x.followup)]))}
+      <p class="xs muted">"None documented" means no record exists; it does not show whether informal follow-up happened.</p>`)}
+    ${sec("contrib", "3. Business Contributions", "Competitive intelligence, observed behaviours, department context", `
+      <h4>Register 5 · Competitive intelligence</h4>
+      ${regTable(["ID", "When", "Item", "Finding", "Business relevance", "Communicated via", "Organisational response", "Source"], R.intelligence.map(x => [`<span class="ev-id">${esc(x.id)}</span>`, esc(x.when), esc(x.item), esc(x.finding), esc(x.relevance), esc(x.channel), esc(x.response), `<span class="xs t2">${esc(x.source)}</span>`]))}
+      <h4>Observed behaviours</h4>${kvTable(R.behaviours)}
+      <h4>Department results <span class="tag">Context, not individual performance</span></h4>
+      ${regTable(["Business measure", "Pre-Valtora", "June", "December"], d.business.rows.map(x => [esc(x.measure), esc(x.pre), esc(x.june), `<b>${esc(x.dec)}</b>`]))}
+      <p class="xs t2">${esc(d.business.response)}</p>`)}
+    ${sec("dev", "4. Development & Follow-Up", "HR records and your own management actions", `
+      <h4>Register 6 · HR development records</h4>
+      ${regTable(["ID", "Period", "Record", "Status", "Source"], R.development.map(x => [`<span class="ev-id">${esc(x.id)}</span>`, esc(x.period), esc(x.record), esc(x.status) + (x.note ? `<div class="xs muted">${esc(x.note)}</div>` : ""), `<span class="xs t2">${esc(x.source)}</span>`]))}
+      <h4>Your management actions <span class="xs muted">(from your own records this year)</span></h4>
+      ${regTable(["When", "Record", "Status", "Source"], managerRecords(r))}`)}
   </div>`;
 }
 VIEWS.yearend = function () {
   const r = rec();
   if (r3Status(r) === "locked") return pageHead("My Inbox / Year-end update", "Year-End Performance Update") + lockedPanel("Not available yet", "The year-end update is published in December.");
   if (!r.r3.dataset) return pageHead("My Inbox / Year-end update", "Year-End Performance Update") + `<div class="card pad stack">${r.r3.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span>${esc(r.r3.error)}</span></div>` : `<p class="small t2">Loading the year-end update…</p>`}<div><button class="btn primary" data-act="loadYearEnd" id="load-yearend">Load year-end update</button></div></div>`;
-  return pageHead("My Inbox / Year-end update", "Year-End Performance Update — Omar Hassan", `<button class="btn" data-act="go" data-go="inbox/yearend">${icon("back", "i-sm")} Back to email</button><button class="btn primary" data-act="go" data-go="appraisal">${icon("clipboard", "i-sm")} Open appraisal</button>`, `${APP.cycleLabel} · Compare these results with the objectives and competencies agreed in January.`) + yearEndBody(r.r3.dataset);
+  return pageHead("My Inbox / Year-end update", "Year-End Performance Update — Omar Hassan", `<button class="btn" data-act="go" data-go="inbox/yearend">${icon("back", "i-sm")} Back to email</button><button class="btn primary" data-act="go" data-go="appraisal">${icon("clipboard", "i-sm")} Open appraisal</button>`, `${APP.cycleLabel} · Compare these results with the objectives and competencies agreed in January.`) + yearEndBody(r.r3.dataset, r, UI.evOpen);
 };
 
 function rateSeg(path, cur, err) {
@@ -34,9 +71,9 @@ VIEWS.appraisal = function () {
   const ed = apEditable(r), c = appraisalCalc(r), C = APPRAISAL_CONFIG, tab = ["how", "summary"].includes(UI.apTab) ? UI.apTab : "what";
   const pct = (v) => v == null ? "—" : `${v}%`;
   const cards = `<div class="ap-summary">
-    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : c.objDone ? c.whatPartial + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} of ${C.whatWeight} points` : `${c.objDone} of ${c.objectives.length} objectives assessed`}</span></div>
-    <div class="ap-sc how"><span class="xs">HOW Achievement</span><b class="num">${pct(c.howPct)}</b><span class="xs">${c.howPct != null ? `Contributes ${c.howContrib} of ${C.howWeight} points` : `${c.rated} of ${c.comps.length} competencies rated`}</span></div>
-    <div class="ap-sc overall"><span class="xs">Overall Performance Score</span><b class="num">${c.overall != null ? c.overall : "—"}<small>/100</small></b><span class="xs">WHAT ${C.whatWeight}% · HOW ${C.howWeight}%</span></div>
+    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} points (weight ${C.whatWeight}%)` : !c.weightOK && c.objectives.length ? `Weights total ${c.totalWeight}%, not 100%` : `${c.objDone} of ${c.objectives.length} objectives assessed`}</span></div>
+    <div class="ap-sc how"><span class="xs">HOW Achievement</span><b class="num">${pct(c.howPct)}</b><span class="xs">${c.howPct != null ? `Contributes ${c.howContrib} points (weight ${C.howWeight}%)` : `${c.rated} of ${c.comps.length} competencies rated`}</span></div>
+    <div class="ap-sc overall"><span class="xs">Overall Performance Score</span><b class="num">${c.overall != null ? c.overall + "%" : "—"}</b><span class="xs">WHAT ${C.whatWeight}% · HOW ${C.howWeight}%</span></div>
   </div>`;
   const tabs = [["what", `WHAT — Performance Objectives (${C.whatWeight}%)`], ["how", `HOW — Competencies (${C.howWeight}%)`], ["summary", "Final Performance Summary"]];
   return pageHead(`Performance Management / Final Appraisal`, `Final Appraisal · ${esc(E.name)}`, `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence</button>`, `${APP.cycleLabel} · Results against the plan agreed in January.`) + `
@@ -60,7 +97,7 @@ function apWhat(r, c, ed) {
         <div class="ap-obj-f"><span>Objective achievement <b class="num">${x.ach == null ? "—" : x.ach + "%"}</b></span><span>× weight ${x.weight}% = <b class="num">${x.contrib == null ? "—" : x.contrib + " pts"}</b> towards WHAT</span></div>
       </div>` : ""}
     </section>`; }).join("")}
-    <p class="xs muted">KPIs are taken from the January KPI text. Several measurable targets in one KPI are treated as separate KPIs with equal shares. KPI achievement is capped at ${APPRAISAL_CONFIG.kpiCap}%.</p></div>`;
+    <p class="xs muted">KPIs, targets and weights are taken from the January plan and can't be changed. Several measurable targets in one KPI become separate KPIs with equal shares. Achievement is not capped.</p></div>`;
 }
 function kpiRow(y, base, ed) {
   const k = y.k, e = y.e, p = `${base}.${y.i}`, type = e.type || k.type, dir = e.dir || k.dir, res = y.res;
@@ -69,10 +106,12 @@ function kpiRow(y, base, ed) {
   const inputErr = res.status === "invalid" ? "err" : "";
   return `<div class="kpi-item ${type === "review" ? "flagged" : ""}">
     <div class="kpi-item-h"><span class="kpi-num">KPI ${y.i + 1}</span><span class="grow small">${esc(k.name)}</span>${y.share < 100 ? `<span class="xs muted">${Math.round(y.share * 10) / 10}% of objective</span>` : ""}</div>
-    ${type === "review" ? `<div class="kpi-flag">${icon("alert", "i-xs")} Flagged for review: ${esc(k.reason || "measured by manager judgment")}</div>` : ""}
+    <div class="kpi-match"><span class="cov cov-${y.match.status}">${COVERAGE_LABEL[y.match.status]}</span><span class="xs t2">Relevant evidence: ${y.match.refs.length ? y.match.refs.map(ref => `<button class="ev-ref" data-act="evRef" data-ref="${ref}">${esc(ref)} · ${esc(REF_LABEL[ref] || "")}</button>`).join(" ") : "none identified"}</span></div>
+    ${y.match.notes.length ? `<div class="xs t2 kpi-notes">${y.match.notes.map(n => `<div>${icon("info", "i-xs")} ${esc(n)}</div>`).join("")}</div>` : ""}
+    ${type === "review" ? `<div class="kpi-flag">${icon("alert", "i-xs")} Requires review: ${esc(k.reason || "measured by manager judgment")} Enter your assessed % and justify it with evidence.</div>` : ""}
     <div class="kpi-grid">
       <div class="kg"><span class="kg-l">Target</span><b class="kg-target">${esc(fmtTarget(k))}</b><span class="xs muted">From January · locked</span></div>
-      <div class="kg"><span class="kg-l">${type === "review" ? "Assessed achievement %" : "Actual result"}</span>${ed ? (type === "review" ? `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.manual" ${bind(p + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.kpiCap}">` : `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.actual" ${bind(p + ".actual")} value="${esc(e.actual || "")}" placeholder="${k.unit === "%" ? "e.g. 92%" : k.unit ? `e.g. 4.1${k.unit}` : "e.g. 7"}">`) : `<b>${esc(type === "review" ? (e.manual ? e.manual + "%" : "—") : (e.actual || "—"))}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>
+      <div class="kg"><span class="kg-l">${type === "review" ? "Assessed achievement %" : "Actual result"}</span>${ed ? (type === "review" ? `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.manual" ${bind(p + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.manualMax}">` : `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.actual" ${bind(p + ".actual")} value="${esc(e.actual || "")}" placeholder="${k.unit === "%" ? "Percentage, e.g. 80%" : k.unit ? `Score, e.g. 3.5${k.unit}` : "Number, e.g. 7"}">`) : `<b>${esc(type === "review" ? (e.manual ? e.manual + "%" : "—") : (e.actual || "—"))}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>
       <div class="kg"><span class="kg-l">Achievement</span><b class="kg-ach ${res.pct == null ? "na" : res.pct >= 100 ? "good" : "low"}">${res.pct == null ? "—" : res.pct + "%"}</b><span class="xs muted">${res.status === "ok" ? esc(res.note) : ""}</span></div>
       <div class="kg"><span class="kg-l">Measure</span>${sel}</div>
     </div>
@@ -98,9 +137,9 @@ function apSummary(r, c, ed) {
   return `<div class="stack">
     <div class="card"><div class="card-h"><h3>Score calculation</h3></div><div class="card-b"><div class="table-wrap"><table class="tbl" style="min-width:0"><thead><tr><th>Component</th><th>Achievement</th><th>Weight</th><th>Contribution</th></tr></thead><tbody>
       ${row("WHAT — Performance Objectives", c.whatPct, C.whatWeight, c.whatContrib)}${row("HOW — Competencies", c.howPct, C.howWeight, c.howContrib)}
-      <tr class="total"><td><b>Overall Performance Score</b></td><td></td><td class="num">100%</td><td class="num"><b>${c.overall == null ? "—" : c.overall + " / 100"}</b></td></tr>
+      <tr class="total"><td><b>Overall Performance Score</b></td><td></td><td class="num">100%</td><td class="num"><b>${c.overall == null ? "—" : c.overall + "%"}</b></td></tr>
     </tbody></table></div>
-    <details class="xs muted" style="margin-top:8px"><summary style="cursor:pointer">How it is calculated</summary><p style="margin-top:6px">KPI achievement = actual ÷ target × 100 (lower-is-better: target ÷ actual × 100), capped at ${C.kpiCap}%. Objective achievement = average of its KPIs (equal shares). WHAT = Σ objective achievement × objective weight. HOW = average competency rating ÷ ${C.howScale} × 100. Overall = WHAT × ${C.whatWeight}% + HOW × ${C.howWeight}%. Blank results are never treated as zero.</p></details></div></div>
+    <details class="xs muted" style="margin-top:8px"><summary style="cursor:pointer">How it is calculated</summary><p style="margin-top:6px">KPI achievement = actual ÷ target × 100 (lower is better: target ÷ actual × 100, only when both are above 0). No cap: overachievement stays visible. Objective achievement = average of its KPIs (equal shares; no subweights were set in January). WHAT = Σ objective achievement × objective weight. HOW = average competency rating × 20 (1 = 20% … 5 = 100%). Overall = WHAT × ${C.whatWeight}% + HOW × ${C.howWeight}% (can exceed 100). Blank results are never treated as zero; figures are rounded only for display.</p></details></div></div>
     <div class="card"><div class="card-b stack">
       <div class="grid2"><div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "strengths")}">Key strengths <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "strengths"), a.overall.strengths, "")}</div>
       <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "dev")}">Development priorities <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "dev"), a.overall.dev, "")}</div></div>
@@ -123,7 +162,7 @@ DRAWERS.evidence = function (d) {
   const r = rec(), list = r.evidence.filter(e => d.id === "all" || e.link === d.id);
   return `<div class="drawer-scrim" data-act="closeDrawer"></div><aside class="drawer wide" role="dialog" aria-label="Evidence"><div class="drawer-h"><h3>Evidence</h3><button class="icon-btn" data-act="closeDrawer" aria-label="Close">${icon("x")}</button></div>
     <div class="drawer-b"><h4>Your Evidence Log (${list.length})</h4>${list.length ? list.map(e => `<div class="ev-card"><div class="row between"><span class="tag">${esc(e.period)}</span><span class="xs muted">${esc(e.source === "Other" ? e.sourceOther : e.source)} · ${esc(e.status)}</span></div><div class="xs muted">${esc(linkLabel(e.link))}</div><div>${esc(e.text)}</div>${e.impact ? `<div class="xs"><span class="muted">Impact:</span> ${esc(e.impact)}</div>` : ""}${e.action ? `<div class="xs"><span class="muted">Action:</span> ${esc(e.action)}</div>` : ""}</div>`).join("") : `<p class="small muted">No entries.</p>`}
-    ${r.r3.dataset ? `<h4 style="margin-top:10px">Year-end performance update</h4>${yearEndBody(r.r3.dataset)}` : ""}</div></aside>`;
+    ${r.r3.dataset ? `<h4 style="margin-top:10px">Year-end performance record</h4>${yearEndBody(r.r3.dataset, r, d.sec)}` : ""}</div></aside>`;
 };
 
 /* ---------- Bias reflection ---------- */

@@ -164,7 +164,7 @@ function commercialOverview(r) {
     </div>
     <div class="card"><div class="card-h"><h3>Business insights</h3><span class="xs muted">${pinfo.sub}</span></div><div class="card-b insights">
       <div class="insight">${icon("alert", "i-sm")}<span><b>Competitive pressure.</b> Valtora's lower-priced Customer360 alternative coincides with the June drop in win rate and the rise in price-related objections.</span></div>
-      ${yr ? `<div class="insight good">${icon("trend", "i-sm")}<span><b>Partial recovery by December.</b> Win rate ${d.winRate.year}% (June 24%), price-related objections ${d.objections.year}% (June 29%), qualified opportunities ${fmtPct(d.opps.year, true)} vs pre-launch (June −12%). ${esc((r.r3.dataset.company.rows.find(x => /response/i.test(x[0])) || [, ""])[1])}.</span></div>` : ""}
+      ${yr ? `<div class="insight good">${icon("trend", "i-sm")}<span><b>Partial recovery by December.</b> Win rate ${d.winRate.year}% (June 24%), price-related objections ${d.objections.year}% (June 29%), qualified opportunities ${fmtPct(d.opps.year, true)} vs pre-launch (June −12%). ${esc(r.r3.dataset.business ? r.r3.dataset.business.response : "")}</span></div>` : ""}
       ${!yr && showMarket ? `<div class="insight neutral">${icon("log", "i-sm")}<span><b>Market intelligence (individual work evidence · Omar Hassan).</b> ${DASHBOARD.mi.map(x => esc(x.t)).join("; ")}.</span></div>` : ""}
       <div class="insight neutral">${icon("info", "i-sm")}<span>Company and department results reflect many factors. A drop in sales or win rate is not, on its own, evidence of an individual's performance.</span></div>
     </div></div>

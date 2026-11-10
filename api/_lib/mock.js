@@ -94,7 +94,7 @@ function appraisalTurn(history, ctx) {
   if (f.complete && (AP.wrap.test(last) || AP.devFollow.test(last))) return r("Thanks for going through this with me. I'll work on raising deadline conflicts earlier and bringing practical options, and I appreciate that the analysis was recognised.");
   if (AP.wrap.test(last)) return r("Before we finish, I'm not sure what we've agreed for next year.");
   if (AP.jan.test(last)) return r(said(logs.alignment, /(quality|actionab|relevan)/) ? "Yes, we agreed my recommendations would be judged on their quality, not on whether they were adopted." : "I remember we discussed the plan in January, but I don't recall agreeing anything specific about that.");
-  if (AP.mid.test(last)) return r(said(logs.diagnostic, /(coach|check-in|weekly|session|follow)/) ? (ctx.pathway === "A" ? "Yes, the coaching sessions and monthly check-ins helped." : "We talked about support in July, but I don't think much happened after the summer.") : "I don't remember us agreeing any follow-up in July.");
+  if (AP.mid.test(last)) return r(said(logs.diagnostic, /(coach|check-in|weekly|session|follow)/) ? "We talked about support in July, but I don't think much happened after the summer." : "I don't remember us agreeing any follow-up in July.");
   if (AP.intent.test(last)) return r("I was worried we'd make a rushed pricing decision. I wanted everyone to see the risks first.");
   if (AP.devAction.test(last) && AP.devSupport.test(last) && AP.devFollow.test(last)) return r("That works for me. Let's look at it again at the first check-in.");
   if (AP.vague.test(last) && !AP.situation.test(last) && !/(next year|going forward|from now on)/.test(last)) return r("Could you give me an example of what you mean?");

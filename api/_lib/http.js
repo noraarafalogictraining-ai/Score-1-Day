@@ -43,7 +43,7 @@ function cleanAppraisal(a) {
   const o = a.overall || {};
   return {
     what: arr(a.what, LIMITS.objectives).map(x => ({ objective: str(x.objective), weight: int(x.weight, 0, 100), achievement: pct(x.achievement),
-      kpis: arr(x.kpis, 6).map(k => ({ name: str(k.name), target: str(k.target, 60), type: str(k.type, 40), actual: str(k.actual, 60), achievement: pct(k.achievement), evidence: str(k.evidence) })) })),
+      kpis: arr(x.kpis, 6).map(k => ({ name: str(k.name), target: str(k.target, 60), type: str(k.type, 40), actual: str(k.actual, 60), achievement: pct(k.achievement), evidence: str(k.evidence), matched: str(k.matched, 160) })) })),
     how: arr(a.how, LIMITS.comps).map(x => ({ name: str(x.name, 120), level: str(x.level, 40), standard: str(x.standard), observed: str(x.observed), rating: int(x.rating, 1, 5), just: str(x.just) })),
     overall: { whatPct: pct(o.whatPct), howPct: pct(o.howPct), score: pct(o.score, 100), just: str(o.just, LIMITS.longText), strengths: str(o.strengths), dev: str(o.dev) }
   };

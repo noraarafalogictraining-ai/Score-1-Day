@@ -42,11 +42,27 @@ function objTab(r, ed) {
     ${weightSummary(r)}
     ${g.objectives.length ? g.objectives.map((o, i) => objCard(o, i, ed, g.tried)).join("") : `<div class="card"><div class="empty">${icon("target")}<b>No objectives yet</b><span class="small">Use Add Objective to create the first one.</span></div></div>`}
     ${ed ? validationBlock("Objective validation", objectiveValidation(r), "All objectives are complete and the weights total 100%.") : ""}
+    ${ed ? coverageSummary(r) : ""}
   </div>`;
+}
+/* KPI evidence check (January): informative, never blocks submission, never reveals year-end results */
+function coverageBlock(o) {
+  if (!String(o.kpi || "").trim()) return "";
+  const c = objectiveCoverage(o);
+  return `<div class="cov-list">${c.kpis.map(({ k, c: x }) => `<div class="cov-row"><span class="cov cov-${x.status}">${x.label}</span><span class="xs t2">${c.kpis.length > 1 ? `<b>${esc(k.name)}</b> · ` : ""}${esc(x.message)}</span></div>`).join("")}</div>`;
+}
+function coverageSummary(r) {
+  const all = r.goals.objectives.filter(o => String(o.kpi || "").trim()).flatMap(o => objectiveCoverage(o).kpis.map(x => x.c.status));
+  if (!all.length) return "";
+  const n = (s) => all.filter(x => x === s).length;
+  return `<section class="card" id="kpi-coverage"><div class="card-h"><h3>KPI evidence check</h3><span class="xs muted">Advisory · you decide</span></div><div class="card-b stack-sm">
+    <div class="row" style="gap:8px">${["supported", "clarify", "unavailable"].map(s => `<span class="cov cov-${s}">${COVERAGE_LABEL[s]}: ${n(s)}</span>`).join("")}</div>
+    <p class="xs muted">Checks whether each KPI has a measurable target and whether NextWave's records will be able to measure it. You can revise your KPIs before submitting.</p>
+  </div></section>`;
 }
 function objCard(o, i, ed, tried) {
   const base = P("goals", "objectives", i), miss = objMissing(o), editing = ed && UI.edit === o.id, bad = (f) => tried && miss.some(m => m.startsWith(f)) ? "err" : "";
-  const meta = `<div class="goal-meta one"><div><div class="k">KPI / Performance measure</div>${o.kpi ? esc(o.kpi) : `<span class="muted">Not set</span>`}</div></div>`;
+  const meta = `<div class="goal-meta one"><div><div class="k">KPI / Performance measure</div>${o.kpi ? esc(o.kpi) : `<span class="muted">Not set</span>`}</div></div>${coverageBlock(o)}`;
   const form = `<div class="goal-form">
       <div class="field full"><label class="lbl" for="${base}.objective">Objective <span class="req">*</span></label><textarea class="ta ${bad("Objective")}" rows="2" id="${base}.objective" ${bind(base + ".objective")} placeholder="What must be achieved this year?">${esc(o.objective)}</textarea></div>
       <div class="field full"><label class="lbl" for="${base}.kpi">KPI / Performance measure <span class="req">*</span></label><textarea class="ta ${bad("KPI")}" rows="2" id="${base}.kpi" ${bind(base + ".kpi")} placeholder="How will performance be measured? Write the target into the measure.">${esc(o.kpi)}</textarea></div>

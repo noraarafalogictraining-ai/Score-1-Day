@@ -32,7 +32,6 @@ module.exports = H.handler(async (body) => {
   if (kind !== "appraisal" && (!last || last.from !== "manager")) throw new H.BadInput("The last message must be the manager's.");
   if (kind === "appraisal" && !history.length) return { provider: AI.provider(), reply: SC.APPRAISAL.opening, complete: false };   /* fixed, neutral opening */
   if (kind === "appraisal" && last.from !== "manager") throw new H.BadInput("The last message must be the manager's.");
-  if (kind === "appraisal" && !ctx.pathway) throw new H.BadInput("Year-end evidence is missing.");
   if (history[0] && history[0].from === "employee") {
     const expected = kind === "alignment" ? SC.ALIGNMENT.opening : kind === "diagnostic" ? SC.DIAGNOSTIC.opening : SC.APPRAISAL.opening;
     if (history[0].text.trim() !== expected.trim()) throw new H.BadInput("The conversation history does not match the scenario.");

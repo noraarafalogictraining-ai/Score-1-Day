@@ -65,7 +65,6 @@ function sbiiCriterion(s) {
 module.exports = H.handler(async (body) => {
   const taskName = body.task;
   const inp = input(taskName, body.payload);
-  if (["bias", "round3", "sbii"].includes(taskName) && !inp.pathway) throw new H.BadInput("Year-end evidence is missing.");
   const provider = AI.provider();
   if (provider === "unavailable") throw Object.assign(new Error("AI assessment is unavailable: no AI provider is configured on the server."), { code: "ai_unavailable", status: 503 });
   const t = PR.task(taskName, inp);
