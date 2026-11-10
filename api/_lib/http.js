@@ -36,12 +36,16 @@ function cleanPlan(p) {
 function cleanEvidence(e) {
   return arr(e, LIMITS.evidence).map(x => ({ period: str(x.period, 80), link: str(x.link, 200), text: str(x.text), source: str(x.source, 200), impact: str(x.impact), action: str(x.action), status: str(x.status, 40) }));
 }
+/* Year-end appraisal (prototype shape): WHAT = KPI results with achievement %, HOW = 1–5 ratings, overall = 0–100 score. */
+const pct = (v, hi = 200) => { const n = Number(v); return v === null || v === "" || !Number.isFinite(n) ? null : Math.max(0, Math.min(hi, Math.round(n * 10) / 10)); };
 function cleanAppraisal(a) {
   a = a || {};
+  const o = a.overall || {};
   return {
-    what: arr(a.what, LIMITS.objectives).map(x => ({ objective: str(x.objective), kpi: str(x.kpi), weight: int(x.weight, 0, 100), actual: str(x.actual), rating: int(x.rating, 1, 5), just: str(x.just) })),
+    what: arr(a.what, LIMITS.objectives).map(x => ({ objective: str(x.objective), weight: int(x.weight, 0, 100), achievement: pct(x.achievement),
+      kpis: arr(x.kpis, 6).map(k => ({ name: str(k.name), target: str(k.target, 60), type: str(k.type, 40), actual: str(k.actual, 60), achievement: pct(k.achievement), evidence: str(k.evidence) })) })),
     how: arr(a.how, LIMITS.comps).map(x => ({ name: str(x.name, 120), level: str(x.level, 40), standard: str(x.standard), observed: str(x.observed), rating: int(x.rating, 1, 5), just: str(x.just) })),
-    overall: { what: int((a.overall || {}).what, 1, 5), how: int((a.overall || {}).how, 1, 5), final: int((a.overall || {}).final, 1, 5), just: str((a.overall || {}).just, LIMITS.longText), strengths: str((a.overall || {}).strengths), dev: str((a.overall || {}).dev) }
+    overall: { whatPct: pct(o.whatPct), howPct: pct(o.howPct), score: pct(o.score, 100), just: str(o.just, LIMITS.longText), strengths: str(o.strengths), dev: str(o.dev) }
   };
 }
 const pathwayOf = (v) => ["A", "B", "C"].includes(v) ? v : null;

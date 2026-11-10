@@ -161,11 +161,11 @@ function planPayload(r = rec()) {
 }
 function evidencePayload(r = rec()) { return r.evidence.map(e => ({ period: e.period, link: linkLabel(e.link, r), text: e.text, source: e.source === "Other" ? e.sourceOther : e.source, impact: e.impact, action: e.action, status: e.status })); }
 function appraisalPayload(r = rec()) {
-  const a = r.r3.appraisal;
+  const a = r.r3.appraisal, c = appraisalCalc(r);
   return {
-    what: r.goals.objectives.map(o => ({ objective: o.objective, kpi: o.kpi, weight: num(o.weight), actual: (a.what[o.id] || {}).actual || "", rating: (a.what[o.id] || {}).rating || null, just: (a.what[o.id] || {}).just || "" })),
+    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? "" : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "" })) })),
     how: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "", observed: (a.how[c.id] || {}).observed || "", rating: (a.how[c.id] || {}).rating || null, just: (a.how[c.id] || {}).just || "" })),
-    overall: { ...a.overall }
+    overall: { whatPct: c.whatPct, howPct: c.howPct, score: c.overall, just: a.overall.just, strengths: a.overall.strengths, dev: a.overall.dev }
   };
 }
 const managerWords = (log, max) => { const t = log.filter(m => m.from === "manager").map(m => m.text).join(" / "); return t.length > max ? "…" + t.slice(-max) : t; };
@@ -179,13 +179,18 @@ function priorPayload(r = rec()) {
   };
 }
 function appraisalValidation(r = rec()) {
-  const a = r.r3.appraisal, errors = [];
-  r.goals.objectives.forEach((o, i) => { const x = a.what[o.id] || {}, miss = []; if (!(x.actual || "").trim()) miss.push("actual result / evidence"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`Objective ${i + 1}: ${miss.join(", ")}.`); });
-  r.goals.comps.forEach(c => { const x = a.how[c.id] || {}, miss = []; if (!(x.observed || "").trim()) miss.push("observed behaviour"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`${compName(c.id)}: ${miss.join(", ")}.`); });
+  const a = r.r3.appraisal, c = appraisalCalc(r), errors = [];
+  c.objectives.forEach((x, oi) => x.rows.forEach(y => {
+    const tag = `Objective ${oi + 1}${x.rows.length > 1 ? `, KPI ${y.i + 1}` : ""}`;
+    if (y.res.status === "blank") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
+    if (y.res.status === "invalid") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
+    if (y.res.status === "review") errors.push(`${tag}: no usable target. Switch the measure to manager review and enter an assessed %.`);
+    if (!String(y.e.evidence || "").trim()) errors.push(`${tag}: add the supporting evidence.`);
+  }));
+  r.goals.comps.forEach(k => { const x = a.how[k.id] || {}, miss = []; if (!(x.observed || "").trim()) miss.push("observed behavior"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`${compName(k.id)}: ${miss.join(", ")}.`); });
   const o = a.overall, miss = [];
-  if (!o.what) miss.push("overall WHAT rating"); if (!o.how) miss.push("overall HOW rating"); if (!o.final) miss.push("overall performance rating");
-  if (!o.just.trim()) miss.push("evidence-based justification"); if (!o.strengths.trim()) miss.push("key strengths"); if (!o.dev.trim()) miss.push("development priorities");
-  if (miss.length) errors.push(`Overall appraisal: ${miss.join(", ")}.`);
+  if (!o.strengths.trim()) miss.push("key strengths"); if (!o.dev.trim()) miss.push("development priorities"); if (!o.just.trim()) miss.push("evidence-based justification");
+  if (miss.length) errors.push(`Summary: ${miss.join(", ")}.`);
   return { errors, ok: errors.length === 0 };
 }
 const ratingLabel = (v) => { const r = RATING_SCALE.find(x => x.v === v); return r ? `${r.v} · ${r.l}` : "Not rated"; };

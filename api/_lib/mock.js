@@ -10,6 +10,7 @@ const RB = require("./rubrics");
 
 const lc = (s) => String(s || "").toLowerCase();
 const has = (s, rx) => rx.test(lc(s));
+const lowScore = (a) => a && a.overall && a.overall.score != null && a.overall.score < 55; /* roughly the old 1–2 of 5 band */
 const BLAME = /(your fault|unacceptable|careless|you should have known|no excuse|stop challenging|you always|lazy|you failed)/;
 const DISMISS = /(don't worry|do not worry|just accept|that's how it is|not up for discussion|no need to|just sign|stop worrying)/;
 const ADDRESS_A = /(quality|relevan|useful|actionab|evidence-based|how well)/, ADDRESS_B = /(adopt|control|decision|not only|regardless|even if|whether management)/;
@@ -49,10 +50,10 @@ function converse(kind, history, ctx) {
     return { reply: hit ? hit[1] : "It's been a lot to juggle. Where would you like to start?" };
   }
   /* appraisal */
-  const a = ctx.appraisal, adoptReason = a && a.overall.final <= 2 && has(a.overall.just, /(not adopted|weren't adopted|were not adopted|didn't adopt|not implemented)/);
+  const a = ctx.appraisal, adoptReason = a && lowScore(a) && has(a.overall.just, /(not adopted|weren't adopted|were not adopted|didn't adopt|not implemented)/);
   if (!history.length) {
     if (adoptReason) return { reply: "I thought we agreed my analysis would be judged on quality, not adoption. How did that affect my rating?" };
-    if (a && a.overall.final >= 5) return { reply: "Thank you, I appreciate it. What should I still work on next year?" };
+    if (a && a.overall.score != null && a.overall.score >= 90) return { reply: "Thank you, I appreciate it. What should I still work on next year?" };
     return { reply: "Thanks, the deadline and communication points are fair. What development could help me with stakeholders?" };
   }
   return { reply: "That helps. Can we agree two concrete development steps for next year?" };
@@ -121,15 +122,15 @@ function assess(task, inp) {
     };
   }
   if (task === "bias") {
-    const text = [inp.appraisal.overall.just, ...inp.appraisal.what.map(w => w.just), ...inp.appraisal.how.map(h => h.just)].join("\n");
+    const text = [inp.appraisal.overall.just, ...inp.appraisal.what.flatMap(w => w.kpis.map(k => k.evidence)), ...inp.appraisal.how.map(h => h.just)].join("\n");
     const flags = [];
     const anchor = firstSentence(text, /(last year|previous rating|previous year)/); if (anchor) flags.push({ bias: "anchoring", evidence: anchor, explanation: "[Test] The reasoning refers to the previous rating." });
-    const adopt = inp.appraisal.overall.final <= 2 && firstSentence(text, /(not adopted|weren't adopted|were not adopted|not implemented)/); if (adopt) flags.push({ bias: "severity", evidence: adopt, explanation: "[Test] The rating appears to penalise non-adoption." });
+    const adopt = lowScore(inp.appraisal) && firstSentence(text, /(not adopted|weren't adopted|were not adopted|not implemented)/); if (adopt) flags.push({ bias: "severity", evidence: adopt, explanation: "[Test] The rating appears to penalise non-adoption." });
     return { flags, overlooked: [], overemphasized: [], summary: flags.length ? "[Scripted test assessment] Possible biases found." : "[Scripted test assessment] No bias indicated by your reasoning." };
   }
   /* round3 */
-  const a = inp.appraisal, j = a.overall.just, allJ = [j, ...a.what.map(w => w.just), ...a.how.map(h => h.just)].join("\n");
-  const adopt = a.overall.final <= 2 && /(not adopted|weren't adopted|were not adopted|not implemented)/i.test(allJ), rich = allJ.length > 200;
+  const a = inp.appraisal, j = a.overall.just, allJ = [j, ...a.what.flatMap(w => w.kpis.map(k => k.evidence)), ...a.how.map(h => h.just)].join("\n");
+  const adopt = lowScore(a) && /(not adopted|weren't adopted|were not adopted|not implemented)/i.test(allJ), rich = allJ.length > 200;
   const conv = inp.history.filter(m => m.from === "manager").map(m => m.text).join("\n");
   return {
     criteria: [

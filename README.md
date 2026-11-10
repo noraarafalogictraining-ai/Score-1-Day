@@ -93,6 +93,30 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 
   A period unlocks only after its release, and the dashboard switches to the newest period when results arrive. All figures come from one source (`bizData` in `src/views_monitor.js`, using `DASHBOARD` and the server's year-end company figures). Figures the scenario doesn't define (for example revenue growth actuals) show "—" with "Not published".
 
+## Final appraisal prototype (experimental, not yet approved)
+
+The Final Appraisal page is a working prototype with three tabs and three live summary cards (WHAT Achievement, HOW Achievement, Overall Performance Score).
+
+- **WHAT — Performance Objectives (60%)**: one collapsible card per January objective (title, weight, number of KPIs, objective achievement). Expanding it shows each KPI with its January target (locked), the actual result, the calculated achievement and the supporting evidence. Only one objective is open at a time.
+- **HOW — Competencies (40%)**: each competency with its expected level and the January written standard; the manager writes the observed behavior, a 1–5 rating and the evidence/justification.
+- **Final Performance Summary**: the calculation table (achievement × weight = contribution), key strengths, development priorities and the evidence-based justification. Submit stays disabled until everything required is complete; the list of what is missing is shown above it. The Omar conversation and feedback flow after submission are unchanged.
+
+**Calculation rules** (all in `src/appraisal_calc.js`, `APPRAISAL_CONFIG`):
+
+| Step | Rule |
+|---|---|
+| KPI achievement | actual ÷ target × 100 (higher is better); target ÷ actual × 100 when lower is better |
+| Cap | 120% per KPI (`kpiCap`, not yet approved) |
+| Objective achievement | equal-share average of its KPIs (no KPI subweights are added to the January plan) |
+| Contribution | objective achievement × objective weight |
+| WHAT | sum of contributions |
+| HOW | average competency rating ÷ 5 × 100 |
+| Overall | WHAT × 60% + HOW × 40% |
+
+**Safeguards**: a blank result is never counted as zero (the score stays "—" until every KPI is filled); non-numbers and negative values are rejected with a message; no division by zero; KPIs with no number, a milestone, more than one figure, or a zero target are **flagged for manager review**, where the manager enters an assessed achievement % (0–120) instead of a formula result; the manager can also switch any KPI between Higher is better / Lower is better / Manager review.
+
+**Prototype limitation — the January plan has one free-text KPI per objective.** The prototype reads that text and splits it into separate KPIs where it contains several measurable targets (e.g. "95% on time and 95% passing review" → 2 KPIs), then reads the number as the target. It cannot understand time units, so "one consultation per quarter" is read as a target of 1, and an annual actual of 4 shows as 400% (capped at 120%). A structured January form (KPI, target, unit, direction per line) would remove this guesswork; it was deliberately not changed in this prototype.
+
 ## The three-round experience (facilitator view of the structure)
 
 | Round | What happens | Facilitator |

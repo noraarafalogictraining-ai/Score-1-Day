@@ -55,10 +55,10 @@ const GROUPS = [
   ] },
   /* ROUND 3 */
   { id: "r3_what", round: 3, label: "WHAT evaluation", task: "round3", criteria: [
-    { id: "r3_what_grounded", max: 4, label: "Ratings grounded in available evidence", desc: "Each objective rating is supported by the year-end evidence actually available." },
-    { id: "r3_what_limits", max: 2, label: "Limitations identified", desc: "Where the KPI does not match the available evidence, the manager notes the limitation instead of inventing results." },
+    { id: "r3_what_grounded", max: 4, label: "Results grounded in available evidence", desc: "Each KPI actual and its supporting evidence come from the year-end evidence actually available; results are not invented." },
+    { id: "r3_what_limits", max: 2, label: "Limitations identified", desc: "Where the KPI does not match the available evidence (or the target is unclear), the manager notes the limitation instead of inventing results." },
     { id: "r3_what_balance", max: 2, label: "Recognises results and gaps", desc: "Acknowledges positive results and documented gaps; does not penalise non-adoption of sound recommendations." },
-    { id: "r3_what_overall", max: 2, label: "Defensible overall WHAT", desc: "Overall WHAT rating follows from the objective ratings and weights." }
+    { id: "r3_what_overall", max: 2, label: "Defensible WHAT result", desc: "The WHAT achievement follows from the KPI results and objective weights, and the evidence supports it." }
   ] },
   { id: "r3_how", round: 3, label: "HOW evaluation", task: "round3", criteria: [
     { id: "r3_how_behaviour", max: 2, label: "Uses behavioural evidence", desc: "Competency ratings cite observed behaviours, not traits." },
@@ -66,7 +66,7 @@ const GROUPS = [
     { id: "r3_how_balance", max: 1, label: "Balanced", desc: "Recognises strengths (analysis) and gaps (communication/stakeholder) fairly." }
   ] },
   { id: "r3_overall", round: 3, label: "Overall rating and justification", task: "round3", criteria: [
-    { id: "r3_overall_defensible", max: 2, label: "Defensible overall rating", desc: "The overall rating is consistent with WHAT, HOW and the evidence; not anchored on the previous 4/5." },
+    { id: "r3_overall_defensible", max: 2, label: "Defensible overall score", desc: "The overall score is consistent with WHAT, HOW and the evidence; not anchored on the previous 4/5." },
     { id: "r3_overall_justify", max: 2, label: "Evidence-based justification", desc: "The justification cites specific evidence from the whole year." },
     { id: "r3_overall_specific", max: 1, label: "Specific strengths and development priorities", desc: "Strengths and priorities are specific and actionable." }
   ] },

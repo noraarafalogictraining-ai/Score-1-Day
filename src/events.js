@@ -145,6 +145,9 @@ const ACTIONS = {
   orgToggle() { UI.orgOpen = UI.orgOpen === false; render(); },
   respToggle(el) { UI.respOpen = UI.respOpen || { strategy: true }; UI.respOpen[el.dataset.id] = !UI.respOpen[el.dataset.id]; render(); },
   ceoToggle(el) { UI.ceoOpen = UI.ceoOpen === el.dataset.id ? null : el.dataset.id; render(); },
+  apTab(el) { UI.apTab = el.dataset.v; render(); },
+  apOpen(el) { const cur = UI.apOpen === undefined ? (rec().goals.objectives[0] || {}).id : UI.apOpen; UI.apOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
+  compOpen(el) { const cur = UI.compOpen === undefined ? (rec().goals.comps[0] || {}).id : UI.compOpen; UI.compOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },
   kpi(el) { UI.kpiOpen = UI.kpiOpen === el.dataset.id ? null : el.dataset.id; render(); },
   period(el) { if (!periodAvailable(el.dataset.v)) return; UI.period = el.dataset.v; UI.month = null; UI.kpiOpen = null; render(); },
@@ -292,6 +295,7 @@ document.addEventListener("change", (ev) => {
   if (el.dataset.bind && el.tagName === "SELECT") { handleBind(el); render(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) { UI.modal.d[el.dataset.ev] = el.value; if (el.tagName === "SELECT") render(); return; }
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
+  if (el.dataset.kpiMode) { const v = el.value, base = el.dataset.kpiMode; setPath(S, base + ".type", v === "review" ? "review" : "numeric"); if (v !== "review") setPath(S, base + ".dir", v); afterBind(base); save(); render(); return; }
   if (el.dataset.actChange === "compPick") { if (el.value) ACTIONS.compAdd({ dataset: { id: el.value } }); return; }
   if (el.dataset.fac) { const r = rec(), id = el.dataset.fac, max = +el.max; if (el.value === "") delete r.fac[id]; else r.fac[id] = Math.max(0, Math.min(max, Math.round(+el.value))); save(); render(); }
 });

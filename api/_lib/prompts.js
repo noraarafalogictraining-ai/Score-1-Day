@@ -46,9 +46,12 @@ function yearEndText(p) {
 }
 function appraisalText(a) {
   if (!a) return "(none)";
-  return [...a.what.map((x, i) => `WHAT ${i + 1}: ${x.objective} | KPI: ${x.kpi} | weight ${x.weight}% | actual/evidence: ${x.actual} | rating ${x.rating}/5 | justification: ${x.just}`),
+  const p = (v) => v == null ? "not calculated" : `${v}%`;
+  return [...a.what.map((x, i) => [`WHAT ${i + 1}: ${x.objective} | weight ${x.weight}% | objective achievement ${p(x.achievement)}`,
+      ...x.kpis.map((k, j) => `  KPI ${j + 1}: ${k.name} | target ${k.target} (${k.type}) | actual ${k.actual || "—"} | achievement ${p(k.achievement)} | evidence: ${k.evidence}`)].join("\n")),
     ...a.how.map(x => `HOW: ${x.name} (expected ${x.level}) | observed: ${x.observed} | rating ${x.rating}/5 | justification: ${x.just}`),
-    `Overall WHAT ${a.overall.what}/5 · overall HOW ${a.overall.how}/5 · FINAL ${a.overall.final}/5`, `Final justification: ${a.overall.just}`, `Key strengths: ${a.overall.strengths}`, `Development priorities: ${a.overall.dev}`].join("\n");
+    `WHAT achievement ${p(a.overall.whatPct)} (60%) · HOW achievement ${p(a.overall.howPct)} (40%) · OVERALL SCORE ${a.overall.score == null ? "not calculated" : a.overall.score + "/100"}`,
+    `Final justification: ${a.overall.just}`, `Key strengths: ${a.overall.strengths}`, `Development priorities: ${a.overall.dev}`].join("\n");
 }
 
 /* ---------- Assessment prompts ---------- */
