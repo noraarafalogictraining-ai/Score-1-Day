@@ -6,7 +6,7 @@ const STAGE_TAB = { 1: "Expectations", 2: "Mid-year", 3: "Year-end" };
 function roundAvailable(n, r = rec()) { return n === 1 ? goalsApproved(r) : n === 2 ? r.r2.submitted : r.r3.done; }
 VIEWS.review = function () {
   const r = rec();
-  if (!r.r3.done && !UI.facOK) return pageHead("Feedback report", "Feedback report") + lockedPanel("Not available yet", "Your feedback report is available once the year-end appraisal is complete.");
+  if (!r.r3.done) return pageHead("Feedback report", "Feedback report") + lockedPanel("Not available yet", "Your feedback report is available once the year-end appraisal is complete.");
   if (!AIS.scoring) return pageHead("Feedback report", "Feedback report", empChip()) + lockedPanel("Scoring unavailable", "The SCORE server could not be reached.");
   const sum = scoreSummary(r), tab = UI.sub || "summary";
   const tabs = [["summary", "Overview"], ...[1, 2, 3].map(n => [String(n), STAGE_TAB[n]])];

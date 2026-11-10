@@ -145,9 +145,9 @@ const ACTIONS = {
     ACTIONS._start(name);
   },
   signinConfirm() { const m = UI.modal; UI.modal = null; ACTIONS._start(m.name); },
-  _start(name) { const p = document.getElementById("login-pass"); if (p) p.value = ""; startSession(name); setSignedIn(true); UI.facOK = false; go("inbox", "start"); },
+  _start(name) { const p = document.getElementById("login-pass"); if (p) p.value = ""; startSession(name); setSignedIn(true); go("inbox", "start"); },
   resume() { setSignedIn(true); go("home"); },
-  signout() { save(true); setSignedIn(false); UI.dd = null; UI.facOK = false; location.hash = ""; render(); },
+  signout() { save(true); setSignedIn(false); UI.dd = null; location.hash = ""; render(); },
   doReset() { const n = S.session ? S.session.name : ""; startSession(n); UI.modal = null; toast("Session reset."); go("home"); },
 
   /* --- navigation --- */
@@ -247,7 +247,7 @@ const ACTIONS = {
   /* --- rounds --- */
   releaseCode(el) {
     const k = el.dataset.k, v = ((document.getElementById("code-" + k) || {}).value || "").trim();
-    if (v === RELEASE_CODES[k] || v === FAC_CODE) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update released." : "Year-end update released."); go(k === "r2" ? "home" : "yearend"); }
+    if (k === pendingRelease() && v === RELEASE_CODES[k]) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update received." : "Year-end update received."); k === "r2" ? go("home") : go("inbox", "yearend"); }
     else { UI.codeErr = k; render(); }
   },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
@@ -275,28 +275,11 @@ const ACTIONS = {
     const v = appraisalValidation(r);
     if (!v.ok) { UI.apPart = v.I.length ? "I" : v.II.length ? "II" : "III"; toast(`${plural(v.errors.length, "item needs", "items need")} attention before finalizing.`); return go("appraisal"); }
     if (r.r3.bias.reflection.trim().length < 15) { r.r3.bias.tried = true; toast("Write a short reflection before finalizing."); return render(); }
-    if (!aiReady()) { toast("AI assessment is unavailable. Your facilitator can finalize the appraisal."); return; }
+    if (!aiReady()) { toast("AI assessment is unavailable. Please let your facilitator know."); return; }
     assessRound3();
   },
   assessRetry(el) { const k = el.dataset.k; if (k === "round1") assessRound1(); else if (k === "round2") assessRound2(); else assessRound3(); },
 
-  /* --- facilitator --- */
-  facUnlock() {
-    const v = ((document.getElementById("fac-code") || {}).value || "").trim();
-    const k = Object.keys(RELEASE_CODES).find(x => RELEASE_CODES[x] === v);
-    if (v === FAC_CODE) { UI.facOK = true; UI.codeErr = null; return render(); }
-    if (k) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update released." : "Year-end update released."); go(k === "r2" ? "home" : "inbox", k === "r2" ? null : "yearend"); return; }
-    UI.codeErr = "fac"; render();
-  },
-  release(el) { releaseRound(el.dataset.k); toast("Released on this device."); render(); },
-  facAlign() { const r = rec(); if (r.goals.status !== "pending_alignment") return; r.goals.status = "approved"; r.align.confirmed = true; r.align.manual = true; r.align.log.push({ from: "sys", text: "Contract confirmed by the facilitator" }); pulseNote(r, "alignment", "Alignment confirmed manually", "Confirmed by the facilitator without an assessed conversation: no Pulse change.", 1); save(); toast("Alignment confirmed."); render(); assessRound1(); },
-  facEnd(el) { const r = rec(); if (el.dataset.k === "diag") { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation ended by the facilitator" }); } else { r.r3.conv.ended = true; r.r3.conv.log.push({ from: "sys", text: "Conversation ended by the facilitator" }); } save(); render(); },
-  facPathway(el) {
-    const r = rec(), p = el.dataset.v; r.r2.pathway = p; r.r2.manual = true; r.r2.submitted = true;
-    if (!r.pulse.slots.coaching) { if (p === "A") applyPulse(r, "constructive", "Pathway A set by the facilitator."); else if (p === "C") applyPulse(r, "punitive", "Pathway C set by the facilitator."); else pulseNote(r, "coaching", "Pathway B set by the facilitator", "Partially effective management: no Pulse change.", 2); }
-    save(); toast(`Pathway ${p} set.`); render();
-  },
-  facFinal() { const r = rec(); if (r.r3.done) return; r.r3.done = true; pulseNote(r, "appraisal", "Appraisal finalized by the facilitator", "No assessed appraisal: no Pulse change.", 3); save(); toast("Appraisal finalized."); render(); },
   pc(el) { rec().pc[el.dataset.i] = el.dataset.v; save(); render(); }
 };
 
@@ -311,7 +294,6 @@ document.addEventListener("click", (ev) => {
 });
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "Escape") { if (UI.modal) { UI.modal = null; render(); } else if (UI.drawer) { UI.drawer = null; render(); } else if (UI.dd) { UI.dd = null; render(); } }
-  if (ev.key === "Enter" && ev.target.id === "fac-code") ACTIONS.facUnlock();
   if (ev.key === "Enter" && ev.target.id && ev.target.id.startsWith("code-")) ACTIONS.releaseCode({ dataset: { k: ev.target.id.slice(5) } });
   if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey) && ev.target.dataset && /\.drafts\./.test(ev.target.dataset.bind || "")) { const k = ev.target.dataset.bind.split(".").pop(); ev.preventDefault(); ACTIONS.chatSend({ dataset: { k } }); }
 });

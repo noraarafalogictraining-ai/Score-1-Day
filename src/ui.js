@@ -216,7 +216,6 @@ function notifDropdown(notes) {
 function userDropdown() {
   return `<div class="dropdown" role="menu"><div class="dd-head">${esc(S.session.name)}<div class="xs muted" style="text-transform:none;letter-spacing:0;font-weight:500">${DIRECTOR.title}</div></div>
     <button class="dd-item" data-act="go" data-go="profile">${icon("user", "i-sm")} My Profile</button>
-    <button class="dd-item" data-act="go" data-go="facilitator">${icon("shield", "i-sm")} Facilitator View</button>
     <button class="dd-item" data-act="signout">${icon("logout", "i-sm")} Sign Out</button></div>`;
 }
 function navButton(n, child) {

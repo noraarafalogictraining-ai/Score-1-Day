@@ -702,6 +702,8 @@ table.tbl.reg { min-width: 640px; font-size: .8rem; } .tbl.reg td, .tbl.reg th {
   .agreed-grid, .res-grid { grid-template-columns: 1fr 1fr; } .res-grid > div:first-child { grid-column: 1 / -1; }
   .ack-grid { grid-template-columns: 1fr; } .ack-grid > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--line2); }
 }
+.wait-card { border-left: 4px solid var(--blue); } .wait-b { display: flex; gap: 14px; padding: 16px 18px; align-items: flex-start; } .wait-b > svg { color: var(--blue); margin-top: 3px; flex: none; }
+.wait-row { gap: 8px; } .wait-row .inp { width: 200px; }
 </style>
 <div id="app"></div>
 <script>
@@ -1131,8 +1133,8 @@ const SIM_DATES = {
   start: "Mon 4 Jan 2027", deadline: "Mon 11 Jan 2027", submitted: "Fri 8 Jan 2027", approved: "Mon 11 Jan 2027",
   alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 17 Dec 2027"
 };
-/* Facilitator codes (local gate on each device; visible in page source) */
-const FAC_CODE = "5050";
+/* Codes the facilitator announces in the room; participants enter them on the "Wait for the facilitator message" card.
+   (A local gate on each device; visible in the page source.) */
 const RELEASE_CODES = { r2: "4826", r3: "7319" };
 
 /* Form vocabularies (EVIDENCE_SOURCES and FREQUENCIES come from employees.js) */
@@ -1940,7 +1942,6 @@ function notifDropdown(notes) {
 function userDropdown() {
   return `<div class="dropdown" role="menu"><div class="dd-head">${esc(S.session.name)}<div class="xs muted" style="text-transform:none;letter-spacing:0;font-weight:500">${DIRECTOR.title}</div></div>
     <button class="dd-item" data-act="go" data-go="profile">${icon("user", "i-sm")} My Profile</button>
-    <button class="dd-item" data-act="go" data-go="facilitator">${icon("shield", "i-sm")} Facilitator View</button>
     <button class="dd-item" data-act="signout">${icon("logout", "i-sm")} Sign Out</button></div>`;
 }
 function navButton(n, child) {
@@ -2020,7 +2021,7 @@ const aiReady = () => AIS.provider === "live" || AIS.provider === "mock";
 function aiNotice() {
   if (!AIS.loaded) return "";
   if (AIS.provider === "mock") return `<div class="notice warn ai-banner">${icon("alert", "i-sm")}<span><b>Test mode:</b> scripted test responses, not live AI. Use only for automated testing.</span></div>`;
-  if (AIS.provider === "unavailable") return `<div class="notice risk ai-banner">${icon("alert", "i-sm")}<span><b>Live AI conversations are unavailable:</b> no AI provider is configured on the server. Your facilitator can continue the session manually.</span></div>`;
+  if (AIS.provider === "unavailable") return `<div class="notice risk ai-banner">${icon("alert", "i-sm")}<span><b>Live AI conversations are unavailable:</b> no AI provider is configured on the server. Please let your facilitator know.</span></div>`;
   if (AIS.provider === "offline") return `<div class="notice risk ai-banner">${icon("alert", "i-sm")}<span>${esc(AIS.error)}</span></div>`;
   return "";
 }
@@ -2071,6 +2072,7 @@ VIEWS.home = function () {
   const E = EMP(), r = rec();
   return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", `${DIRECTOR.title} · Commercial Department`) + `
   <div class="stack-lg">
+    ${waitCard(r)}
     <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee overview</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div>
       <button class="btn" data-act="modal" data-m="profile" data-emp="${S.emp}">${icon("user", "i-sm")} View profile</button></div></div>
     ${commercialOverview(r)}
@@ -2140,7 +2142,7 @@ MODALS.profile = function (m) {
 VIEWS.inbox = function () {
   const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
-  return pageHead("My Inbox", "My Inbox") + `<div class="card split">
+  return pageHead("My Inbox", "My Inbox") + waitCard() + `<div class="card split" ${pendingRelease() ? 'style="margin-top:14px"' : ""}>
     <div class="list">${chatInboxItem()}<div class="list-h">Email</div>${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
     <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
   </div>`;
@@ -2164,45 +2166,7 @@ function mailView(m) {
   </article>`;
 }
 
-/* ---------- Facilitator view ---------- */
-VIEWS.facilitator = function () {
-  if (!UI.facOK) return pageHead("Facilitator", "Facilitator view") + `<div class="card pad-lg stack" style="max-width:440px">
-    <p class="small t2">Enter your code.</p>
-    <div class="field"><label for="fac-code">Code</label><input class="inp" id="fac-code" inputmode="numeric" autocomplete="off" maxlength="8"></div>
-    ${UI.codeErr === "fac" ? `<div class="err-text">That code is not correct.</div>` : ""}
-    <div><button class="btn primary" data-act="facUnlock">Open facilitator view</button></div></div>`;
-  const r = rec(), sc = scoreSummary(r), crit = criterionResults(r);
-  return pageHead("Facilitator", "Facilitator view", "", "Round control, scenario state and manual controls for this device.") + `<div class="stack-lg">
-    <div class="grid2" style="align-items:start">
-      <div class="card"><div class="card-h"><h3>Rounds</h3><span class="xs muted">AI: <b>${esc(AIS.provider)}</b>${AIS.model ? ` · ${esc(AIS.model)}` : ""}</span></div><div class="card-b stack">
-        <div class="row between nowrap"><div><b class="small">Round 1 · Setting Performance Expectations</b><div class="xs muted">Goal plan ${STATUS_LABEL[r.goals.status]}</div></div>${statusChip(r.goals.status)}</div>
-        <div class="row between nowrap"><div><b class="small">Round 2 · Valtora event</b><div class="xs muted">Release after announcing the event in the room. Code for participants: ${RELEASE_CODES.r2}</div></div><button class="btn sm ${S.released.r2 ? "" : "primary"}" data-act="release" data-k="r2" ${S.released.r2 ? "disabled" : ""}>${S.released.r2 ? "Released" : "Release Round 2"}</button></div>
-        <div class="row between nowrap"><div><b class="small">Round 3 · Year-end evaluation</b><div class="xs muted">Code for participants: ${RELEASE_CODES.r3}</div></div><button class="btn sm ${S.released.r3 ? "" : "primary"}" data-act="release" data-k="r3" ${S.released.r3 ? "disabled" : ""}>${S.released.r3 ? "Released" : "Release Round 3"}</button></div>
-        <details class="small"><summary class="t2" style="cursor:pointer">Trainer announcement for Round 2</summary><p class="t2" style="margin-top:8px;white-space:pre-line">${esc(VALTORA_ANNOUNCEMENT)}</p></details>
-      </div></div>
-      <div class="card"><div class="card-h"><h3>Scenario state</h3></div><div class="card-b stack">
-        <dl class="kv"><dt>Alignment</dt><dd>${r.align.confirmed ? `Confirmed${r.align.manual ? " (manual)" : ""} · ${esc((r.align.assessment && r.align.assessment.classification || {}).behaviour || "not assessed")}` : esc(STATUS_LABEL[r.goals.status])}</dd>
-        <dt>Round 2 pathway</dt><dd>${r.r2.pathway ? `<b>${r.r2.pathway}</b>${r.r2.manual ? " (manual)" : ""}` : "Not set"}</dd>
-        <dt>Year-end dataset</dt><dd>${r.r3.dataset ? esc(r.r3.tag || "Loaded") : "Not loaded"}</dd>
-        <dt>Learning Score</dt><dd><b>${sc.total}/${sc.max}</b>${sc.pending ? ` · ${sc.pending} criteria pending` : ""}</dd></dl>
-        ${pulseBars(r, true)}
-      </div></div>
-    </div>
-    <div class="card"><div class="card-h"><h3>Manual controls</h3><span class="xs muted">Use when AI is unavailable or an assessment fails</span></div><div class="card-b stack">
-      <div class="row between"><span class="small">Confirm the alignment without an AI conversation</span><button class="btn sm" data-act="facAlign" ${r.goals.status !== "pending_alignment" ? "disabled" : ""}>Confirm alignment</button></div>
-      <div class="row between"><span class="small">End Omar's mid-year conversation</span><button class="btn sm" data-act="facEnd" data-k="diag" ${r2Status(r) === "locked" || r.r2.diag.ended ? "disabled" : ""}>End conversation</button></div>
-      <div class="row between"><span class="small">Set the Round 2 pathway (overrides the AI classification; applies the matching coaching Pulse event if none was applied)</span><div class="seg">${["A", "B", "C"].map(p => `<button class="${r.r2.pathway === p ? "on" : ""}" data-act="facPathway" data-v="${p}" ${!S.released.r2 ? "disabled" : ""}>${p}</button>`).join("")}</div></div>
-      <div class="row between"><span class="small">End Omar's appraisal conversation</span><button class="btn sm" data-act="facEnd" data-k="appraisal" ${r.r3.appraisal.status !== "submitted" || r.r3.conv.ended ? "disabled" : ""}>End conversation</button></div>
-      <div class="row between"><span class="small">Finalize the appraisal without AI assessment</span><button class="btn sm" data-act="facFinal" ${!r.r3.conv.ended || r.r3.done ? "disabled" : ""}>Finalize</button></div>
-    </div></div>
-    <div class="card"><div class="card-h"><h3>Criterion scores</h3><span class="xs muted">Enter a score to override the AI assessment; clear it to restore</span></div><div class="card-b" style="overflow-x:auto">
-      ${AIS.scoring ? `<table class="tbl" style="min-width:720px"><thead><tr><th>Round</th><th>Criterion</th><th>AI</th><th>Max</th><th>Override</th></tr></thead><tbody>${crit.map(c => `<tr><td>${c.round}</td><td>${esc(c.groupLabel)} · ${esc(c.label)}</td><td class="num">${c.a ? c.a.score : "—"}</td><td class="num">${c.max}</td><td><input class="inp" style="width:80px" type="number" min="0" max="${c.max}" data-fac="${c.id}" value="${r.fac[c.id] != null ? r.fac[c.id] : ""}"></td></tr>`).join("")}</tbody></table>` : `<p class="small muted">Scoring structure unavailable: the SCORE server could not be reached.</p>`}
-    </div></div>
-    <div class="card"><div class="card-h"><h3>Employee Pulse history</h3></div><div class="card-b">${pulseHistory(r, true)}</div></div>
-    <div class="card pad row between"><div><b class="small">SCORE feedback report</b><div class="xs muted">Scores, evidence and feedback by round. Participants see it after the final appraisal.</div></div><button class="btn" data-act="go" data-go="review">Open report</button></div>
-    <div class="card pad row between"><div><b class="small">Reset this device</b><div class="xs muted">Deletes this session's saved progress.</div></div><button class="btn danger" data-act="modal" data-m="reset">${icon("reset", "i-sm")} Reset session</button></div>
-  </div>`;
-};
+/* The facilitator view was removed: events are released by the code participants enter on the "Wait for the facilitator message" card (waitCard). */
 MODALS.reset = function () {
   return modalWrap("Reset this session?", `<p class="small t2">All plans, conversations, evidence, appraisals, scores and Pulse history saved on this device will be deleted. This cannot be undone.</p>`, `<button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" style="background:var(--risk);border-color:var(--risk)" data-act="doReset">Delete and reset</button>`);
 };
@@ -2368,13 +2332,24 @@ function chatPanel() {
 VIEWS.conversations = function () { setTimeout(() => { UI.chatOpen = true; go("inbox"); }, 0); return ""; };
 
 /* =========================================================
-   MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · FACILITATOR GATES
+   MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · NEXT-EVENT CODE
    The app never generates evidence: managers record what they receive offline.
    ========================================================= */
-function releaseGate(k, title, text) {
-  return `<div class="card"><div class="empty">${icon("lock")}<h3>${title}</h3><p class="small" style="max-width:58ch">${text}</p>
-    <div class="row nowrap" style="gap:8px;margin-top:6px"><label class="sr" for="code-${k}">Release code</label><input class="inp" id="code-${k}" placeholder="Facilitator release code" inputmode="numeric" autocomplete="off" maxlength="8" style="width:220px"><button class="btn" data-act="releaseCode" data-k="${k}">Unlock</button></div>
-    ${UI.codeErr === k ? `<div class="err-text">That code is not correct.</div>` : ""}</div></div>`;
+/* Next event: "Wait for the facilitator message", then the participant enters the code announced in the room. */
+function pendingRelease(r = rec()) {
+  if (!S.released.r2 && goalsApproved(r)) return "r2";
+  if (S.released.r2 && !S.released.r3 && r.r2.submitted) return "r3";
+  return null;
+}
+function waitCard(r = rec()) {
+  const k = pendingRelease(r); if (!k) return "";
+  const what = k === "r2" ? "the mid-year business update" : "the year-end performance update";
+  return `<section class="card wait-card" id="wait-card"><div class="wait-b">${icon("clock")}<div class="grow stack-sm">
+      <h3>Wait for the facilitator message</h3>
+      <p class="small t2">Your facilitator will announce when ${what} is available and give you a code. Enter it here to continue.</p>
+      <div class="row nowrap wait-row"><label class="sr" for="code-${k}">Code</label><input class="inp" id="code-${k}" placeholder="Enter the code" inputmode="numeric" autocomplete="off" maxlength="8"><button class="btn primary" data-act="releaseCode" data-k="${k}" id="code-go">Continue</button></div>
+      ${UI.codeErr === k ? `<div class="err-text" id="code-err">That code isn't valid. Check the code your facilitator gave you.</div>` : ""}
+    </div></div></section>`;
 }
 
 VIEWS.evidence = function () {
@@ -2858,7 +2833,7 @@ const STAGE_TAB = { 1: "Expectations", 2: "Mid-year", 3: "Year-end" };
 function roundAvailable(n, r = rec()) { return n === 1 ? goalsApproved(r) : n === 2 ? r.r2.submitted : r.r3.done; }
 VIEWS.review = function () {
   const r = rec();
-  if (!r.r3.done && !UI.facOK) return pageHead("Feedback report", "Feedback report") + lockedPanel("Not available yet", "Your feedback report is available once the year-end appraisal is complete.");
+  if (!r.r3.done) return pageHead("Feedback report", "Feedback report") + lockedPanel("Not available yet", "Your feedback report is available once the year-end appraisal is complete.");
   if (!AIS.scoring) return pageHead("Feedback report", "Feedback report", empChip()) + lockedPanel("Scoring unavailable", "The SCORE server could not be reached.");
   const sum = scoreSummary(r), tab = UI.sub || "summary";
   const tabs = [["summary", "Overview"], ...[1, 2, 3].map(n => [String(n), STAGE_TAB[n]])];
@@ -3066,9 +3041,9 @@ const ACTIONS = {
     ACTIONS._start(name);
   },
   signinConfirm() { const m = UI.modal; UI.modal = null; ACTIONS._start(m.name); },
-  _start(name) { const p = document.getElementById("login-pass"); if (p) p.value = ""; startSession(name); setSignedIn(true); UI.facOK = false; go("inbox", "start"); },
+  _start(name) { const p = document.getElementById("login-pass"); if (p) p.value = ""; startSession(name); setSignedIn(true); go("inbox", "start"); },
   resume() { setSignedIn(true); go("home"); },
-  signout() { save(true); setSignedIn(false); UI.dd = null; UI.facOK = false; location.hash = ""; render(); },
+  signout() { save(true); setSignedIn(false); UI.dd = null; location.hash = ""; render(); },
   doReset() { const n = S.session ? S.session.name : ""; startSession(n); UI.modal = null; toast("Session reset."); go("home"); },
 
   /* --- navigation --- */
@@ -3168,7 +3143,7 @@ const ACTIONS = {
   /* --- rounds --- */
   releaseCode(el) {
     const k = el.dataset.k, v = ((document.getElementById("code-" + k) || {}).value || "").trim();
-    if (v === RELEASE_CODES[k] || v === FAC_CODE) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update released." : "Year-end update released."); go(k === "r2" ? "home" : "yearend"); }
+    if (k === pendingRelease() && v === RELEASE_CODES[k]) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update received." : "Year-end update received."); k === "r2" ? go("home") : go("inbox", "yearend"); }
     else { UI.codeErr = k; render(); }
   },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
@@ -3196,28 +3171,11 @@ const ACTIONS = {
     const v = appraisalValidation(r);
     if (!v.ok) { UI.apPart = v.I.length ? "I" : v.II.length ? "II" : "III"; toast(`${plural(v.errors.length, "item needs", "items need")} attention before finalizing.`); return go("appraisal"); }
     if (r.r3.bias.reflection.trim().length < 15) { r.r3.bias.tried = true; toast("Write a short reflection before finalizing."); return render(); }
-    if (!aiReady()) { toast("AI assessment is unavailable. Your facilitator can finalize the appraisal."); return; }
+    if (!aiReady()) { toast("AI assessment is unavailable. Please let your facilitator know."); return; }
     assessRound3();
   },
   assessRetry(el) { const k = el.dataset.k; if (k === "round1") assessRound1(); else if (k === "round2") assessRound2(); else assessRound3(); },
 
-  /* --- facilitator --- */
-  facUnlock() {
-    const v = ((document.getElementById("fac-code") || {}).value || "").trim();
-    const k = Object.keys(RELEASE_CODES).find(x => RELEASE_CODES[x] === v);
-    if (v === FAC_CODE) { UI.facOK = true; UI.codeErr = null; return render(); }
-    if (k) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update released." : "Year-end update released."); go(k === "r2" ? "home" : "inbox", k === "r2" ? null : "yearend"); return; }
-    UI.codeErr = "fac"; render();
-  },
-  release(el) { releaseRound(el.dataset.k); toast("Released on this device."); render(); },
-  facAlign() { const r = rec(); if (r.goals.status !== "pending_alignment") return; r.goals.status = "approved"; r.align.confirmed = true; r.align.manual = true; r.align.log.push({ from: "sys", text: "Contract confirmed by the facilitator" }); pulseNote(r, "alignment", "Alignment confirmed manually", "Confirmed by the facilitator without an assessed conversation: no Pulse change.", 1); save(); toast("Alignment confirmed."); render(); assessRound1(); },
-  facEnd(el) { const r = rec(); if (el.dataset.k === "diag") { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation ended by the facilitator" }); } else { r.r3.conv.ended = true; r.r3.conv.log.push({ from: "sys", text: "Conversation ended by the facilitator" }); } save(); render(); },
-  facPathway(el) {
-    const r = rec(), p = el.dataset.v; r.r2.pathway = p; r.r2.manual = true; r.r2.submitted = true;
-    if (!r.pulse.slots.coaching) { if (p === "A") applyPulse(r, "constructive", "Pathway A set by the facilitator."); else if (p === "C") applyPulse(r, "punitive", "Pathway C set by the facilitator."); else pulseNote(r, "coaching", "Pathway B set by the facilitator", "Partially effective management: no Pulse change.", 2); }
-    save(); toast(`Pathway ${p} set.`); render();
-  },
-  facFinal() { const r = rec(); if (r.r3.done) return; r.r3.done = true; pulseNote(r, "appraisal", "Appraisal finalized by the facilitator", "No assessed appraisal: no Pulse change.", 3); save(); toast("Appraisal finalized."); render(); },
   pc(el) { rec().pc[el.dataset.i] = el.dataset.v; save(); render(); }
 };
 
@@ -3232,7 +3190,6 @@ document.addEventListener("click", (ev) => {
 });
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "Escape") { if (UI.modal) { UI.modal = null; render(); } else if (UI.drawer) { UI.drawer = null; render(); } else if (UI.dd) { UI.dd = null; render(); } }
-  if (ev.key === "Enter" && ev.target.id === "fac-code") ACTIONS.facUnlock();
   if (ev.key === "Enter" && ev.target.id && ev.target.id.startsWith("code-")) ACTIONS.releaseCode({ dataset: { k: ev.target.id.slice(5) } });
   if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey) && ev.target.dataset && /\.drafts\./.test(ev.target.dataset.bind || "")) { const k = ev.target.dataset.bind.split(".").pop(); ev.preventDefault(); ACTIONS.chatSend({ dataset: { k } }); }
 });

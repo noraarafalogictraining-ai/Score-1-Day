@@ -14,8 +14,8 @@ const SIM_DATES = {
   start: "Mon 4 Jan 2027", deadline: "Mon 11 Jan 2027", submitted: "Fri 8 Jan 2027", approved: "Mon 11 Jan 2027",
   alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 17 Dec 2027"
 };
-/* Facilitator codes (local gate on each device; visible in page source) */
-const FAC_CODE = "5050";
+/* Codes the facilitator announces in the room; participants enter them on the "Wait for the facilitator message" card.
+   (A local gate on each device; visible in the page source.) */
 const RELEASE_CODES = { r2: "4826", r3: "7319" };
 
 /* Form vocabularies (EVIDENCE_SOURCES and FREQUENCIES come from employees.js) */

@@ -66,7 +66,8 @@ ROUND_RX = re.compile(r"\bRound [123]\b|SCORE Performance Hub|\bpilot\b|simulati
 def visible_text(pg):
     return pg.inner_text(".head") + "\n" + pg.inner_text(".side") + "\n" + pg.inner_text("main")
 def facilitator_code(pg, U, code):
-    pg.goto(U + "#facilitator"); pg.wait_for_timeout(200); pg.fill("#fac-code", code); act(pg, "facUnlock"); pg.wait_for_timeout(500)
+    """The participant enters the code announced by the facilitator on the 'Wait for the facilitator message' card."""
+    pg.goto(U + "#home"); pg.wait_for_timeout(250); pg.fill("#wait-card input", code); pg.click("#code-go"); pg.wait_for_timeout(500)
 
 def add_obj(pg, i, obj, measure, due, w):
     act(pg, "addObj"); b = f".objectives.{i}."
@@ -231,7 +232,7 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             st_ = pg.inner_text(".side")
             check("No team list, Business Dashboard, conversations, SCORE Review or Year-End Update in the sidebar", not any(x in st_ for x in ["Youssef", "Business Dashboard", "SCORE Review", "Year-End Update", "Commercial team", "Employee Conversations"]))
             act(pg, "dd", dd="user")
-            check("User menu: My Profile, Facilitator View, Sign Out", [t.strip() for t in pg.locator(".dropdown .dd-item").all_inner_texts()] == ["My Profile", "Facilitator View", "Sign Out"])
+            check("User menu: My Profile and Sign Out only (no Facilitator View)", [t.strip() for t in pg.locator(".dropdown .dd-item").all_inner_texts()] == ["My Profile", "Sign Out"])
             pg.locator('.dropdown [data-go="profile"]').click(); pg.wait_for_timeout(250)
             prof = pg.inner_text("main")
             check("My Profile has three tabs", [t.strip() for t in pg.locator(".tabs .tab").all_inner_texts()] == ["Overview", "My Responsibilities", "My Performance Objectives"])
@@ -435,6 +436,14 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             pg.goto(U + "#home"); pg.wait_for_timeout(200)
             check("Business event hidden until released", "Valtora" not in pg.inner_text("main") and "Start of Year" in pg.inner_text("main"))
             check("Old Business Dashboard link opens Home", (pg.goto(U + "#business"), pg.wait_for_timeout(300), pg.url.endswith("#home"))[2])
+            check("Home shows 'Wait for the facilitator message' with a code field", "Wait for the facilitator message" in pg.inner_text("#wait-card") and pg.locator("#wait-card input").count() == 1)
+            check("Facilitator View removed from the user menu", (act(pg, "dd", dd="user") or True) and "Facilitator" not in pg.inner_text("header") and (act(pg, "dd", dd="user") or True))
+            pg.fill("#wait-card input", "7319"); pg.click("#code-go"); pg.wait_for_timeout(300)
+            check("A wrong code (including the year-end code) does not release the mid-year event", not S_rel(pg)["r2"] and not S_rel(pg)["r3"] and "isn't valid" in pg.inner_text("#wait-card"))
+            pg.fill("#wait-card input", "5050"); pg.click("#code-go"); pg.wait_for_timeout(300)
+            check("The old facilitator master code no longer works", not S_rel(pg)["r2"])
+            pg.goto(U + "#inbox"); pg.wait_for_timeout(200)
+            check("The waiting card is also shown in the inbox", pg.locator("#wait-card").count() == 1)
             facilitator_code(pg, U, "4826")
             check("Release code 4826 starts the business event", S_rel(pg)["r2"])
             check("Omar's chat notification appears immediately, before any email is read", badge(pg) == "1" and not any(R(pg) and state(pg)["read"].get("sh-" + x) for x in ["nadine", "youssef", "salma", "mariam", "nour"]))
@@ -510,7 +519,9 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             check("Constructive coaching → pathway A and Pulse +5 trust / +4 development", r["r2"]["pathway"] == "A" and r["pulse"]["values"] == {"performance": 77, "trust": 71, "development": 62}, str(r["pulse"]["values"]))
             check("Pathway is not shown to participants", "Pathway" not in pg.inner_text("main"))
             # ---- Round 3 ----
+            check("Year-end waiting card appears after the mid-year review, asking for the facilitator's code", (pg.goto(U + "#home"), pg.wait_for_timeout(250), "year-end performance update" in pg.inner_text("#wait-card"))[2])
             facilitator_code(pg, U, "7319"); pg.wait_for_timeout(500)
+            check("Year-end code opens the HR year-end email; the waiting card disappears", pg.url.endswith("#inbox/yearend") and pg.locator("#wait-card").count() == 0)
             r = R(pg)
             check("Year-end update arrives by email with the evidence attached", r["r3"]["dataset"] and "Year-End Performance Update and Appraisal" in pg.inner_text("main") and pg.locator(".attach").count() == 1)
             shot(pg, "u05_yearend_email")
@@ -677,11 +688,9 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
                 check(f"Phone 390px: no horizontal scroll on {route}", mp.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth") <= 0)
             check("Phone: Pulse values readable in the top bar", all(v.is_visible() for v in mp.locator(".pt-txt b").all()) and mp.locator(".pt-txt b").count() == 3)
             mp.goto(U + "#home"); mp.wait_for_timeout(250); shot(mp, "u06_home_phone"); act(mp, "side"); check("Phone: navigation drawer opens", mp.locator(".side.open").count() == 1); shot(mp, "u07_nav_phone", False); mp.close()
-            # facilitator view & tablet
-            pg.goto(U + "#facilitator"); pg.wait_for_timeout(150); pg.fill("#fac-code", "5050"); act(pg, "facUnlock")
-            check("Facilitator sees pathway and Pulse history", "Round 2 pathway" in pg.inner_text("main") and "Event history" not in pg.inner_text("main"))
-            pg.locator('[data-fac="r1_kpi_relevance"]').fill("1"); pg.locator('[data-fac="r1_kpi_relevance"]').dispatch_event("change"); pg.wait_for_timeout(150)
-            check("Facilitator override applied", R(pg)["fac"]["r1_kpi_relevance"] == 1)
+            # the facilitator view no longer exists & tablet
+            pg.goto(U + "#facilitator"); pg.wait_for_timeout(200)
+            check("Old facilitator link opens Home (no facilitator view)", pg.locator("#fac-code").count() == 0 and "Facilitator view" not in pg.inner_text("main"))
             tp = ctx.new_page(); tp.set_viewport_size({"width": 1024, "height": 1366}); tp.route(re.compile(r"fonts\.(googleapis|gstatic)"), lambda r: r.abort())
             tp.goto(U + "#home"); tp.wait_for_timeout(300)
             if tp.locator("#resume-btn").count(): tp.click("#resume-btn"); tp.wait_for_timeout(300)
@@ -705,9 +714,8 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             np_.click("#chat-bubble"); np_.wait_for_timeout(200)
             check("No-AI mode: chat says unavailable, no composer, no fake reply", np_.locator('[data-bind$="drafts.chat"]').count() == 0 and "unavailable" in np_.inner_text(".chat-win") and sum(1 for m in np_.evaluate("JSON.parse(JSON.stringify(S))")["recs"]["omar"]["align"]["log"] if m["from"] == "employee") == 1)
             act(np_, "closeChat")
-            np_.goto(f"http://localhost:{NOAI}/#facilitator"); np_.wait_for_timeout(150); np_.fill("#fac-code", "5050"); act(np_, "facUnlock"); act(np_, "facAlign"); np_.wait_for_timeout(500)
             r = np_.evaluate("JSON.parse(JSON.stringify(S))")["recs"]["omar"]
-            check("Facilitator can confirm alignment manually; assessment error reported, no invented score", r["goals"]["status"] == "approved" and r["plan"]["assessment"] is None and "unavailable" in (r["plan"]["error"] or ""))
+            check("No-AI mode: no manual override; the plan stays pending until the conversation can take place", r["goals"]["status"] == "pending_alignment" and r["plan"]["assessment"] is None and np_.locator("#wait-card").count() == 0)
             b.close()
     finally:
         srv.terminate(); srv2.terminate()

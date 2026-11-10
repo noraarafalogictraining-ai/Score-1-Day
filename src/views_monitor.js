@@ -1,11 +1,22 @@
 /* =========================================================
-   MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · FACILITATOR GATES
+   MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · NEXT-EVENT CODE
    The app never generates evidence: managers record what they receive offline.
    ========================================================= */
-function releaseGate(k, title, text) {
-  return `<div class="card"><div class="empty">${icon("lock")}<h3>${title}</h3><p class="small" style="max-width:58ch">${text}</p>
-    <div class="row nowrap" style="gap:8px;margin-top:6px"><label class="sr" for="code-${k}">Release code</label><input class="inp" id="code-${k}" placeholder="Facilitator release code" inputmode="numeric" autocomplete="off" maxlength="8" style="width:220px"><button class="btn" data-act="releaseCode" data-k="${k}">Unlock</button></div>
-    ${UI.codeErr === k ? `<div class="err-text">That code is not correct.</div>` : ""}</div></div>`;
+/* Next event: "Wait for the facilitator message", then the participant enters the code announced in the room. */
+function pendingRelease(r = rec()) {
+  if (!S.released.r2 && goalsApproved(r)) return "r2";
+  if (S.released.r2 && !S.released.r3 && r.r2.submitted) return "r3";
+  return null;
+}
+function waitCard(r = rec()) {
+  const k = pendingRelease(r); if (!k) return "";
+  const what = k === "r2" ? "the mid-year business update" : "the year-end performance update";
+  return `<section class="card wait-card" id="wait-card"><div class="wait-b">${icon("clock")}<div class="grow stack-sm">
+      <h3>Wait for the facilitator message</h3>
+      <p class="small t2">Your facilitator will announce when ${what} is available and give you a code. Enter it here to continue.</p>
+      <div class="row nowrap wait-row"><label class="sr" for="code-${k}">Code</label><input class="inp" id="code-${k}" placeholder="Enter the code" inputmode="numeric" autocomplete="off" maxlength="8"><button class="btn primary" data-act="releaseCode" data-k="${k}" id="code-go">Continue</button></div>
+      ${UI.codeErr === k ? `<div class="err-text" id="code-err">That code isn't valid. Check the code your facilitator gave you.</div>` : ""}
+    </div></div></section>`;
 }
 
 VIEWS.evidence = function () {

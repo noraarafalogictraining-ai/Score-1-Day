@@ -41,7 +41,7 @@ Walks the full Omar journey in Chromium against the local server (test mode and 
 The participant sees a corporate employee platform, not a training exercise: no round labels, progress trackers or simulation wording. The three rounds still run internally (content release, events, conversations, scoring) and remain visible in the Facilitator view.
 
 - **Login:** "Welcome to NextWave", Username, Password, Sign In. It follows the original SCORE artifact design (navy with cyan and purple glows, NextWave logo). This is training sign-in: any username, the password is not checked or stored. A saved session shows a discreet "Continue as …" link.
-- **Top bar:** NextWave logo, Employee Pulse (three ring indicators: Performance blue, Trust teal, Development purple; hover for meaning, click for details and history), notifications, and a user menu with **My Profile**, **Facilitator View** and **Sign Out**.
+- **Top bar:** NextWave logo, Employee Pulse (three ring indicators: Performance blue, Trust teal, Development purple; hover for meaning, click for details and history), notifications, and a user menu with **My Profile** and **Sign Out**.
 - **Sidebar:** Home · My Inbox · Business Dashboard · Performance Management (Objectives, Evidence Log, Final Appraisal) · Employee Conversations.
 - **Home (Commercial overview):** Omar's employee overview and the commercial dashboard. At the start of the year it shows the CEO targets with baseline placeholders; after the Valtora release, the agreed mid-year figures; after the year-end update, the company's December figures. Home and Business Dashboard use the same data. KPI cards expand, chart months are clickable, and there is a trend / period-comparison switch and an expandable business alert.
 - **My Profile:** the participant as Commercial Director (name from login): employment information, job description, the CEO-set objectives for 2027 (read-only) and the reporting line with four direct reports.
@@ -49,7 +49,7 @@ The participant sees a corporate employee platform, not a training exercise: no 
   - The year-end update arrives as an HR email with the evidence attached ("Open"), and the appraisal is opened from that email.
   - The Round 2 checklist is now **Mid-year review**, reached from the Evidence Log and the conversation.
   - SCORE Review is now a **feedback report**, shown to participants after the final appraisal (via the HR completion email) and to the facilitator at any time.
-  - Release codes are typed into the Facilitator View code box: **4826** releases the business event, **7319** releases the year-end update, **5050** opens the Facilitator view.
+  - **Event release:** when the next event is due, Home and the Inbox show **"Wait for the facilitator message"** with a code box. The facilitator announces the code in the room and participants enter it: **4826** releases the mid-year business event (after the January plan is confirmed), **7319** releases the year-end update (after the mid-year review is submitted). Codes only work at the right moment.
 
 Configuration: the director profile, job description and CEO objectives are `DIRECTOR` and `CEO_OBJECTIVES` in `src/pilot.js` (provisional fictional targets, separate from Omar's data). Company year-end figures for the dashboard come from the server (`COMPANY_YEAR_END.metrics` in `api/_lib/scenario_omar.js`), so they stay hidden until released.
 
@@ -213,7 +213,7 @@ These slots are separate from the written appraisal's slot (fair/unfair appraisa
 
 The **Employee Pulse** (Performance, Trust, Development; 0–100) is always visible in the header, with a full event history. The **SCORE Review** shows each round's criteria with the score, evidence quotes, reason, confidence and missing information.
 
-Facilitator view: user menu → *Facilitator view* (code **5050**). It shows the AI status, round releases, the Valtora announcement, the Round 2 pathway, the Pulse history, per-criterion score overrides, and manual controls for when AI is unavailable (confirm alignment, end conversations, set pathway A/B/C, finalise the appraisal). Codes are a local gate on each device and are visible in the page source.
+There is no facilitator view. Events are released only by the codes participants enter on the "Wait for the facilitator message" card (`waitCard` in `src/views_monitor.js`; codes in `src/content.js` → `RELEASE_CODES`). The master code 5050 and the manual controls (confirm alignment, end conversations, set pathway, finalize without AI, per-criterion overrides, device reset) were removed. Without live AI, a session can't pass the January alignment. Codes are a local gate on each device and are visible in the page source.
 
 ---
 

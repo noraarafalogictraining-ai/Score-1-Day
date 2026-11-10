@@ -27,7 +27,7 @@ const aiReady = () => AIS.provider === "live" || AIS.provider === "mock";
 function aiNotice() {
   if (!AIS.loaded) return "";
   if (AIS.provider === "mock") return `<div class="notice warn ai-banner">${icon("alert", "i-sm")}<span><b>Test mode:</b> scripted test responses, not live AI. Use only for automated testing.</span></div>`;
-  if (AIS.provider === "unavailable") return `<div class="notice risk ai-banner">${icon("alert", "i-sm")}<span><b>Live AI conversations are unavailable:</b> no AI provider is configured on the server. Your facilitator can continue the session manually.</span></div>`;
+  if (AIS.provider === "unavailable") return `<div class="notice risk ai-banner">${icon("alert", "i-sm")}<span><b>Live AI conversations are unavailable:</b> no AI provider is configured on the server. Please let your facilitator know.</span></div>`;
   if (AIS.provider === "offline") return `<div class="notice risk ai-banner">${icon("alert", "i-sm")}<span>${esc(AIS.error)}</span></div>`;
   return "";
 }

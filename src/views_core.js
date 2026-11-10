@@ -22,6 +22,7 @@ VIEWS.home = function () {
   const E = EMP(), r = rec();
   return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", `${DIRECTOR.title} · Commercial Department`) + `
   <div class="stack-lg">
+    ${waitCard(r)}
     <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee overview</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div>
       <button class="btn" data-act="modal" data-m="profile" data-emp="${S.emp}">${icon("user", "i-sm")} View profile</button></div></div>
     ${commercialOverview(r)}
@@ -91,7 +92,7 @@ MODALS.profile = function (m) {
 VIEWS.inbox = function () {
   const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
-  return pageHead("My Inbox", "My Inbox") + `<div class="card split">
+  return pageHead("My Inbox", "My Inbox") + waitCard() + `<div class="card split" ${pendingRelease() ? 'style="margin-top:14px"' : ""}>
     <div class="list">${chatInboxItem()}<div class="list-h">Email</div>${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
     <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
   </div>`;
@@ -115,45 +116,7 @@ function mailView(m) {
   </article>`;
 }
 
-/* ---------- Facilitator view ---------- */
-VIEWS.facilitator = function () {
-  if (!UI.facOK) return pageHead("Facilitator", "Facilitator view") + `<div class="card pad-lg stack" style="max-width:440px">
-    <p class="small t2">Enter your code.</p>
-    <div class="field"><label for="fac-code">Code</label><input class="inp" id="fac-code" inputmode="numeric" autocomplete="off" maxlength="8"></div>
-    ${UI.codeErr === "fac" ? `<div class="err-text">That code is not correct.</div>` : ""}
-    <div><button class="btn primary" data-act="facUnlock">Open facilitator view</button></div></div>`;
-  const r = rec(), sc = scoreSummary(r), crit = criterionResults(r);
-  return pageHead("Facilitator", "Facilitator view", "", "Round control, scenario state and manual controls for this device.") + `<div class="stack-lg">
-    <div class="grid2" style="align-items:start">
-      <div class="card"><div class="card-h"><h3>Rounds</h3><span class="xs muted">AI: <b>${esc(AIS.provider)}</b>${AIS.model ? ` · ${esc(AIS.model)}` : ""}</span></div><div class="card-b stack">
-        <div class="row between nowrap"><div><b class="small">Round 1 · Setting Performance Expectations</b><div class="xs muted">Goal plan ${STATUS_LABEL[r.goals.status]}</div></div>${statusChip(r.goals.status)}</div>
-        <div class="row between nowrap"><div><b class="small">Round 2 · Valtora event</b><div class="xs muted">Release after announcing the event in the room. Code for participants: ${RELEASE_CODES.r2}</div></div><button class="btn sm ${S.released.r2 ? "" : "primary"}" data-act="release" data-k="r2" ${S.released.r2 ? "disabled" : ""}>${S.released.r2 ? "Released" : "Release Round 2"}</button></div>
-        <div class="row between nowrap"><div><b class="small">Round 3 · Year-end evaluation</b><div class="xs muted">Code for participants: ${RELEASE_CODES.r3}</div></div><button class="btn sm ${S.released.r3 ? "" : "primary"}" data-act="release" data-k="r3" ${S.released.r3 ? "disabled" : ""}>${S.released.r3 ? "Released" : "Release Round 3"}</button></div>
-        <details class="small"><summary class="t2" style="cursor:pointer">Trainer announcement for Round 2</summary><p class="t2" style="margin-top:8px;white-space:pre-line">${esc(VALTORA_ANNOUNCEMENT)}</p></details>
-      </div></div>
-      <div class="card"><div class="card-h"><h3>Scenario state</h3></div><div class="card-b stack">
-        <dl class="kv"><dt>Alignment</dt><dd>${r.align.confirmed ? `Confirmed${r.align.manual ? " (manual)" : ""} · ${esc((r.align.assessment && r.align.assessment.classification || {}).behaviour || "not assessed")}` : esc(STATUS_LABEL[r.goals.status])}</dd>
-        <dt>Round 2 pathway</dt><dd>${r.r2.pathway ? `<b>${r.r2.pathway}</b>${r.r2.manual ? " (manual)" : ""}` : "Not set"}</dd>
-        <dt>Year-end dataset</dt><dd>${r.r3.dataset ? esc(r.r3.tag || "Loaded") : "Not loaded"}</dd>
-        <dt>Learning Score</dt><dd><b>${sc.total}/${sc.max}</b>${sc.pending ? ` · ${sc.pending} criteria pending` : ""}</dd></dl>
-        ${pulseBars(r, true)}
-      </div></div>
-    </div>
-    <div class="card"><div class="card-h"><h3>Manual controls</h3><span class="xs muted">Use when AI is unavailable or an assessment fails</span></div><div class="card-b stack">
-      <div class="row between"><span class="small">Confirm the alignment without an AI conversation</span><button class="btn sm" data-act="facAlign" ${r.goals.status !== "pending_alignment" ? "disabled" : ""}>Confirm alignment</button></div>
-      <div class="row between"><span class="small">End Omar's mid-year conversation</span><button class="btn sm" data-act="facEnd" data-k="diag" ${r2Status(r) === "locked" || r.r2.diag.ended ? "disabled" : ""}>End conversation</button></div>
-      <div class="row between"><span class="small">Set the Round 2 pathway (overrides the AI classification; applies the matching coaching Pulse event if none was applied)</span><div class="seg">${["A", "B", "C"].map(p => `<button class="${r.r2.pathway === p ? "on" : ""}" data-act="facPathway" data-v="${p}" ${!S.released.r2 ? "disabled" : ""}>${p}</button>`).join("")}</div></div>
-      <div class="row between"><span class="small">End Omar's appraisal conversation</span><button class="btn sm" data-act="facEnd" data-k="appraisal" ${r.r3.appraisal.status !== "submitted" || r.r3.conv.ended ? "disabled" : ""}>End conversation</button></div>
-      <div class="row between"><span class="small">Finalize the appraisal without AI assessment</span><button class="btn sm" data-act="facFinal" ${!r.r3.conv.ended || r.r3.done ? "disabled" : ""}>Finalize</button></div>
-    </div></div>
-    <div class="card"><div class="card-h"><h3>Criterion scores</h3><span class="xs muted">Enter a score to override the AI assessment; clear it to restore</span></div><div class="card-b" style="overflow-x:auto">
-      ${AIS.scoring ? `<table class="tbl" style="min-width:720px"><thead><tr><th>Round</th><th>Criterion</th><th>AI</th><th>Max</th><th>Override</th></tr></thead><tbody>${crit.map(c => `<tr><td>${c.round}</td><td>${esc(c.groupLabel)} · ${esc(c.label)}</td><td class="num">${c.a ? c.a.score : "—"}</td><td class="num">${c.max}</td><td><input class="inp" style="width:80px" type="number" min="0" max="${c.max}" data-fac="${c.id}" value="${r.fac[c.id] != null ? r.fac[c.id] : ""}"></td></tr>`).join("")}</tbody></table>` : `<p class="small muted">Scoring structure unavailable: the SCORE server could not be reached.</p>`}
-    </div></div>
-    <div class="card"><div class="card-h"><h3>Employee Pulse history</h3></div><div class="card-b">${pulseHistory(r, true)}</div></div>
-    <div class="card pad row between"><div><b class="small">SCORE feedback report</b><div class="xs muted">Scores, evidence and feedback by round. Participants see it after the final appraisal.</div></div><button class="btn" data-act="go" data-go="review">Open report</button></div>
-    <div class="card pad row between"><div><b class="small">Reset this device</b><div class="xs muted">Deletes this session's saved progress.</div></div><button class="btn danger" data-act="modal" data-m="reset">${icon("reset", "i-sm")} Reset session</button></div>
-  </div>`;
-};
+/* The facilitator view was removed: events are released by the code participants enter on the "Wait for the facilitator message" card (waitCard). */
 MODALS.reset = function () {
   return modalWrap("Reset this session?", `<p class="small t2">All plans, conversations, evidence, appraisals, scores and Pulse history saved on this device will be deleted. This cannot be undone.</p>`, `<button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" style="background:var(--risk);border-color:var(--risk)" data-act="doReset">Delete and reset</button>`);
 };
