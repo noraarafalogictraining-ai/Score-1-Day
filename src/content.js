@@ -21,8 +21,12 @@ const RELEASE_CODES = { r2: "4826", r3: "7319" };
 /* Form vocabularies (EVIDENCE_SOURCES and FREQUENCIES come from employees.js) */
 const PERIODS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Q1", "Q2", "Q3", "Q4", "H1 (Jan–Jun)", "H2 (Jul–Dec)", "Full year"];
 const EVIDENCE_STATUS = ["Open", "Ongoing", "Completed"];
+/* Competency rating scale of the NextWave Performance Appraisal Form (3 = Meets Expectations = 100%) */
 const RATING_SCALE = [
-  { v: 5, l: "Exceptional" }, { v: 4, l: "Exceeds Expectations" }, { v: 3, l: "Meets Expectations" }, { v: 2, l: "Below Expectations" }, { v: 1, l: "Unsatisfactory" }
+  { v: 4, l: "Exceptional", d: "Skillfully demonstrates the competency and acts as a role model or reference." },
+  { v: 3, l: "Meets Expectations", d: "Demonstrates and performs the required competency independently." },
+  { v: 2, l: "Needs Improvement", d: "Partially demonstrates the required competency and requires constant supervision." },
+  { v: 1, l: "Unsatisfactory", d: "Performance is significantly below the criteria required for successful job performance." }
 ];
 const LEVELS = [{ id: "basic", l: "Basic" }, { id: "intermediate", l: "Intermediate" }, { id: "advanced", l: "Advanced" }];
 const OBJ_RANGE = { min: 3, max: 5, hardMax: 8 };
@@ -36,7 +40,7 @@ function hrMessages() {
   return {
     start: { subject: "Annual Performance Goal Setting — Action Required", date: SIM_DATES.start,
       body: ["Dear Commercial Director,", `The ${APP.cycleYear} performance cycle (${APP.cycleLabel}) has started. Please complete the performance goal plan for Omar Hassan, Market Intelligence Analyst.`, "__LIST__", `Deadline: ${SIM_DATES.deadline}.`, "NextWave HR"],
-      list: ["Review Omar's role, previous-year evidence and job description (printed handouts).", "Define performance objectives with measurable KPIs and targets.", "Set objective weights (total 100%).", "Identify evidence sources and review frequencies.", "Select role-relevant competencies and expected proficiency levels.", "Align the expectations with Omar."],
+      list: ["Review Omar's role, previous-year evidence and job description (printed handouts).", "Complete the Objectives of the Year form: SMART objectives, each with a measurement, due date and weight (total 100%).", "Select role-relevant competencies, expected proficiency levels and behavioral standards.", "Discuss and acknowledge the performance standards and expectations with Omar."],
       action: { l: "Open Performance Goal Plan", go: "goals" } },
     approved: { subject: "Performance Contract Confirmed — Monitoring Begins", date: SIM_DATES.approved,
       body: ["Dear Commercial Director,", "Omar Hassan's performance expectations have been established and the performance contract is confirmed.", "Throughout the year, you are responsible for:", "__LIST__", "The next formal checkpoint will take place in six months. Please maintain your performance records throughout the year.", "NextWave HR"],

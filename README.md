@@ -93,31 +93,57 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 
   A period unlocks only after its release, and the dashboard switches to the newest period when results arrive. All figures come from one source (`bizData` in `src/views_monitor.js`, using `DASHBOARD` and the server's year-end company figures). Figures the scenario doesn't define (for example revenue growth actuals) show "—" with "Not published".
 
-## Final appraisal prototype (experimental, not yet approved)
+## Objectives of the Year and Performance Appraisal Form (follows the NextWave HR forms)
 
-The Final Appraisal page is a working prototype with three tabs and three live summary cards (WHAT Achievement, HOW Achievement, Overall Performance Score).
+The January form and the December appraisal follow the two reference documents (*Objective Setting form* and *Performance Appraisal form*). Participant screens, Omar's AI context and the assessors no longer use the term "KPI".
 
-- **WHAT — Performance Objectives (60%)**: one collapsible card per January objective (title, weight, number of KPIs, objective achievement). Expanding it shows each KPI with its January target (locked), the actual result, the calculated achievement and the supporting evidence. Only one objective is open at a time.
-- **HOW — Competencies (40%)**: each competency with its expected level and the January written standard; the manager writes the observed behavior, a 1–5 rating and the evidence/justification.
-- **Final Performance Summary**: the calculation table (achievement × weight = contribution), key strengths, development priorities and the evidence-based justification. Submit stays disabled until everything required is complete; the list of what is missing is shown above it. The Omar conversation and feedback flow after submission are unchanged.
+**January: Objectives of the Year** (`src/views_goals.js`). The header shows Employee Name, Job Title, BU / Department, Direct Manager (the participant · Commercial Director), Performance Year and Rating Period. It is followed by **PERFORMANCE STANDARDS AND EXPECTATIONS** with the table No. · Objective / Project · Measurement · Due date (date selector) · Weight, plus a total. Rows open into an editing panel, and participants write every objective themselves.
+- **SMART check:** each objective gets S, M, A, R and T indicators and constructive feedback, judged from the objective, measurement and due date together. It never rewrites anything.
+- **What blocks submission:** a missing field, weights not totalling 100%, a measurement with no identifiable target or completion rule (including two targets, a change stated "by X%" with no level, or an ambiguous figure), or a due date outside 2027.
+- **What is advisory only:** S, A and R warnings.
+- **Acknowledgement:** the template's wording, with manager and employee status and date. Omar is only shown as acknowledging after the alignment discussion ends in agreement. A facilitator override is labelled as such, with no employee acknowledgement recorded.
+- **Agreed definition:** at submission, each objective stores the target and calculation definition it was agreed with (`o.agreed`), so year-end uses what was agreed.
+- **Competencies:** selection, expected levels and behavioral standards are unchanged.
 
-**Calculation rules** (all in `src/appraisal_calc.js`, `APPRAISAL_CONFIG`):
+**December: Performance Appraisal Form** (`src/views_appraisal.js`, calculations in `src/appraisal_calc.js`). It is one activity with three parts, a progress indicator, a live score strip, Save draft, a year-end evidence drawer and a review step. The header shows Employee Name, Position, Department, Time in Present Position ("Not recorded · 4 years at NextWave", because only company tenure is established), Type of Rating (Annual), Rating Period, and Manager Name and Title. The form's instructions are included.
+- **Part I · Competencies (40%):** the January competencies, each row Competency · Expected proficiency · Rating · Comments, expandable to show the agreed standard. The rating scale is exactly 4 Exceptional · 3 Meets Expectations · 2 Needs Improvement · 1 Unsatisfactory, and comments are required. **Competencies score = (average rating ÷ 3) × 100** (3 = 100%), shown with the form's formula.
+- **Part II · Objectives (60%):** columns No. · Objective(s) · Measure · Target · Due date · Actual achievement · % Achieved · Weight · Weighted score · Comments. Objective, measure, target, due date and weight come from January and are read-only. The manager enters the actual achievement and comments; the percentages are calculated and never pre-filled.
+- **Overall:** objectives × 60/100 + competencies × 40/100, shown with the form's Employee Performance Profile. The overall % is rounded to a whole number (half up) for classification only: **101%+ Exceptional · 86–100 Very Good · 76–85 Good · 60–75 Needs Improvement · below 60 Unacceptable**.
+- **Part III · Development Plan:** Career Planning (short term, long term), Learning & Development Plan rows (improvement area, action), Training & Development rows (course, institute or source, preferred date) and Additional Comments (Employee, Direct Manager, kept separate). The signature blocks for employee, manager and department manager are never filled in automatically.
 
-| Step | Rule |
+**Calculation methods per objective.** No cap applies anywhere, so results above 100% are possible.
+
+| Measure type | Rule |
 |---|---|
-| KPI achievement | actual ÷ target × 100 (higher is better); target ÷ actual × 100 when lower is better |
-| Cap | none (`kpiCap: null`): overachievement stays visible |
-| Objective achievement | equal-share average of its KPIs (no KPI subweights are added to the January plan) |
-| Contribution | objective achievement × objective weight |
-| WHAT | sum of contributions |
-| HOW | average competency rating ÷ 5 × 100 |
-| Overall | WHAT × 60% + HOW × 40% |
+| Quantity or percentage (higher is better) | % achieved = actual ÷ target × 100 |
+| Lower is better: reductions to a level, time limits such as "within 2 working days", "no more than 2" | target ÷ actual × 100, only when both are above 0; otherwise a manager assessment |
+| Milestone or completion with a due date | Completed by the due date = 100%. Not completed = 0%. Completed late or partly = manager assessment |
+| Unclear or qualitative | Manager assessment: a % plus a documented measurement basis plus confirmed evidence review. Until all three are given it "needs clarification" and is excluded from the score |
 
-**Safeguards**: a blank result is never counted as zero (the score stays "—" until every KPI is filled); non-numbers and negative values are rejected with a message; no division by zero; KPIs with no number, a milestone, more than one figure, or a zero target are **flagged for manager review**, where the manager enters an assessed achievement % (0–120) instead of a formula result; the manager can also switch any KPI between Higher is better / Lower is better / Manager review.
+Other rules:
+- Weighted score = % achieved × weight ÷ 100, and the objectives score is the sum of the weighted scores.
+- The actual must use the target's unit: a % target needs a % sign, a 1–5 score must stay at or below 5, and a count target rejects %.
+- Dates in the wording are never read as targets, and "11 of 12" is read as a target of 11.
+- If the weights don't total 100%, no objectives score is calculated.
+- Values stay unrounded internally.
 
-**Prototype limitation — the January plan has one free-text KPI per objective.** The prototype reads that text and splits it into separate KPIs where it contains several measurable targets (e.g. "95% on time and 95% passing review" → 2 KPIs), then reads the number as the target. Since Phase 5 the evidence matcher flags period mismatches (e.g. "per quarter" against H2-only records) and unit mismatches, but the manager still has to convert the actual into the same period and unit as the target. A structured January form (KPI, target, unit, direction per line) would remove this guesswork; it was deliberately not changed in this prototype.
+**Flow.**
+1. Complete Parts I–II.
+2. **Share Parts I–II with Omar.** His neutral opening message arrives, and Parts I–II become read-only.
+3. The appraisal discussion happens in the chat. Part III stays editable throughout.
+4. Closing the discussion returns the participant to Part III.
+5. **Review & finalize:** a summary of the whole form, the bias check and reflection, then finalize. Finalizing requires all three parts to be complete. "Reconsider" reopens Parts I–II.
 
-## Year-end evidence repository and KPI matching (Phase 5, experimental)
+**Data migration** (`migrateRecord` in `src/state.js`, applied to saved sessions on load):
+- Old KPI text becomes the Measurement word for word; no due date is invented.
+- Old 1–5 competency ratings are **not converted**: they are cleared, kept as `legacyRating` and flagged for re-rating, and their comments are kept.
+- Single-measure results move into the new fields. Multi-measure results are kept for review.
+- Old strengths, development and justification text moves into Direct Manager comments.
+- A shared appraisal that needs re-rating returns to draft. The flags are shown at the top of the form.
+
+## Year-end evidence repository and measurement matching (Phase 5)
+
+*Since the form redesign: one target per objective (no KPI splitting), no KPI wording, and the January evidence check is part of the SMART feedback. The evidence registers below are unchanged.*
 
 **One record for everyone.** `api/_lib/evidence_omar.js` (server only, versioned `2027.1`) holds Omar's 2027 year-end evidence. Every participant receives the same record; the former per-pathway datasets (A/B/C) are retired as evidence. The mid-year result still drives the Employee Pulse, but no longer changes Omar's results. The browser receives the record only after the December event is released (`/api/yearend`). A reconciliation guard stops the server if the registers stop matching the approved totals.
 
@@ -274,7 +300,7 @@ Since Phase 5 there is a single canonical record for every participant: see *Yea
 
 ## Testing results
 
-`tests/test_pilot.py`: 84 checks pass in scripted test mode and no-AI mode. They cover:
+`tests/test_pilot.py`: 272 checks pass in scripted test mode and no-AI mode (including the Objectives of the Year form, SMART checks, the Performance Appraisal Form calculations, rating bands, development plan, migration and the full January–December flow). They cover:
 - the API (methods, invalid JSON, oversized or tampered input, the same year-end record for everyone, no-AI 503s);
 - that confidential files are not downloadable and the page source contains no hidden facts, model answers or datasets;
 - the scoring total (100 = 35/40/25) and the blaming → pathway C → punitive rule;

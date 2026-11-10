@@ -64,103 +64,171 @@ function rateSeg(path, cur, err) {
 function rateRO(v) { return v ? `<div><span class="tag blue">${esc(ratingLabel(v))}</span></div>` : `<span class="muted small">Not rated</span>`; }
 const apEditable = (r = rec()) => ["not_started", "draft"].includes(r.r3.appraisal.status) && !r.r3.done;
 
+/* ---------- PERFORMANCE APPRAISAL FORM (one activity: Parts I, II and III) ---------- */
+const AP_PARTS = [["I", "Part I · Competencies", "40%"], ["II", "Part II · Objectives", "60%"], ["III", "Part III · Development Plan", ""]];
+const pdpEditable = (r = rec()) => !r.r3.done;
+const pctTxt = (v) => v == null ? "—" : `${v}%`;
+function apPartStatus(r, c, v) {
+  return {
+    I: { done: !v.I.length, label: `${c.rated}/${c.comps.length} rated` },
+    II: { done: !v.II.length, label: `${c.objDone}/${c.objectives.length} assessed` },
+    III: { done: !v.III.length, label: v.III.length ? `${plural(v.III.length, "item", "items")} open` : "Complete" }
+  };
+}
+function apHeader(r) {
+  const E = EMP();
+  return `<div class="hr-title">Performance Appraisal Form</div>
+    ${formHeadTable([[["Employee Name", esc(E.name)], ["Time in Present Position", "Not recorded · 4 years at NextWave"]], [["Position", esc(E.title)], ["Type of Rating", `<span class="rt-type"><span class="on">☑ Annual</span><span>☐ Probationary</span><span>☐ Interim</span></span>`]], [["Department", "Commercial"], ["Rating Period", "From 1 January 2027 to 31 December 2027"]], [["Supervisor / Manager Name", managerName()], ["Supervisor / Manager Title", "Commercial Director"]]])}
+    <details class="hr-instr"><summary>Instructions</summary><div class="xs t2 stack-sm">
+      <p>This form is to be used for annual evaluations, and at other times during the year when formal feedback is needed.</p>
+      <p><b>Part I – Competencies (represent 40% of the overall score).</b> These include competencies common to the employee's position job standards. Rate each competency based on performance during the period identified above.</p>
+      <p><b>Part II – Goals from last year or last evaluation period (represent 60% of the overall score).</b> Rate the progress made on each of the goals established at the beginning of the period. Also include any new goals established during the evaluation period and note any modifications to the original goals.</p>
+      <p><b>Part III – Professional Development Plan.</b> Enter any actions that will be taken by the employee or his manager/supervisor to support the employee's development. The plan may include career growth, job mastery, or actions to correct performance.</p>
+      <p><i>*Remember that these are behavioral elements and that your judgment in each case must be supported by fact.</i></p>
+    </div></details>`;
+}
 VIEWS.appraisal = function () {
   const r = rec(), E = EMP(), st = appraisalStatus(r);
-  if (r3Status(r) === "locked") return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Not yet open", "The year-end appraisal opens in December, together with the year-end performance update.");
-  if (!r.r3.dataset) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Year-end update not received", "The appraisal opens with the year-end performance update from HR.") + `<div style="margin-top:12px"><button class="btn primary" data-act="go" data-go="inbox/yearend">Open HR email</button></div>`;
-  const ed = apEditable(r), c = appraisalCalc(r), C = APPRAISAL_CONFIG, tab = ["how", "summary"].includes(UI.apTab) ? UI.apTab : "what";
-  const pct = (v) => v == null ? "—" : `${v}%`;
-  const cards = `<div class="ap-summary">
-    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} points (weight ${C.whatWeight}%)` : !c.weightOK && c.objectives.length ? `Weights total ${c.totalWeight}%, not 100%` : `${c.objDone} of ${c.objectives.length} objectives assessed${c.unresolved ? ` · ${plural(c.unresolved, "KPI", "KPIs")} unresolved` : ""}`}</span></div>
-    <div class="ap-sc how"><span class="xs">HOW Achievement</span><b class="num">${pct(c.howPct)}</b><span class="xs">${c.howPct != null ? `Contributes ${c.howContrib} points (weight ${C.howWeight}%)` : `${c.rated} of ${c.comps.length} competencies rated`}</span></div>
-    <div class="ap-sc overall"><span class="xs">Overall Performance Score</span><b class="num">${c.overall != null ? c.overall + "%" : "—"}</b><span class="xs">WHAT ${C.whatWeight}% · HOW ${C.howWeight}%</span></div>
-  </div>`;
-  const tabs = [["what", `WHAT — Performance Objectives (${C.whatWeight}%)`], ["how", `HOW — Competencies (${C.howWeight}%)`], ["summary", "Final Performance Summary"]];
-  return pageHead(`Performance Management / Final Appraisal`, `Final Appraisal · ${esc(E.name)}`, `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence</button>`, `${APP.cycleLabel} · Results against the plan agreed in January.`) + `
+  if (r3Status(r) === "locked") return pageHead(`Final Appraisal / ${esc(E.name)}`, "Performance Appraisal Form", empChip()) + lockedPanel("Not yet open", "The year-end appraisal opens in December, together with the year-end performance record.");
+  if (!r.r3.dataset) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Performance Appraisal Form", empChip()) + lockedPanel("Year-end record not received", "The appraisal opens with the year-end performance record from HR.") + `<div style="margin-top:12px"><button class="btn primary" data-act="go" data-go="inbox/yearend">Open HR email</button></div>`;
+  const ed = apEditable(r), c = appraisalCalc(r), v = appraisalValidation(r), ps = apPartStatus(r, c, v), a = r.r3.appraisal;
+  const part = ["I", "II", "III"].includes(UI.apPart) ? UI.apPart : a.status === "submitted" ? "III" : "I";
+  const nav = `<div class="ap-parts" role="tablist">${AP_PARTS.map(([id, l, w]) => `<button class="ap-part ${part === id ? "on" : ""} ${ps[id].done ? "done" : ""}" role="tab" aria-selected="${part === id}" data-act="apPart" data-v="${id}">${icon(ps[id].done ? "check" : "clock", "i-xs")}<span class="grow"><b>${l}</b>${w ? ` <span class="xs muted">(${w})</span>` : ""}<span class="xs muted ap-part-s">${ps[id].label}</span></span></button>`).join("")}</div>`;
+  const strip = `<div class="ap-strip">
+      <div><span class="xs muted">Competencies score</span><b class="num">${pctTxt(c.competenciesScore)}</b></div>
+      <div><span class="xs muted">Objectives score</span><b class="num">${pctTxt(c.objectivesScore)}</b></div>
+      <div><span class="xs muted">Overall score</span><b class="num">${pctTxt(c.overall)}</b></div>
+      <div><span class="xs muted">Performance rating</span><b>${c.band ? esc(c.band.label) : "—"}</b></div></div>`;
+  const flags = (a.flags || []).length ? `<div class="notice warn">${icon("alert", "i-sm")}<div class="stack-sm"><b>Saved entries that need your review</b><ul class="list-plain small">${a.flags.map(f => `<li>${esc(f)}</li>`).join("")}</ul></div></div>` : "";
+  const body = part === "I" ? apPartI(r, c, ed) : part === "II" ? apPartII(r, c, ed) : apPartIII(r, c, pdpEditable(r));
+  const partErrs = v[part];
+  return pageHead(`Performance Management / Final Appraisal`, `Final Appraisal · ${esc(E.name)}`, `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Year-end evidence</button>`, `${APP.cycleLabel} · Evaluated against the objectives and competencies agreed in January.`) + `
   <div class="stack">
-    ${r.r3.appraisal.revisions && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You are reconsidering the appraisal. Update it, then submit the revision.</span></div>` : ""}
+    ${a.revisions && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You are reconsidering the appraisal. Update it, then submit the revision.</span></div>` : ""}
     ${!ed ? appraisalStatusNotice(r) : ""}
-    ${cards}
-    <div class="tabs" role="tablist">${tabs.map(([id, l]) => `<button class="tab ${tab === id ? "on" : ""}" role="tab" aria-selected="${tab === id}" data-act="apTab" data-v="${id}">${l}</button>`).join("")}</div>
-    ${tab === "how" ? apHow(r, c, ed) : tab === "summary" ? apSummary(r, c, ed) : apWhat(r, c, ed)}
+    ${flags}
+    <section class="hr-form" id="appraisal-form">
+      ${apHeader(r)}
+      ${nav}${strip}
+      <div class="ap-body">${body}</div>
+      ${partErrs.length && (ed || part === "III") ? `<div class="notice warn ap-errs">${icon("alert", "i-sm")}<div class="stack-sm"><b>To complete ${AP_PARTS.find(x => x[0] === part)[1]}:</b><ul class="list-plain small">${partErrs.slice(0, 10).map(e => `<li>${esc(e)}</li>`).join("")}${partErrs.length > 10 ? `<li>…and ${partErrs.length - 10} more</li>` : ""}</ul></div></div>` : ""}
+      <div class="ap-actions">
+        <button class="btn" data-act="saveDraft" id="save-draft">${icon("check", "i-sm")} Save draft</button>
+        <span class="grow xs muted">Entries save automatically as you type.</span>
+        ${ed ? `<button class="btn primary" data-act="submitAppraisal" id="submit-appraisal" ${v.shareOK && !UI.busy ? "" : "disabled"} title="${v.shareOK ? "" : "Complete Parts I and II first"}">${icon("send", "i-sm")} ${a.revisions ? "Submit revised appraisal" : "Share Parts I–II with Omar"}</button>` : ""}
+        ${!ed && !r.r3.done && r.r3.conv.ended ? `<button class="btn primary" data-act="go" data-go="reflection" id="go-review">${icon("clipboard", "i-sm")} Review & finalize</button>` : ""}
+        ${r.r3.done ? `<button class="btn" data-act="go" data-go="reflection">${icon("eye", "i-sm")} View final appraisal</button>` : ""}
+      </div>
+    </section>
   </div>`;
 };
-function apWhat(r, c, ed) {
-  const open = UI.apOpen === undefined ? (c.objectives[0] && c.objectives[0].o.id) : UI.apOpen;
-  return `<div class="stack-sm">${c.objectives.map((x, oi) => {
-    const isOpen = open === x.o.id, base = P("r3", "appraisal", "what", x.o.id, "kpis");
-    return `<section class="ap-obj ${isOpen ? "open" : ""}" id="apobj-${x.o.id}">
-      <button class="ap-obj-h" data-act="apOpen" data-id="${x.o.id}" aria-expanded="${isOpen}"><span class="goal-n">${oi + 1}</span><span class="grow"><b>${esc(x.o.objective)}</b><span class="xs muted">${plural(x.rows.length, "KPI", "KPIs")}${x.rows.length > 1 ? ` · ${Math.round(100 / x.rows.length * 10) / 10}% each` : ""}</span></span><span class="tag">Weight ${x.weight}%</span><span class="ap-ach ${x.ach == null ? "na" : ""}">${x.ach == null ? "—" : x.ach + "%"}</span>${icon("chevdown", "i-sm")}</button>
-      ${isOpen ? `<div class="ap-obj-b">
-        <div class="xs muted">January KPI: <span class="t2">“${esc(x.o.kpi)}”</span></div>
-        ${x.rows.map(y => kpiRow(y, base, ed)).join("")}
-        <div class="ap-obj-f"><span>Objective achievement <b class="num">${x.ach == null ? "—" : x.ach + "%"}</b></span><span>× weight ${x.weight}% = <b class="num">${x.contrib == null ? "—" : x.contrib + " pts"}</b> towards WHAT</span></div>
-      </div>` : ""}
-    </section>`; }).join("")}
-    <p class="xs muted">KPIs, targets and weights are taken from the January plan and can't be changed. Several measurable targets in one KPI become separate KPIs with equal shares. Achievement is not capped.</p></div>`;
-}
-function kpiRow(y, base, ed) {
-  const k = y.k, e = y.e, p = `${base}.${y.i}`, type = e.type || k.type, dir = e.dir || k.dir, res = y.res;
-  const mode = type === "review" ? "review" : dir;
-  const sel = ed ? `<select class="sel sm" data-kpi-mode="${p}" aria-label="How this KPI is measured">${[["higher", "Higher is better"], ["lower", "Lower is better"], ["review", "Manager review"]].map(([v, l]) => `<option value="${v}" ${mode === v ? "selected" : ""} ${v !== "review" && (k.target == null || !y.match.numericAllowed) ? "disabled" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${mode === "review" ? "Manager review" : mode === "lower" ? "Lower is better" : "Higher is better"}</span>`;
-  const inputErr = res.status === "invalid" ? "err" : "";
-  return `<div class="kpi-item ${type === "review" ? "flagged" : ""}">
-    <div class="kpi-item-h"><span class="kpi-num">KPI ${y.i + 1}</span><span class="grow small">${esc(k.name)}</span>${y.share < 100 ? `<span class="xs muted">${Math.round(y.share * 10) / 10}% of objective</span>` : ""}</div>
-    <div class="kpi-match"><span class="cov cov-${y.match.status}">${COVERAGE_LABEL[y.match.status]}</span><span class="xs t2">Relevant evidence: ${y.match.refs.length ? y.match.refs.map(ref => `<button class="ev-ref" data-act="evRef" data-ref="${ref}">${esc(ref)} · ${esc(REF_LABEL[ref] || "")}</button>`).join(" ") : "none identified"}</span></div>
-    ${y.match.notes.length ? `<div class="xs t2 kpi-notes">${y.match.notes.map(n => `<div>${icon("info", "i-xs")} ${esc(n)}</div>`).join("")}</div>` : ""}
-    ${type === "review" ? `<div class="kpi-flag ${res.status === "ok" ? "resolved" : ""}">${icon(res.status === "ok" ? "check" : "alert", "i-xs")} <span><b>${res.status === "ok" ? "Resolved by manager review" : "Unresolved: not included in the score"}</b> · ${esc(k.reason || "Measured by manager judgment.")}${y.match.numericAllowed ? "" : " A formula can't be applied to this KPI."}</span></div>` : ""}
-    <div class="kpi-grid">
-      <div class="kg"><span class="kg-l">Target</span><b class="kg-target">${esc(fmtTarget(k))}</b><span class="xs muted">From January · locked</span></div>
-      <div class="kg"><span class="kg-l">${type === "review" ? "Assessed achievement %" : "Actual result"}</span>${ed ? (type === "review" ? `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.manual" ${bind(p + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.manualMax}">` : `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.actual" ${bind(p + ".actual")} value="${esc(e.actual || "")}" placeholder="${k.unit === "%" ? "Percentage, e.g. 80%" : k.unit ? `Score, e.g. 3.5${k.unit}` : "Number, e.g. 7"}">`) : `<b>${esc(type === "review" ? (e.manual ? e.manual + "%" : "—") : (e.actual || "—"))}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>
-      <div class="kg"><span class="kg-l">Achievement</span><b class="kg-ach ${res.pct == null ? "na" : res.pct >= 100 ? "good" : "low"}">${res.pct == null ? "—" : res.pct + "%"}</b><span class="xs muted">${res.status === "ok" ? esc(res.note) : ""}</span></div>
-      <div class="kg"><span class="kg-l">Measure</span>${sel}</div>
-    </div>
-    ${type === "review" ? `<div class="review-box">
-      <label class="check"><input type="checkbox" id="${p}.reviewed" ${bind(p + ".reviewed")} ${e.reviewed ? "checked" : ""} ${ed ? "" : "disabled"}> I have reviewed the relevant evidence records for this KPI <span class="req">*</span></label>
-      <div class="field"><label class="lbl" for="${p}.basis">Measurement basis <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.basis" ${bind(p + ".basis")} placeholder="How did you determine the %? Which records did you count, against what, and why is this a fair reading of the January KPI?">${esc(e.basis || "")}</textarea>` : `<div class="small t2">${esc(e.basis || "—")}</div>`}</div>
-    </div>` : ""}
-    <div class="field"><label class="lbl" for="${p}.evidence">Supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.evidence" ${bind(p + ".evidence")} placeholder="Which year-end evidence or Evidence Log entries support this result?">${esc(e.evidence || "")}</textarea>` : `<div class="small t2">${esc(e.evidence || "—")}</div>`}</div>
-  </div>`;
-}
-function apHow(r, c, ed) {
+function partBand(t) { return `<div class="part-band">${t}</div>`; }
+function apPartI(r, c, ed) {
   const a = r.r3.appraisal, open = UI.compOpen === undefined ? (r.goals.comps[0] && r.goals.comps[0].id) : UI.compOpen;
-  return `<div class="stack-sm">${r.goals.comps.map(k => {
-    const x = a.how[k.id] || {}, isOpen = open === k.id, base = P("r3", "appraisal", "how", k.id), t = a.tried;
-    return `<section class="ap-obj ${isOpen ? "open" : ""}"><button class="ap-obj-h" data-act="compOpen" data-id="${k.id}" aria-expanded="${isOpen}"><span class="goal-n">${icon("layers", "i-xs")}</span><span class="grow"><b>${esc(compName(k.id))}</b><span class="xs muted">Expected level: ${levelLabel(k.level)}</span></span><span class="ap-ach ${x.rating ? "" : "na"}">${x.rating ? `${x.rating}/5` : "—"}</span>${icon("chevdown", "i-sm")}</button>
-      ${isOpen ? `<div class="ap-obj-b">
-        <div class="std-box"><span class="kg-l">Expected behavioral standard (January)</span><div class="small">${k.standard ? esc(k.standard) : "<span class='muted'>None written</span>"}</div></div>
-        <div class="field"><label class="lbl" for="${base}.observed">Observed behavior <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.observed" ${bind(base + ".observed")} placeholder="What did Omar actually do? Use the year-end evidence and your Evidence Log.">${esc(x.observed || "")}</textarea>` : `<div class="small t2">${esc(x.observed || "—")}</div>`}</div>
-        <div class="field"><span class="lbl">Performance rating (1–5) <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, t && !x.rating) : rateRO(x.rating)}<span class="hint">Rate the behavior against the agreed standard and the expected ${levelLabel(k.level)} level.</span></div>
-        <div class="field"><label class="lbl" for="${base}.just">Supporting evidence and justification <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.just" ${bind(base + ".just")}>${esc(x.just || "")}</textarea>` : `<div class="small t2">${esc(x.just || "—")}</div>`}</div>
-      </div>` : ""}</section>`; }).join("")}
-    <p class="xs muted">HOW Achievement = average rating ÷ ${APPRAISAL_CONFIG.howScale} × 100.</p></div>`;
+  const rows = c.comps.map((x, i) => {
+    const k = x.c, h = x.h, isOpen = open === k.id, base = P("r3", "appraisal", "how", k.id), tried = a.tried;
+    return `<tr class="ap-row ${isOpen ? "open" : ""}" data-act="compOpen" data-id="${k.id}" id="comp-row-${k.id}"><td><b>${esc(compName(k.id))}</b></td><td>${levelLabel(k.level)}</td><td class="c-rate">${x.rating ? `<b class="num">${x.rating}</b> <span class="xs muted">${esc(ratingLabel(x.rating).split(" · ")[1])}</span>` : `<span class="muted">—</span>`}</td><td><div class="clamp xs">${h.comments ? esc(h.comments) : `<span class="muted">—</span>`}</div></td><td class="c-exp">${icon("chevdown", "i-sm")}</td></tr>
+      ${isOpen ? `<tr class="ap-edit"><td colspan="5"><div class="ap-edit-b">
+        <div class="grid2"><div><span class="kg-l">Competency</span><div class="small"><b>${esc(compName(k.id))}</b></div></div><div><span class="kg-l">Expected proficiency</span><div class="small">${levelLabel(k.level)}</div></div></div>
+        <div class="std-box"><span class="kg-l">Agreed behavioral standard (January)</span><div class="small">${k.standard ? esc(k.standard) : "<span class='muted'>None written</span>"}</div></div>
+        ${h.legacyRating && !x.rating ? `<div class="notice warn xs">${icon("alert", "i-xs")}<span>Earlier rating ${h.legacyRating} on the former 1–5 scale was not converted. Rate again on the 1–4 scale.</span></div>` : ""}
+        <div class="field"><span class="lbl">Rating <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, tried && !x.rating) : rateRO(x.rating)}</div>
+        <div class="field"><label class="lbl" for="${base}.comments">Comments / supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="3" id="${base}.comments" ${bind(base + ".comments")} placeholder="What did Omar do that supports this rating? Refer to the agreed standard and the evidence.">${esc(h.comments || "")}</textarea>` : `<div class="small t2" style="white-space:pre-line">${esc(h.comments || "—")}</div>`}</div>
+      </div></td></tr>` : ""}`;
+  }).join("");
+  const ratings = c.comps.map(x => x.rating == null ? "__" : x.rating);
+  return `${partBand("PART I. COMPETENCIES EVALUATION")}
+    <table class="hr-tbl scale-tbl"><thead><tr><th colspan="3">Performance Rating</th></tr></thead><tbody>${RATING_SCALE.map(x => `<tr><td><b>${x.l}</b></td><td class="num c-no"><b>${x.v}</b></td><td class="xs">${esc(x.d)}</td></tr>`).join("")}</tbody></table>
+    <p class="xs t2">Rate the appraisee's competencies in the following areas in terms of their current role requirements. If appropriate provide evidence to support your assessment.</p>
+    <div class="table-wrap"><table class="hr-tbl ap-tbl"><thead><tr><th>Competencies</th><th>Expected proficiency</th><th>Rating</th><th>Comments</th><th class="c-exp"></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="formula-box"><div class="xs"><b>Your score is 100% at 3.</b> To identify the overall competencies score, divide the average of the competency ratings by 3, then multiply by 100.<div class="formula num">{[(${ratings.join(" + ")}) / ${c.comps.length}] / 3} × 100</div></div><b class="num formula-res" id="comp-score">${pctTxt(c.competenciesScore)}</b></div>`;
 }
-function apSummary(r, c, ed) {
-  const a = r.r3.appraisal, C = APPRAISAL_CONFIG, v = appraisalValidation(r), ta = (path, val, ph, rows = 2) => ed ? `<textarea class="ta" rows="${rows}" id="${path}" ${bind(path)} placeholder="${ph}">${esc(val || "")}</textarea>` : `<div class="small t2">${esc(val || "—")}</div>`;
-  const row = (l, ach, w, contrib) => `<tr><td>${l}</td><td class="num">${ach == null ? "—" : ach + "%"}</td><td class="num">${w}%</td><td class="num"><b>${contrib == null ? "—" : contrib}</b></td></tr>`;
-  return `<div class="stack">
-    <div class="card"><div class="card-h"><h3>Score calculation</h3></div><div class="card-b"><div class="table-wrap"><table class="tbl" style="min-width:0"><thead><tr><th>Component</th><th>Achievement</th><th>Weight</th><th>Contribution</th></tr></thead><tbody>
-      ${row("WHAT — Performance Objectives", c.whatPct, C.whatWeight, c.whatContrib)}${row("HOW — Competencies", c.howPct, C.howWeight, c.howContrib)}
-      <tr class="total"><td><b>Overall Performance Score</b></td><td></td><td class="num">100%</td><td class="num"><b>${c.overall == null ? "—" : c.overall + "%"}</b></td></tr>
-    </tbody></table></div>
-    <details class="xs muted" style="margin-top:8px"><summary style="cursor:pointer">How it is calculated</summary><p style="margin-top:6px">KPI achievement = actual ÷ target × 100 (lower is better: target ÷ actual × 100, only when both are above 0). No cap: overachievement stays visible. Objective achievement = average of its KPIs (equal shares; no subweights were set in January). WHAT = Σ objective achievement × objective weight. HOW = average competency rating × 20 (1 = 20% … 5 = 100%). Overall = WHAT × ${C.whatWeight}% + HOW × ${C.howWeight}% (can exceed 100). Blank results are never treated as zero; figures are rounded only for display.</p></details></div></div>
-    <div class="card"><div class="card-b stack">
-      <div class="grid2"><div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "strengths")}">Key strengths <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "strengths"), a.overall.strengths, "")}</div>
-      <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "dev")}">Development priorities <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "dev"), a.overall.dev, "")}</div></div>
-      <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "just")}">Evidence-based overall justification <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "just"), a.overall.just, "What does the score reflect? Cite the evidence that matters most.", 3)}</div>
-    </div></div>
-    ${ed ? `<div class="card"><div class="card-b stack">
-      ${v.ok ? `<div class="notice good">${icon("check", "i-sm")}<span>Everything required is complete.</span></div>` : `<div class="notice warn">${icon("alert", "i-sm")}<div class="stack-sm"><b>Complete before submitting (${v.errors.length}):</b><ul class="list-plain">${v.errors.slice(0, 12).map(e => `<li>${esc(e)}</li>`).join("")}${v.errors.length > 12 ? `<li>…and ${v.errors.length - 12} more</li>` : ""}</ul></div></div>`}
-      <div class="row between"><span class="xs muted">Your progress saves automatically. ${r.r3.appraisal.revisions ? "Submitting records the revised appraisal." : "Submitting shares the appraisal with Omar."}</span><button class="btn primary" data-act="submitAppraisal" id="submit-appraisal" ${v.ok && !UI.busy ? "" : "disabled"}>${icon("send", "i-sm")} ${r.r3.appraisal.revisions ? "Submit revised appraisal" : "Submit appraisal"}</button></div>
-    </div></div>` : ""}
-  </div>`;
+function objMethodSelect(x, base, ed) {
+  if (x.def.type !== "numeric") return `<span class="tag">${x.def.type === "milestone" ? "Completion rule" : "Manager assessment"}</span>`;
+  const cur = x.method;
+  return ed ? `<select class="sel sm" data-obj-mode="${base}" aria-label="How achievement is calculated">${[["higher", "Actual ÷ target × 100"], ["lower", "Lower is better (target ÷ actual)"], ["review", "Manager assessment (documented basis)"]].map(([v, l]) => `<option value="${v}" ${cur === v ? "selected" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${METHOD_LABEL[cur]}</span>`;
+}
+function manualBox(x, base, ed) {
+  const e = x.e;
+  return `<div class="review-box">
+      ${x.def.type === "review" ? `<div class="kpi-flag ${x.res.status === "ok" ? "resolved" : ""}">${icon(x.res.status === "ok" ? "check" : "alert", "i-xs")} <span><b>${x.res.status === "ok" ? "Assessed with a documented basis" : "Needs clarification: not yet in the score"}</b> · ${esc(x.def.reason || "")}</span></div>` : ""}
+      <div class="grid2"><div class="field"><label class="lbl" for="${base}.manual">% achieved (your assessment) <span class="req">*</span></label>${ed ? `<input class="inp" inputmode="decimal" id="${base}.manual" ${bind(base + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.manualMax}">` : `<b>${esc(e.manual ? e.manual + "%" : "—")}</b>`}</div>
+      <label class="check" style="align-self:end"><input type="checkbox" id="${base}.reviewed" ${bind(base + ".reviewed")} ${e.reviewed ? "checked" : ""} ${ed ? "" : "disabled"}> I have reviewed the relevant year-end evidence <span class="req">*</span></label></div>
+      <div class="field"><label class="lbl" for="${base}.basis">Measurement basis <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.basis" ${bind(base + ".basis")} placeholder="How did you reach this %? What did you compare with what, and why is it a fair reading of the agreed objective? Note any limitation in the evidence.">${esc(e.basis || "")}</textarea>` : `<div class="small t2">${esc(e.basis || "—")}</div>`}</div>
+    </div>`;
+}
+function apPartII(r, c, ed) {
+  const open = UI.apOpen === undefined ? (c.objectives[0] && c.objectives[0].o.id) : UI.apOpen;
+  const rows = c.objectives.map(x => {
+    const o = x.o, e = x.e, isOpen = open === o.id, base = P("r3", "appraisal", "what", o.id), res = x.res;
+    const actualCell = x.method === "milestone" ? (e.milestone ? esc((MILESTONE_OPTIONS.find(m => m[0] === e.milestone) || [, ""])[1].replace(/ \(.*\)$/, "")) : "—") : x.method === "review" ? (e.manual ? `Assessed ${esc(e.manual)}%` : "—") : (e.actual ? esc(e.actual) : "—");
+    const input = x.method === "milestone"
+      ? `<div class="field"><label class="lbl" for="${base}.milestone">Actual achievement: completion status <span class="req">*</span></label>${ed ? `<select class="sel" id="${base}.milestone" ${bind(base + ".milestone")}><option value="">Select…</option>${MILESTONE_OPTIONS.map(([v, l]) => `<option value="${v}" ${e.milestone === v ? "selected" : ""}>${l}</option>`).join("")}</select>` : `<b>${actualCell}</b>`}</div>${["late", "partial"].includes(e.milestone) ? manualBox(x, base, ed) : ""}`
+      : x.method === "review" ? manualBox(x, base, ed)
+      : `<div class="field"><label class="lbl" for="${base}.actual">Actual achievement <span class="req">*</span></label>${ed ? `<input class="inp ${res.status === "invalid" ? "err" : ""}" inputmode="decimal" id="${base}.actual" ${bind(base + ".actual")} value="${esc(e.actual || "")}" placeholder="${x.def.unit === "%" ? "Percentage, e.g. 80%" : x.def.unit ? `Score, e.g. 3.5${x.def.unit}` : "Number, e.g. 9"}">` : `<b>${esc(e.actual || "—")}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>`;
+    return `<tr class="ap-row ${isOpen ? "open" : ""}" data-act="apOpen" data-id="${o.id}" id="apobj-${o.id}">
+        <td class="c-no">${x.i + 1}</td><td><div class="clamp">${esc(o.objective)}</div></td><td><div class="clamp xs">${esc(o.measure || "")}</div></td><td class="num">${esc(fmtDefinitionTarget(x.def))}</td><td class="xs">${esc(fmtDue(o.due))}</td>
+        <td class="xs">${actualCell}</td><td class="num shade c-pct">${pctTxt(res.pct)}</td><td class="num shade">${x.weight}%</td><td class="num calc c-ws">${pctTxt(x.weighted)}</td><td><div class="clamp xs">${e.comments ? esc(e.comments) : `<span class="muted">—</span>`}</div></td></tr>
+      ${isOpen ? `<tr class="ap-edit"><td colspan="10"><div class="ap-edit-b">
+        <div class="agreed-grid">
+          <div class="full"><span class="kg-l">Objective (as agreed in January)</span><div class="small">${esc(o.objective)}</div></div>
+          <div class="full"><span class="kg-l">Measurement</span><div class="small">${esc(o.measure || "—")}</div></div>
+          <div><span class="kg-l">Target</span><b class="kg-target">${esc(fmtDefinitionTarget(x.def))}</b></div><div><span class="kg-l">Due date</span><div class="small">${esc(fmtDue(o.due))}</div></div><div><span class="kg-l">Weight</span><div class="small"><b>${x.weight}%</b></div></div><div><span class="kg-l">Calculation</span>${objMethodSelect(x, base, ed)}</div>
+        </div>
+        <div class="xs t2">Relevant year-end evidence: ${x.match.refs.length ? x.match.refs.map(ref => `<button class="ev-ref" data-act="evRef" data-ref="${ref}">${esc(ref)} · ${esc(REF_LABEL[ref] || "")}</button>`).join(" ") : "none identified: explain how you assessed the result"}</div>
+        ${x.match.notes.map(n => `<div class="xs t2">${icon("info", "i-xs")} ${esc(n.replace(/Your target/, "The target"))}</div>`).join("")}
+        <div class="res-grid">
+          <div>${input}</div>
+          <div class="calc-cell"><span class="kg-l">% achieved</span><b class="kg-ach num ${res.pct == null ? "na" : res.pct >= 100 ? "good" : "low"}">${pctTxt(res.pct)}</b><span class="xs muted">${res.status === "ok" ? esc(res.note) : ""}</span></div>
+          <div class="calc-cell ws"><span class="kg-l">Weighted score</span><b class="kg-ach num">${pctTxt(x.weighted)}</b><span class="xs muted">% achieved × ${x.weight}%</span></div>
+        </div>
+        <div class="field"><label class="lbl" for="${base}.comments">Comments / supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.comments" ${bind(base + ".comments")} placeholder="Which evidence supports the actual achievement? Note any limitation or modification to the original goal.">${esc(e.comments || "")}</textarea>` : `<div class="small t2" style="white-space:pre-line">${esc(e.comments || "—")}</div>`}</div>
+      </div></td></tr>` : ""}`;
+  }).join("");
+  const ws = c.objectives.map(x => x.weighted == null ? "__" : x.weighted);
+  const C = APPRAISAL_CONFIG;
+  return `${partBand("PART II. OBJECTIVES EVALUATION")}
+    <p class="xs t2">Rate the progress made on each of the goals established at the beginning of the period and any new goals. Note any modifications to the original goals.</p>
+    <div class="table-wrap"><table class="hr-tbl ap-tbl obj-eval"><thead><tr><th class="c-no">No.</th><th>Objective(s)</th><th>Measure</th><th>Target</th><th>Due date</th><th>Actual achievement</th><th class="shade">% Achieved</th><th class="shade">Weight</th><th class="calc">Weighted score</th><th>Comments</th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="7" class="right"><b>Total</b></td><td class="num shade"><b>${c.totalWeight}%</b></td><td class="num calc"><b>${pctTxt(c.objectivesScore)}</b></td><td></td></tr></tfoot></table></div>
+    <div class="formula-box"><div class="xs"><b>Your overall objectives score is equal to the total of your weighted scores.</b><div class="formula num">${ws.join(" + ")} =</div></div><b class="num formula-res" id="obj-score">${pctTxt(c.objectivesScore)}</b></div>
+    <div class="formula-box"><div class="xs"><b>OVERALL RATING (based on Parts I and II)</b> · Relative weights of competencies and performance objectives are considered.<div class="formula num">${pctTxt(c.objectivesScore)} × (${C.objectivesWeight}/100) + ${pctTxt(c.competenciesScore)} × (${C.competenciesWeight}/100) =</div></div><b class="num formula-res" id="overall-score">${pctTxt(c.overall)}</b></div>
+    ${bandTable(c)}`;
+}
+function bandTable(c) {
+  return `<table class="hr-tbl band-tbl" id="band-table"><thead><tr><th colspan="3">Employee Performance Profile <span class="xs muted" style="font-weight:500;text-transform:none;letter-spacing:0">· the overall score, rounded to a whole %, falls in one band</span></th></tr></thead><tbody>${PERFORMANCE_BANDS.map(b => { const on = c.band && c.band.label === b.label; return `<tr class="${on ? "on" : ""}"><td class="c-tick">${on ? "✓" : ""}</td><td><b>${b.label}</b></td><td class="num">${b.range}</td></tr>`; }).join("")}</tbody></table>`;
+}
+function pdpRows(list, cols, path, ed, addLabel) {
+  const rows = list.map((x, i) => `<tr>${cols.map(([k, l, type]) => `<td>${ed ? (type === "date" ? `<input class="inp sm" type="date" aria-label="${l} ${i + 1}" ${bind(`${path}.${i}.${k}`)} value="${esc(x[k] || "")}">` : `<textarea class="ta sm" rows="2" aria-label="${l} ${i + 1}" ${bind(`${path}.${i}.${k}`)}>${esc(x[k] || "")}</textarea>`) : `<span class="small">${esc(x[k] || "—")}</span>`}</td>`).join("")}${ed ? `<td class="c-act"><button class="icon-btn" data-act="pdpDel" data-k="${path.split(".").pop()}" data-i="${i}" aria-label="Remove row ${i + 1}">${icon("trash", "i-sm")}</button></td>` : ""}</tr>`).join("");
+  return `${rows || `<tr><td colspan="${cols.length + 1}" class="xs muted">No entries.</td></tr>`}${ed ? `<tr><td colspan="${cols.length + 1}"><button class="btn sm" data-act="pdpAdd" data-k="${path.split(".").pop()}">${icon("plus", "i-sm")} ${addLabel}</button></td></tr>` : ""}`;
+}
+function apPartIII(r, c, ed) {
+  const p = r.r3.appraisal.pdp, base = P("r3", "appraisal", "pdp");
+  const ta = (k, ph, rows = 4) => ed ? `<textarea class="ta" rows="${rows}" id="${base}.${k}" ${bind(`${base}.${k}`)} placeholder="${ph}">${esc(p[k] || "")}</textarea>` : `<div class="small t2" style="white-space:pre-line">${esc(p[k] || "—")}</div>`;
+  const signed = r.r3.done;
+  return `${partBand("PART III. DEVELOPMENT PLAN")}
+    ${r.r3.appraisal.status !== "submitted" && !signed ? `<p class="xs muted">Complete Part III after your appraisal discussion with Omar, so the plan reflects what you agree together. You can draft it at any time.</p>` : ""}
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="2" class="grey">Career planning</th></tr><tr><th>Short term <span class="req">*</span></th><th>Long term <span class="req">*</span></th></tr></thead><tbody><tr><td>${ta("short", "Career goals for the next 12 months")}</td><td>${ta("long", "Longer-term career direction")}</td></tr></tbody></table>
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="3" class="grey">Learning & development plan</th></tr><tr><th>Improvement area(s) <i>(if any)</i></th><th>Action</th>${ed ? "<th></th>" : ""}</tr></thead><tbody>${pdpRows(p.ld || [], [["area", "Improvement area"], ["action", "Action"]], `${base}.ld`, ed, "Add development action")}</tbody></table>
+    <p class="xs muted">Actions can include coaching, mentoring, stretch assignments, on-the-job learning, stakeholder exposure, structured feedback or formal training. Be specific: what, who supports it, and by when.</p>
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="4" class="grey">Training & development section</th></tr><tr><th>Training course</th><th>Institute or source</th><th>Preferred date</th>${ed ? "<th></th>" : ""}</tr></thead><tbody>${pdpRows(p.training || [], [["course", "Training course"], ["source", "Institute or source"], ["date", "Preferred date", "date"]], `${base}.training`, ed, "Add training")}</tbody></table>
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="2" class="grey">Additional comments</th></tr><tr><th>Employee</th><th>Direct manager <span class="req">*</span></th></tr></thead><tbody><tr><td>${ta("employee", "Omar's own comments, if he shared any in the discussion (optional)", 5)}</td><td>${ta("manager", "Your overall comments on Omar's performance and development", 5)}</td></tr></tbody></table>
+    ${signatureBlock(r)}`;
+}
+function signatureBlock(r) {
+  const done = r.r3.done;
+  return `<table class="hr-tbl sig-tbl"><tbody><tr>
+      <td><span class="kg-l">Employee signature</span><div class="small">Pending employee acknowledgement</div><div class="xs muted">Date: —</div></td>
+      <td><span class="kg-l">Manager / supervisor signature</span><div class="small">${done ? `${managerName()} · finalized digitally` : "Not yet signed"}</div><div class="xs muted">Date: ${done ? SIM_DATES.closed : "—"}</div></td>
+      <td><span class="kg-l">Department manager signature</span><div class="small">Pending</div><div class="xs muted">Date: —</div></td>
+    </tr></tbody></table>`;
 }
 function appraisalStatusNotice(r) {
   if (r.r3.done) return `<div class="notice good">${icon("check", "i-sm")}<span>The appraisal is final and recorded.</span></div>`;
-  if (r.r3.conv.ended) return `<div class="notice">${icon("info", "i-sm")}<span class="grow">Appraisal shared with Omar.</span><button class="btn sm primary" data-act="go" data-go="reflection">Bias reflection</button></div>`;
+  if (r.r3.conv.ended) return `<div class="notice">${icon("info", "i-sm")}<span class="grow">Appraisal discussion held${r.r3.conv.outcome === "incomplete" ? " (closed before next steps were agreed)" : ""}. Complete Part III, then review and finalize.</span><button class="btn sm primary" data-act="go" data-go="reflection">Review & finalize</button></div>`;
   const c = r.r3.conv, answered = managerCount(c.log) >= CHAT_LIMITS.appraisalMin;
   if (UI.endConfirm && !c.completed) return `<div class="notice warn">${icon("alert", "i-sm")}<span class="grow">You and Omar haven't agreed next steps yet. End the discussion anyway? It will be recorded as not completed.</span><button class="btn sm" data-act="endCancel">Keep talking</button><button class="btn sm primary" data-act="appraisalContinue" id="appraisal-end-confirm">End discussion</button></div>`;
-  return `<div class="notice ${c.completed ? "good" : ""}">${icon(c.completed ? "check" : "chat", "i-sm")}<span class="grow">${c.completed ? "Appraisal Discussion Completed." : answered ? "Appraisal shared with Omar. Continue the discussion in the chat." : "Appraisal shared with Omar."}</span>${c.completed ? "" : `<button class="btn sm" data-act="openChat">Open chat</button>`}${answered ? `<button class="btn sm primary" data-act="appraisalContinue" id="appraisal-continue">${c.completed ? "Continue to bias reflection" : "End discussion"}</button>` : ""}</div>`;
+  return `<div class="notice ${c.completed ? "good" : ""}">${icon(c.completed ? "check" : "chat", "i-sm")}<span class="grow">${c.completed ? "Appraisal Discussion Completed. Complete Part III, then review and finalize." : answered ? "Parts I–II shared with Omar. Continue the discussion in the chat." : "Parts I–II shared with Omar."}</span>${c.completed ? "" : `<button class="btn sm" data-act="openChat">Open chat</button>`}${answered ? `<button class="btn sm primary" data-act="appraisalContinue" id="appraisal-continue">${c.completed ? "Close the discussion" : "End discussion"}</button>` : ""}</div>`;
 }
 DRAWERS.evidence = function (d) {
   const r = rec(), list = r.evidence.filter(e => d.id === "all" || e.link === d.id);
@@ -170,12 +238,40 @@ DRAWERS.evidence = function (d) {
 };
 
 /* ---------- Bias reflection ---------- */
+/* ---------- Review & finalize: summary of the whole form + bias reflection ---------- */
+function appraisalSummary(r) {
+  const c = appraisalCalc(r), v = appraisalValidation(r), p = r.r3.appraisal.pdp || blankPdp(), E = EMP();
+  const ck = (ok, t) => `<div class="ck ${ok ? "ok" : "no"}">${icon(ok ? "check" : "x", "i-sm")}<span>${t}</span></div>`;
+  return `<section class="hr-form" id="appraisal-summary">
+    <div class="hr-title">Performance Appraisal Form · Review</div>
+    ${formHeadTable([[["Employee Name", esc(E.name)], ["Position", esc(E.title)]], [["Department", "Commercial"], ["Rating Period", "1 January – 31 December 2027 · Annual"]], [["Supervisor / Manager", `${managerName()} · Commercial Director`], ["Status", r.r3.done ? "<b>Finalized</b>" : v.ok ? "Ready to finalize" : "In progress"]]])}
+    <div class="sum-scores">
+      <div><span class="xs muted">Competencies score</span><b class="num">${pctTxt(c.competenciesScore)}</b><span class="xs muted">Contribution (40%): ${pctTxt(c.competenciesContrib)}</span></div>
+      <div><span class="xs muted">Objectives score</span><b class="num">${pctTxt(c.objectivesScore)}</b><span class="xs muted">Contribution (60%): ${pctTxt(c.objectivesContrib)}</span></div>
+      <div><span class="xs muted">Overall performance score</span><b class="num" id="sum-overall">${pctTxt(c.overall)}</b></div>
+      <div class="band"><span class="xs muted">Performance rating</span><b id="sum-rating">${c.band ? esc(c.band.label) : "—"}</b><span class="xs muted">${c.band ? esc(c.band.range) : ""}</span></div>
+    </div>
+    <h4>Part I · Competencies evaluation</h4>
+    <div class="table-wrap"><table class="hr-tbl"><thead><tr><th>Competency</th><th>Expected proficiency</th><th>Rating</th><th>Comments</th></tr></thead><tbody>${c.comps.map(x => `<tr><td><b>${esc(compName(x.c.id))}</b></td><td>${levelLabel(x.c.level)}</td><td>${x.rating ? esc(ratingLabel(x.rating)) : "—"}</td><td class="xs">${esc(x.h.comments || "—")}</td></tr>`).join("")}</tbody></table></div>
+    <h4>Part II · Objectives evaluation</h4>
+    <div class="table-wrap"><table class="hr-tbl"><thead><tr><th>No.</th><th>Objective</th><th>Target</th><th>Actual</th><th class="shade">% Achieved</th><th class="shade">Weight</th><th class="calc">Weighted score</th></tr></thead><tbody>${c.objectives.map(x => `<tr><td>${x.i + 1}</td><td class="xs">${esc(x.o.objective)}</td><td class="num">${esc(fmtDefinitionTarget(x.def))}</td><td class="xs">${esc(x.method === "milestone" ? ((MILESTONE_OPTIONS.find(m => m[0] === x.e.milestone) || [, "—"])[1]) : x.method === "review" ? (x.e.manual ? `Assessed ${x.e.manual}%` : "—") : (x.e.actual || "—"))}</td><td class="num shade">${pctTxt(x.res.pct)}</td><td class="num shade">${x.weight}%</td><td class="num calc">${pctTxt(x.weighted)}</td></tr>`).join("")}</tbody></table></div>
+    <h4>Part III · Development plan</h4>
+    <div class="grid2"><div><span class="kg-l">Career planning · short term</span><div class="small t2" style="white-space:pre-line">${esc(p.short || "—")}</div></div><div><span class="kg-l">Career planning · long term</span><div class="small t2" style="white-space:pre-line">${esc(p.long || "—")}</div></div></div>
+    <div><span class="kg-l">Learning & development actions</span>${(p.ld || []).filter(x => x.area || x.action).length ? `<ul class="list-plain small">${p.ld.filter(x => x.area || x.action).map(x => `<li><b>${esc(x.area)}</b> · ${esc(x.action)}</li>`).join("")}</ul>` : `<div class="small muted">—</div>`}</div>
+    <div><span class="kg-l">Training & development</span>${(p.training || []).filter(x => x.course).length ? `<ul class="list-plain small">${p.training.filter(x => x.course).map(x => `<li>${esc(x.course)}${x.source ? ` · ${esc(x.source)}` : ""}${x.date ? ` · ${esc(fmtDue(x.date))}` : ""}</li>`).join("")}</ul>` : `<div class="small muted">None listed</div>`}</div>
+    <div class="grid2"><div><span class="kg-l">Employee comments</span><div class="small t2" style="white-space:pre-line">${esc(p.employee || "None recorded")}</div></div><div><span class="kg-l">Direct manager comments</span><div class="small t2" style="white-space:pre-line">${esc(p.manager || "—")}</div></div></div>
+    <div class="checklist">${ck(!v.I.length, "Part I complete: every competency rated with comments")}${ck(!v.II.length, "Part II complete: every objective result entered and calculated, with comments")}${ck(!v.III.length, "Part III complete: career planning, development actions and manager comments")}${ck(r.r3.conv.ended, `Appraisal discussion held with Omar${r.r3.conv.outcome === "incomplete" ? " (closed before next steps were agreed)" : ""}`)}${ck(c.overall != null, "Final score calculated")}</div>
+    ${!v.ok && !r.r3.done ? `<div class="row"><button class="btn sm" data-act="apGoto" data-v="${v.I.length ? "I" : v.II.length ? "II" : "III"}">${icon("edit", "i-sm")} Complete the form</button></div>` : ""}
+    ${signatureBlock(r)}
+  </section>`;
+}
 VIEWS.reflection = function () {
   const r = rec(), b = r.r3.bias;
-  if (!r.r3.conv.ended) return pageHead("Final Appraisal", "Bias reflection") + lockedPanel("Not yet", "The bias reflection follows the appraisal conversation with Omar.");
+  if (!r.r3.conv.ended) return pageHead("Final Appraisal / Review", "Review & finalize") + lockedPanel("Not yet", "The review follows your appraisal discussion with Omar.");
   const res = b.result, busy = UI.busy === "bias" || UI.busy === "round3";
-  return pageHead("Final Appraisal / Bias reflection", "Appraisal bias reflection", empChip(), "A short check on possible rating biases before your appraisal is final.") + `<div class="stack-lg">
-    <div class="card"><div class="card-h"><h3>What your reasoning suggests</h3>${res && aiReady() && !r.r3.done ? `<button class="btn ghost sm" data-act="runBias">Check again</button>` : ""}</div><div class="card-b stack">
+  return pageHead("Final Appraisal / Review", "Review & finalize", `${empChip()}<button class="btn sm" data-act="apGoto" data-v="III">${icon("clipboard", "i-sm")} Open the form</button>`, "Check the complete appraisal and reflect on possible rating biases before it is final.") + `<div class="stack-lg">
+    ${appraisalSummary(r)}
+    <div class="card"><div class="card-h"><h3>Bias check · what your reasoning suggests</h3>${res && aiReady() && !r.r3.done ? `<button class="btn ghost sm" data-act="runBias">Check again</button>` : ""}</div><div class="card-b stack">
       ${busy && !res ? `<p class="small t2">Reviewing your appraisal…</p>` : ""}
       ${b.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(b.error)}</span>${aiReady() ? `<button class="btn sm" data-act="runBias">Retry</button>` : ""}</div>` : ""}
       ${res ? `${res.flags.length ? res.flags.map(f => `<div class="bias"><b>${esc(BIAS_LABEL[f.bias] || f.bias)}</b><div class="small">Your reasoning: <q>${esc(f.evidence)}</q></div><div class="small t2">${esc(f.explanation)}</div></div>`).join("") : `<div class="notice good">${icon("check", "i-sm")}<span>Your reasoning does not show clear signs of a rating bias.</span></div>`}
@@ -188,7 +284,7 @@ VIEWS.reflection = function () {
       ${r.r3.done ? `<div class="small t2" style="white-space:pre-line">${esc(b.reflection)}</div>` : `<textarea class="ta ${b.tried && b.reflection.trim().length < 15 ? "err" : ""}" rows="4" id="${P("r3", "bias", "reflection")}" ${bind(P("r3", "bias", "reflection"))} placeholder="Which biases could have influenced your ratings? What did you check, and what, if anything, would you change?">${esc(b.reflection)}</textarea>`}
       ${r.r3.sbii.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.sbii.error)}</span>${aiReady() ? `<button class="btn sm" data-act="sbiiRetry">Retry</button>` : ""}</div>` : ""}
       ${r.r3.final.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.final.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round3">Retry assessment</button>` : ""}</div>` : ""}
-      ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review">View feedback report</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalise appraisal"}</button></div>`}
+      ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review">View feedback report</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalize appraisal"}</button></div>`}
     </div></div>
   </div>`;
 };

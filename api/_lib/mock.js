@@ -10,7 +10,7 @@ const RB = require("./rubrics");
 
 const lc = (s) => String(s || "").toLowerCase();
 const has = (s, rx) => rx.test(lc(s));
-const lowScore = (a) => a && a.overall && a.overall.score != null && a.overall.score < 55; /* roughly the old 1–2 of 5 band */
+const lowScore = (a) => a && a.overall && a.overall.score != null && a.overall.score < 60; /* the form's "Unacceptable" band */
 const BLAME = /(your fault|unacceptable|careless|you should have known|no excuse|stop challenging|you always|lazy|you failed)/;
 const DISMISS = /(don't worry|do not worry|just accept|that's how it is|not up for discussion|no need to|just sign|stop worrying)/;
 const ADDRESS_A = /(quality|relevan|useful|actionab|evidence-based|how well)/, ADDRESS_B = /(adopt|control|decision|not only|regardless|even if|whether management)/;
@@ -131,20 +131,20 @@ function assess(task, inp) {
   if (task === "sbii") return sbiiMock(inp);
   if (task === "plan") {
     const o = inp.plan.objectives, cs = inp.plan.comps;
-    const measurable = o.filter(x => /\d/.test(x.kpi)).length / Math.max(1, o.length);
+    const measurable = o.filter(x => /\d/.test(x.measure)).length / Math.max(1, o.length);
     const wsum = o.reduce((s, x) => s + (x.weight || 0), 0);
-    const adoption = o.find(x => /(adopt|accepted by management|approved by management)/i.test(x.kpi));
-    const ev = o[0] ? o[0].kpi.slice(0, 60) : null;
+    const adoption = o.find(x => /(adopt|accepted by management|approved by management)/i.test(x.measure));
+    const ev = o[0] ? (o[0].objective || o[0].measure).slice(0, 60) : null;
     const ref = ["Analytical Thinking", "Business Acumen", "Communication", "Stakeholder Management"];
     const relevant = cs.filter(c => ref.includes(c.name)).length, allAdv = cs.length && cs.every(c => /advanced/i.test(c.level));
     const k = measurable >= 0.75 ? 1 : measurable >= 0.4 ? 0.6 : 0.2;
     return {
       criteria: [
-        crit("r1_kpi_relevance", Math.round(3 * k), ev, "Relevance estimated from KPI completeness."),
+        crit("r1_kpi_relevance", Math.round(3 * k), ev, "Relevance estimated from measurement completeness."),
         crit("r1_kpi_clarity", Math.round(2 * k), ev, "Clarity estimated."),
-        crit("r1_kpi_measurable", Math.round(4 * measurable), ev, `${Math.round(measurable * 100)}% of KPIs contain a figure.`),
+        crit("r1_kpi_measurable", Math.round(4 * measurable), ev, `${Math.round(measurable * 100)}% of measurements contain a figure.`),
         crit("r1_kpi_target", Math.round(3 * k), ev, "Targets estimated."),
-        crit("r1_kpi_control", adoption ? 1 : 3, adoption ? adoption.kpi.slice(0, 60) : ev, adoption ? "A KPI depends on management adoption decisions." : "KPIs are within Omar's influence."),
+        crit("r1_kpi_control", adoption ? 1 : 3, adoption ? adoption.measure.slice(0, 60) : ev, adoption ? "A measurement depends on management adoption decisions." : "Objectives are within Omar's influence."),
         crit("r1_kpi_priorities", Math.round(2 * k), null, "Alignment with commercial priorities estimated."),
         crit("r1_kpi_balance", wsum === 100 ? Math.round(3 * k) : 0, null, `Weights total ${wsum}%.`),
         crit("r1_comp_relevance", Math.min(3, relevant), null, `${relevant} reference-set competencies selected.`),
@@ -152,7 +152,7 @@ function assess(task, inp) {
         crit("r1_comp_clarity", cs.every(c => c.standard.split(/\s+/).length >= 6) ? 2 : 1, null, "Standards checked."),
         crit("r1_comp_alignment", cs.some(c => /communication|stakeholder/i.test(c.name)) ? 2 : 0, null, "Development needs coverage.")
       ],
-      feedback: { objectives: o.map((x, i) => ({ index: i + 1, verdict: /\d/.test(x.kpi) ? "strong" : "needs_improvement", comment: /\d/.test(x.kpi) ? "[Test] Measurable target included." : "[Test] Add a measurable target." })), competencies: cs.map(c => ({ name: c.name, comment: "[Test] Comment." })), overall: "[Scripted test assessment]" }
+      feedback: { objectives: o.map((x, i) => ({ index: i + 1, verdict: /\d/.test(x.measure) ? "strong" : "needs_improvement", comment: /\d/.test(x.measure) ? "[Test] Measurable target included." : "[Test] Add a measurable target." })), competencies: cs.map(c => ({ name: c.name, comment: "[Test] Comment." })), overall: "[Scripted test assessment]" }
     };
   }
   if (task === "alignment") {
@@ -186,20 +186,20 @@ function assess(task, inp) {
     };
   }
   if (task === "bias") {
-    const text = [inp.appraisal.overall.just, ...inp.appraisal.what.flatMap(w => w.kpis.map(k => k.evidence)), ...inp.appraisal.how.map(h => h.just)].join("\n");
+    const text = [inp.appraisal.overall.managerComments, ...inp.appraisal.what.map(w => w.comments), ...inp.appraisal.how.map(h => h.comments)].join("\n");
     const flags = [];
     const anchor = firstSentence(text, /(last year|previous rating|previous year)/); if (anchor) flags.push({ bias: "anchoring", evidence: anchor, explanation: "[Test] The reasoning refers to the previous rating." });
     const adopt = lowScore(inp.appraisal) && firstSentence(text, /(not adopted|weren't adopted|were not adopted|not implemented)/); if (adopt) flags.push({ bias: "severity", evidence: adopt, explanation: "[Test] The rating appears to penalise non-adoption." });
     return { flags, overlooked: [], overemphasized: [], summary: flags.length ? "[Scripted test assessment] Possible biases found." : "[Scripted test assessment] No bias indicated by your reasoning." };
   }
   /* round3 */
-  const a = inp.appraisal, j = a.overall.just, allJ = [j, ...a.what.flatMap(w => w.kpis.map(k => k.evidence)), ...a.how.map(h => h.just)].join("\n");
+  const a = inp.appraisal, j = a.overall.managerComments, allJ = [j, ...a.what.map(w => w.comments), ...a.how.map(h => h.comments)].join("\n");
   const adopt = lowScore(a) && /(not adopted|weren't adopted|were not adopted|not implemented)/i.test(allJ), rich = allJ.length > 200;
   return {
     criteria: [
       crit("r3_what_grounded", rich ? 3 : 1, firstSentence(allJ, /\d/), "Grounding."), crit("r3_what_limits", /(limitation|not available|no data|missing)/i.test(allJ) ? 2 : 0, null, "Limitations."), crit("r3_what_balance", adopt ? 0 : 2, null, "Balance."), crit("r3_what_overall", 2, null, "Overall WHAT."),
       crit("r3_how_behaviour", rich ? 2 : 1, null, "Behaviour."), crit("r3_how_levels", 1, null, "Levels."), crit("r3_how_balance", adopt ? 0 : 1, null, "Balance."),
-      crit("r3_overall_defensible", adopt ? 0 : 2, null, "Defensible."), crit("r3_overall_justify", rich ? 2 : 1, null, "Justification."), crit("r3_overall_specific", a.overall.dev.length > 20 ? 1 : 0, null, "Specific."),
+      crit("r3_overall_defensible", adopt ? 0 : 2, null, "Defensible."), crit("r3_overall_justify", rich ? 2 : 1, null, "Justification."), crit("r3_overall_specific", (a.pdp.ld || []).some(x => x.action.length > 20) ? 1 : 0, null, "Specific."),
       crit("r3_conv_bias", inp.reflection.length > 30 ? 1 : 0, null, "Reflection.")
     ],
     classification: { appraisal: adopt ? "unfair" : rich ? "fair" : "mixed" }, feedback: { summary: "[Scripted test assessment]" }

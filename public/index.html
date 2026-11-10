@@ -640,6 +640,68 @@ table.tbl.reg { min-width: 640px; font-size: .8rem; } .tbl.reg td, .tbl.reg th {
 .kpi-flag.resolved { background: #EEF1F6; color: var(--text2); }
 .review-box { border: 1px dashed var(--line2); border-radius: var(--r-sm); padding: 8px 10px; display: flex; flex-direction: column; gap: 8px; background: #FCFCFD; }
 .check { display: flex; gap: 8px; align-items: flex-start; font-size: .84rem; font-weight: 600; } .check input { margin-top: 3px; width: 16px; height: 16px; flex: none; }
+/* NextWave HR forms (Objectives of the Year · Performance Appraisal Form) */
+.hr-form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); }
+.hr-title { text-align: center; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; font-size: 1rem; }
+.hr-head { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.hr-head th, .hr-head td { border: 1px solid var(--line2); padding: 6px 9px; text-align: left; vertical-align: top; }
+.hr-head th { background: var(--surface2); font-weight: 650; color: var(--text2); width: 18%; white-space: nowrap; }
+.hr-sub { font-size: .84rem; margin: 2px 0 0; }
+.hr-tbl { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.hr-tbl th, .hr-tbl td { border: 1px solid var(--line2); padding: 7px 8px; text-align: left; vertical-align: top; }
+.hr-tbl thead th { background: #F1F2F6; font-weight: 700; font-size: .74rem; color: var(--text2); }
+.hr-tbl th.grey { background: #C9CBD3; color: #1F2430; text-align: center; text-transform: uppercase; letter-spacing: .05em; }
+.hr-tbl .shade { background: #EEECE1; } .hr-tbl thead th.shade { background: #E2DFCD; }
+.hr-tbl .calc { background: #E5EEFC; } .hr-tbl thead th.calc { background: #4A7BD0; color: #fff; }
+.hr-tbl tfoot td { background: var(--surface2); }
+.hr-tbl .right { text-align: right; } .hr-tbl .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.c-no { width: 44px; text-align: center !important; } .c-due { width: 110px; } .c-w { width: 76px; text-align: right !important; } .c-act { width: 76px; white-space: nowrap; } .c-exp { width: 32px; color: var(--muted); }
+.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.obj-tbl { min-width: 760px; } .obj-row.editing td { background: #FAFCFF; } .obj-row.incomplete td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
+.obj-edit > td { background: #FAFCFF; padding: 0 !important; } .obj-edit-b { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.inp-suffix { position: relative; } .inp-suffix span { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .85rem; } .inp-suffix .inp { padding-right: 26px; }
+.smart-chips { display: inline-flex; gap: 3px; margin-top: 5px; }
+.smk { display: inline-flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 5px; font-size: .66rem; font-weight: 800; flex: none; }
+.smk-ok { background: var(--good-soft); color: var(--good); } .smk-warn { background: var(--warn-soft); color: var(--warn); } .smk-fail { background: var(--risk-soft); color: var(--risk); } .smk-info { background: #EEF1F6; color: var(--text2); }
+.smart-fb { display: flex; flex-direction: column; gap: 4px; } .smart-row { display: flex; gap: 8px; align-items: baseline; }
+.ack-box { border: 1px solid var(--line2); border-radius: var(--r-sm); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.ack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--line2); } .ack-grid > div { padding: 8px 10px 2px 0; } .ack-grid > div + div { border-left: 1px solid var(--line2); padding-left: 10px; }
+.hr-instr { border: 1px solid var(--line2); border-radius: var(--r-sm); padding: 6px 10px; } .hr-instr summary { cursor: pointer; font-size: .8rem; font-weight: 700; } .hr-instr[open] summary { margin-bottom: 6px; }
+.rt-type { display: inline-flex; gap: 12px; flex-wrap: wrap; color: var(--muted); } .rt-type .on { color: var(--text); font-weight: 650; }
+.ap-parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.ap-part { border: 1px solid var(--line2); background: var(--surface); border-radius: var(--r-sm); padding: 8px 10px; display: flex; gap: 8px; align-items: flex-start; text-align: left; font: inherit; cursor: pointer; color: var(--text2); }
+.ap-part .grow { display: flex; flex-direction: column; } .ap-part b { font-size: .82rem; } .ap-part > svg { margin-top: 2px; color: var(--muted); }
+.ap-part.done > svg { color: var(--good); } .ap-part.on { border-color: #6F5AA8; box-shadow: inset 0 -3px 0 #6F5AA8; color: var(--text); }
+.ap-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line2); border-radius: var(--r-sm); }
+.ap-strip > div { padding: 7px 10px; display: flex; flex-direction: column; } .ap-strip > div + div { border-left: 1px solid var(--line2); } .ap-strip b { font-size: 1.05rem; }
+.part-band { background: #7B63A8; color: #fff; text-align: center; padding: 7px; font-weight: 600; letter-spacing: .06em; border-radius: 3px; font-size: .86rem; }
+.ap-body { display: flex; flex-direction: column; gap: 10px; }
+.scale-tbl { max-width: 760px; } .scale-tbl td { padding: 5px 8px; }
+.ap-tbl .ap-row { cursor: pointer; } .ap-tbl .ap-row:hover td { background: #FAFBFD; } .ap-tbl .ap-row.open td { background: #F5F2FB; }
+.ap-tbl .ap-row.open .c-exp svg { transform: rotate(180deg); }
+.ap-edit > td { padding: 0 !important; background: #FCFBFE; } .ap-edit-b { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.obj-eval { min-width: 980px; }
+.agreed-grid > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; } .agreed-grid .sel { width: 100%; }
+.agreed-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px 14px; background: #EEECE1; border-radius: var(--r-sm); padding: 9px 11px; } .agreed-grid .full { grid-column: 1 / -1; }
+.res-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 12px; align-items: start; }
+.calc-cell { display: flex; flex-direction: column; gap: 2px; background: #EEECE1; border-radius: var(--r-sm); padding: 8px 10px; } .calc-cell.ws { background: #E5EEFC; }
+.formula-box { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid var(--line2); border-radius: var(--r-sm); padding: 9px 12px; }
+.formula { margin-top: 4px; font-size: .9rem; color: var(--text); } .formula-res { font-size: 1.2rem; min-width: 80px; text-align: right; }
+.band-tbl { max-width: 520px; align-self: center; } .band-tbl tr.on td { background: var(--blue-soft); font-weight: 700; } .c-tick { width: 32px; text-align: center !important; color: var(--blue); font-weight: 800; }
+.pdp-tbl td { padding: 4px; } .pdp-tbl .ta { border-color: transparent; background: #FCFCFD; } .pdp-tbl .ta:focus { border-color: var(--blue); }
+.ta.sm, .inp.sm { font-size: .84rem; padding: 6px 8px; }
+.sig-tbl td { width: 33.3%; padding: 9px 10px; }
+.ap-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; border-top: 1px solid var(--line); padding-top: 12px; }
+.ap-errs { margin: 0; }
+.sum-scores { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; } .sum-scores > div { border: 1px solid var(--line2); border-radius: var(--r-sm); padding: 8px 10px; display: flex; flex-direction: column; } .sum-scores b { font-size: 1.2rem; } .sum-scores .band { background: var(--blue-soft); border-color: var(--blue-line); }
+#appraisal-summary h4 { margin: 4px 0 0; font-size: .84rem; }
+@media (max-width: 760px) {
+  .hr-form { padding: 12px; } .hr-head th { width: auto; white-space: normal; }
+  .hr-head, .hr-head tbody { display: block; } .hr-head tr { display: grid; grid-template-columns: 42% 58%; } .hr-head th, .hr-head td { display: block; overflow-wrap: anywhere; margin: 0 -1px -1px 0; }
+  .ap-parts, .ap-strip, .sum-scores { grid-template-columns: 1fr 1fr; } .ap-strip > div:nth-child(3) { border-left: 0; }
+  .agreed-grid, .res-grid { grid-template-columns: 1fr 1fr; } .res-grid > div:first-child { grid-column: 1 / -1; }
+  .ack-grid { grid-template-columns: 1fr; } .ack-grid > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--line2); }
+}
 </style>
 <div id="app"></div>
 <script>
@@ -1076,8 +1138,12 @@ const RELEASE_CODES = { r2: "4826", r3: "7319" };
 /* Form vocabularies (EVIDENCE_SOURCES and FREQUENCIES come from employees.js) */
 const PERIODS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Q1", "Q2", "Q3", "Q4", "H1 (Jan–Jun)", "H2 (Jul–Dec)", "Full year"];
 const EVIDENCE_STATUS = ["Open", "Ongoing", "Completed"];
+/* Competency rating scale of the NextWave Performance Appraisal Form (3 = Meets Expectations = 100%) */
 const RATING_SCALE = [
-  { v: 5, l: "Exceptional" }, { v: 4, l: "Exceeds Expectations" }, { v: 3, l: "Meets Expectations" }, { v: 2, l: "Below Expectations" }, { v: 1, l: "Unsatisfactory" }
+  { v: 4, l: "Exceptional", d: "Skillfully demonstrates the competency and acts as a role model or reference." },
+  { v: 3, l: "Meets Expectations", d: "Demonstrates and performs the required competency independently." },
+  { v: 2, l: "Needs Improvement", d: "Partially demonstrates the required competency and requires constant supervision." },
+  { v: 1, l: "Unsatisfactory", d: "Performance is significantly below the criteria required for successful job performance." }
 ];
 const LEVELS = [{ id: "basic", l: "Basic" }, { id: "intermediate", l: "Intermediate" }, { id: "advanced", l: "Advanced" }];
 const OBJ_RANGE = { min: 3, max: 5, hardMax: 8 };
@@ -1091,7 +1157,7 @@ function hrMessages() {
   return {
     start: { subject: "Annual Performance Goal Setting — Action Required", date: SIM_DATES.start,
       body: ["Dear Commercial Director,", `The ${APP.cycleYear} performance cycle (${APP.cycleLabel}) has started. Please complete the performance goal plan for Omar Hassan, Market Intelligence Analyst.`, "__LIST__", `Deadline: ${SIM_DATES.deadline}.`, "NextWave HR"],
-      list: ["Review Omar's role, previous-year evidence and job description (printed handouts).", "Define performance objectives with measurable KPIs and targets.", "Set objective weights (total 100%).", "Identify evidence sources and review frequencies.", "Select role-relevant competencies and expected proficiency levels.", "Align the expectations with Omar."],
+      list: ["Review Omar's role, previous-year evidence and job description (printed handouts).", "Complete the Objectives of the Year form: SMART objectives, each with a measurement, due date and weight (total 100%).", "Select role-relevant competencies, expected proficiency levels and behavioral standards.", "Discuss and acknowledge the performance standards and expectations with Omar."],
       action: { l: "Open Performance Goal Plan", go: "goals" } },
     approved: { subject: "Performance Contract Confirmed — Monitoring Begins", date: SIM_DATES.approved,
       body: ["Dear Commercial Director,", "Omar Hassan's performance expectations have been established and the performance contract is confirmed.", "Throughout the year, you are responsible for:", "__LIST__", "The next formal checkpoint will take place in six months. Please maintain your performance records throughout the year.", "NextWave HR"],
@@ -1113,7 +1179,8 @@ function hrMessages() {
 let _uid = 0;
 const uid = (p = "x") => p + Date.now().toString(36) + (_uid++).toString(36);
 
-function blankObjective() { return { id: uid("o"), objective: "", kpi: "", weight: "" }; }
+function blankObjective() { return { id: uid("o"), objective: "", measure: "", due: "", weight: "" }; }
+function blankPdp() { return { short: "", long: "", ld: [{ area: "", action: "" }], training: [], employee: "", manager: "" }; }
 function freshRecord() {
   return {
     goals: { status: "not_started", objectives: [], comps: [], tried: false, submits: 0 },
@@ -1123,7 +1190,7 @@ function freshRecord() {
     r2: { seenDashboard: false, interpretation: "", diag: { log: [], ended: false }, submitted: false, assessment: null, error: null, pathway: null, manual: false },
     r3: {
       dataset: null, error: null,
-      appraisal: { status: "not_started", what: {}, how: {}, overall: { what: null, how: null, final: null, just: "", strengths: "", dev: "" }, tried: false, revisions: 0 },
+      appraisal: { v: 2, status: "not_started", what: {}, how: {}, pdp: blankPdp(), tried: false, revisions: 0, flags: [] },
       conv: { log: [], ended: false, completed: false, outcome: null },
       sbii: { result: null, error: null },
       bias: { result: null, error: null, reflection: "", tried: false },
@@ -1150,8 +1217,39 @@ function storageGet(k) { try { return localStorage.getItem(k); } catch (e) { ret
 function storageSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
 function loadState() {
   const raw = storageGet(APP.storeKey);
-  if (raw) { try { const s = JSON.parse(raw); if (s && s.v === 2) return deepMerge(freshState(), s); } catch (e) { /* unreadable: start fresh */ } }
+  if (raw) { try { const s = JSON.parse(raw); if (s && s.v === 2) { Object.values(s.recs || {}).forEach(migrateRecord); return deepMerge(freshState(), s); } } catch (e) { /* unreadable: start fresh */ } }
   return freshState();
+}
+/* ---------- Migration of sessions saved before the Objectives / Performance Appraisal forms ----------
+   Keeps every participant-written text. Never converts old 1–5 ratings to the 1–4 scale: they are cleared
+   and flagged for re-rating. Several year-end results for one objective are kept for review, not merged. */
+function migrateRecord(r) {
+  if (!r || !r.goals) return;
+  (r.goals.objectives || []).forEach(o => {
+    if (o.measure == null) o.measure = o.kpi || "";
+    if (o.due == null) o.due = "";
+    delete o.kpi;
+  });
+  const a = r.r3 && r.r3.appraisal;
+  if (!a || a.v === 2) return;
+  a.flags = a.flags || [];
+  Object.keys(a.what || {}).forEach(id => {
+    const w = a.what[id] || {}, ks = w.kpis ? Object.values(w.kpis) : null;
+    if (!ks) return;
+    if (ks.length === 1) { const k = ks[0]; a.what[id] = { actual: k.actual || "", comments: k.evidence || "", manual: k.manual || "", basis: k.basis || "", reviewed: !!k.reviewed, mode: k.type === "review" ? "review" : "", dir: k.dir || "" }; }
+    else { a.what[id] = { actual: "", comments: ks.map(k => k.evidence).filter(Boolean).join("\n"), legacy: ks }; a.flags.push(`Objective results entered before the form change were kept for review (objective ${id}).`); }
+  });
+  Object.keys(a.how || {}).forEach(id => {
+    const h = a.how[id] || {}, comments = [h.observed, h.just].filter(x => String(x || "").trim()).join("\n");
+    a.how[id] = { rating: null, comments: h.comments || comments, legacyRating: h.rating || null };
+    if (h.rating) a.flags.push(`${compName(id)}: the earlier rating (${h.rating} on the former 1–5 scale) was not converted. Please rate again on the 1–4 scale.`);
+  });
+  const o = a.overall || {};
+  a.pdp = a.pdp || blankPdp();
+  if (!a.pdp.manager) a.pdp.manager = [o.strengths && `Strengths: ${o.strengths}`, o.dev && `Development priorities: ${o.dev}`, o.just && o.just].filter(Boolean).join("\n");
+  delete a.overall;
+  if (a.flags.length && a.status === "submitted" && !r.r3.done) { a.status = "draft"; a.flags.push("The appraisal was returned to draft because it needs re-rating."); }
+  a.v = 2;
 }
 let S = loadState();
 let _saveT = null;
@@ -1210,27 +1308,27 @@ const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
 function weightTotal(r = rec()) { return r.goals.objectives.reduce((a, o) => a + num(o.weight), 0); }
 function objMissing(o) {
   const m = [];
-  if (!o.objective.trim()) m.push("Objective");
-  if (!o.kpi.trim()) m.push("KPI / Performance measure");
+  if (!String(o.objective || "").trim()) m.push("Objective / Project");
+  if (!String(o.measure || "").trim()) m.push("Measurement");
+  if (!String(o.due || "").trim()) m.push("Due date");
   if (o.weight === "" || o.weight == null) m.push("Weight");
   else if (!(num(o.weight) > 0) || num(o.weight) > 100) m.push("Weight between 1 and 100");
   return m;
 }
-const HAS_TARGET = /\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|all|every)\b/i;
 const words = (t) => String(t || "").trim().split(/\s+/).filter(Boolean).length;
-/* Objectives tab: completeness (blocking) and quality prompts (advisory, never scored here) */
+/* Objectives: completeness and SMART blocking checks (target/completion rule; due date in the rating period) */
 function objectiveValidation(r = rec()) {
   const g = r.goals, errors = [], tips = [], n = g.objectives.length, wt = weightTotal(r);
   if (!n) errors.push("Add at least one objective.");
-  g.objectives.forEach((o, i) => { const m = objMissing(o); if (m.length) errors.push(`Objective ${i + 1}: ${m.join(", ")}.`); });
-  if (n && wt !== 100) errors.push(`Weights total ${wt}%. They must total 100%.`);
-  if (n && (n < OBJ_RANGE.min || n > OBJ_RANGE.max)) tips.push(`${n} objective${n === 1 ? "" : "s"}: ${OBJ_RANGE.min}–${OBJ_RANGE.max} is the recommended range.`);
   g.objectives.forEach((o, i) => {
-    if (o.kpi.trim() && !HAS_TARGET.test(o.kpi)) tips.push(`Objective ${i + 1}: the KPI has no target figure. State the target in the KPI wording if it can be measured.`);
-    if (o.kpi.trim() && words(o.kpi) < 5) tips.push(`Objective ${i + 1}: the KPI is very short. Would you and Omar judge it the same way at year-end?`);
-    if (o.objective.trim() && words(o.objective) < 2) tips.push(`Objective ${i + 1}: describe what must be achieved more clearly.`);
-    if (num(o.weight) > 0 && num(o.weight) < 10) tips.push(`Objective ${i + 1}: a weight under 10% suggests it may not be a priority for the year.`);
+    const m = objMissing(o);
+    if (m.length) { errors.push(`Objective ${i + 1}: complete ${m.join(", ")}.`); return; }
+    const sc = smartCheck(o);
+    sc.blocking.forEach(k => errors.push(`Objective ${i + 1} · ${SMART_LABEL[k]}: ${sc.checks[k].msg}`));
   });
+  if (n && wt !== 100) errors.push(`Objective weights total ${wt}%. They must total 100%.`);
+  if (n && (n < OBJ_RANGE.min || n > OBJ_RANGE.max)) tips.push(`${n} objective${n === 1 ? "" : "s"}: ${OBJ_RANGE.min}–${OBJ_RANGE.max} is the recommended range.`);
+  g.objectives.forEach((o, i) => { if (num(o.weight) > 0 && num(o.weight) < 10) tips.push(`Objective ${i + 1}: a weight under 10% suggests it may not be a priority for the year.`); });
   return { errors, tips, ok: errors.length === 0 };
 }
 /* Competencies tab */
@@ -1264,17 +1362,21 @@ const levelLabel = (id) => (LEVELS.find(l => l.id === id) || {}).l || "Not set";
 /* ---------- Payloads for the server ---------- */
 function planPayload(r = rec()) {
   return {
-    objectives: r.goals.objectives.map(o => ({ objective: o.objective, kpi: o.kpi, weight: num(o.weight) })),
+    objectives: r.goals.objectives.map(o => ({ objective: o.objective, measure: o.measure, due: o.due, weight: num(o.weight) })),
     comps: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "" }))
   };
 }
 function evidencePayload(r = rec()) { return r.evidence.map(e => ({ period: e.period, link: linkLabel(e.link, r), text: e.text, source: e.source === "Other" ? e.sourceOther : e.source, impact: e.impact, action: e.action, status: e.status })); }
 function appraisalPayload(r = rec()) {
-  const a = r.r3.appraisal, c = appraisalCalc(r);
+  const a = r.r3.appraisal, c = appraisalCalc(r), p = a.pdp || blankPdp();
+  const actualText = (x) => x.method === "review" || (x.method === "milestone" && ["late", "partial"].includes(x.e.milestone))
+    ? `${x.method === "milestone" ? (MILESTONE_OPTIONS.find(m => m[0] === x.e.milestone) || [, ""])[1] + "; " : ""}manager-assessed ${x.e.manual || "—"}%${x.e.basis ? `; basis: ${String(x.e.basis).slice(0, 400)}` : ""}${x.res.status === "unresolved" ? " (needs clarification)" : ""}`
+    : x.method === "milestone" ? (MILESTONE_OPTIONS.find(m => m[0] === x.e.milestone) || [, ""])[1] : (x.e.actual || "");
   return {
-    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? (y.e.manual ? `manager-assessed ${y.e.manual}%${y.e.basis ? `; basis: ${String(y.e.basis).slice(0, 400)}` : ""}${y.res.status === "unresolved" ? " (unresolved)" : ""}` : "") : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "", matched: `${y.match.label} (${COVERAGE_LABEL[y.match.status]})` })) })),
-    how: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "", observed: (a.how[c.id] || {}).observed || "", rating: (a.how[c.id] || {}).rating || null, just: (a.how[c.id] || {}).just || "" })),
-    overall: { whatPct: c.whatPct, howPct: c.howPct, score: c.overall, just: a.overall.just, strengths: a.overall.strengths, dev: a.overall.dev }
+    what: c.objectives.map(x => ({ objective: x.o.objective, measure: x.o.measure || "", target: fmtDefinitionTarget(x.def), due: fmtDue(x.o.due), weight: x.weight, method: METHOD_LABEL[x.method], actual: actualText(x), achievement: x.res.pct, weighted: x.weighted, comments: x.e.comments || "", matched: `${x.match.label}` })),
+    how: r.goals.comps.map(k => { const h = a.how[k.id] || {}; return { name: compName(k.id), level: levelLabel(k.level), standard: k.standard || "", rating: COMPETENCY_SCALE.some(s => s.v === h.rating) ? h.rating : null, comments: h.comments || "" }; }),
+    overall: { objectivesScore: c.objectivesScore, competenciesScore: c.competenciesScore, score: c.overall, rating: c.band ? c.band.label : "", managerComments: p.manager || "", employeeComments: p.employee || "" },
+    pdp: { short: p.short || "", long: p.long || "", ld: (p.ld || []).filter(x => (x.area || "").trim() || (x.action || "").trim()).map(x => ({ area: x.area || "", action: x.action || "" })), training: (p.training || []).filter(x => (x.course || "").trim()).map(x => ({ course: x.course || "", source: x.source || "", date: x.date || "" })) }
   };
 }
 const managerWords = (log, max) => { const t = log.filter(m => m.from === "manager").map(m => m.text).join(" / "); return t.length > max ? "…" + t.slice(-max) : t; };
@@ -1287,24 +1389,27 @@ function priorPayload(r = rec()) {
     coachingSummary: managerWords(r.r2.diag.log, 2400)
   };
 }
+/* Validation by part. Parts I–II must be complete to share the appraisal with Omar; all three to finalise. */
 function appraisalValidation(r = rec()) {
-  const a = r.r3.appraisal, c = appraisalCalc(r), errors = [];
-  c.objectives.forEach((x, oi) => x.rows.forEach(y => {
-    const tag = `Objective ${oi + 1}${x.rows.length > 1 ? `, KPI ${y.i + 1}` : ""}`;
-    if (y.res.status === "blank") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
-    if (y.res.status === "invalid") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
-    if (y.res.status === "unresolved") errors.push(`${tag}: unresolved KPI, not yet in the score (${y.res.note.replace(/^Unresolved: /, "")}).`);
-    if (y.res.status === "review") errors.push(`${tag}: ${y.res.note.charAt(0).toLowerCase() + y.res.note.slice(1)}.`);
-    if (!String(y.e.evidence || "").trim()) errors.push(`${tag}: add the supporting evidence.`);
-  }));
-  if (c.objectives.length && !c.weightOK) errors.push(`Objective weights total ${c.totalWeight}%, not 100%: WHAT can't be calculated. Weights were agreed in January and can't be changed here; ask your facilitator.`);
-  r.goals.comps.forEach(k => { const x = a.how[k.id] || {}, miss = []; if (!(x.observed || "").trim()) miss.push("observed behavior"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`${compName(k.id)}: ${miss.join(", ")}.`); });
-  const o = a.overall, miss = [];
-  if (!o.strengths.trim()) miss.push("key strengths"); if (!o.dev.trim()) miss.push("development priorities"); if (!o.just.trim()) miss.push("evidence-based justification");
-  if (miss.length) errors.push(`Summary: ${miss.join(", ")}.`);
-  return { errors, ok: errors.length === 0 };
+  const a = r.r3.appraisal, c = appraisalCalc(r), p = a.pdp || blankPdp(), I = [], II = [], III = [];
+  c.comps.forEach(x => { const miss = []; if (!x.rating) miss.push("rating (1–4)"); if (!String(x.h.comments || "").trim()) miss.push("comments supporting the rating"); if (miss.length) I.push(`${compName(x.c.id)}: add the ${miss.join(" and ")}.`); });
+  c.objectives.forEach(x => {
+    const tag = `Objective ${x.i + 1}`;
+    if (["blank", "invalid", "unresolved"].includes(x.res.status)) II.push(`${tag}: ${x.res.note.charAt(0).toLowerCase() + x.res.note.slice(1)}.`);
+    if (!String(x.e.comments || "").trim()) II.push(`${tag}: add comments or supporting evidence for the result.`);
+  });
+  if (c.objectives.length && !c.weightOK) II.push(`Objective weights total ${c.totalWeight}%, not 100%, so the objectives score can't be calculated. Weights were agreed in January and can't be changed here; contact HR.`);
+  if (!String(p.short || "").trim()) III.push("Career planning: add the short-term plan.");
+  if (!String(p.long || "").trim()) III.push("Career planning: add the long-term plan.");
+  const ld = (p.ld || []).filter(x => (x.area || "").trim() || (x.action || "").trim());
+  if (!ld.length) III.push("Learning & development plan: add at least one improvement area with an action.");
+  ld.forEach((x, i) => { if (!(x.area || "").trim() || !(x.action || "").trim()) III.push(`Learning & development plan, row ${i + 1}: complete both the improvement area and the action.`); });
+  (p.training || []).forEach((x, i) => { if (((x.source || "").trim() || x.date) && !(x.course || "").trim()) III.push(`Training & development, row ${i + 1}: add the training course.`); });
+  if (!String(p.manager || "").trim()) III.push("Additional comments: add the direct manager's comments.");
+  const scoreOK = c.overall != null;
+  return { I, II, III, errors: [...I, ...II, ...III], shareOK: !I.length && !II.length && scoreOK, ok: !I.length && !II.length && !III.length && scoreOK };
 }
-const ratingLabel = (v) => { const r = RATING_SCALE.find(x => x.v === v); return r ? `${r.v} · ${r.l}` : "Not rated"; };
+const ratingLabel = (v) => { const r = COMPETENCY_SCALE.find(x => x.v === v); return r ? `${r.v} · ${r.l}` : "Not rated"; };
 
 /* ---------- Omar chat: one visible thread built from the internal contexts ---------- */
 function chatThread(r = rec()) {
@@ -1326,42 +1431,61 @@ function activeChatContext(r = rec()) {
 const managerCount = (log) => log.filter(m => m.from === "manager").length;
 
 /* =========================================================
-   FINAL APPRAISAL — PROTOTYPE CALCULATIONS (configurable, not yet approved)
-   The January plan has one free-text KPI per objective with the target written
-   into it. For this prototype the KPI text is split into separate KPIs and a
-   numeric target is detected; anything unclear is flagged for review instead of
-   producing a misleading percentage. Nothing in the January plan is changed.
+   PERFORMANCE APPRAISAL FORM — CALCULATIONS (deterministic)
+   Follows the NextWave Performance Appraisal Form:
+   Part I  Competencies (40%): rating 1–4; score = (average rating ÷ 3) × 100 (3 = 100%).
+   Part II Objectives (60%): % achieved = actual ÷ target × 100 (no cap);
+           weighted score = % achieved × weight ÷ 100; objectives score = Σ weighted scores.
+   Overall = objectives × 60/100 + competencies × 40/100, classified on the form's rating bands.
    ========================================================= */
 const APPRAISAL_CONFIG = {
-  whatWeight: 60,          /* % of the overall score from WHAT */
-  howWeight: 40,           /* % of the overall score from HOW */
-  kpiCap: null,            /* null = no cap: overachievement stays visible (approved) */
-  manualMax: 200,          /* highest manager-assessed % accepted for a KPI under review */
-  basisMin: 20,            /* minimum length of the written measurement basis for a reviewed KPI */
-  lowerIsBetter: "inverse",/* "inverse" = target ÷ actual × 100 when both > 0 (otherwise review); "review" = always manager review */
-  howScale: 5              /* HOW achievement = average rating ÷ 5 × 100 (1 = 20% … 5 = 100%) */
+  objectivesWeight: 60, competenciesWeight: 40,
+  ratingMax: 4, meetsRating: 3,     /* 3 = Meets Expectations = 100% */
+  kpiCap: null,                     /* no cap: the form allows results above 100% */
+  manualMax: 200, basisMin: 20,
+  lowerIsBetter: "inverse",         /* target ÷ actual × 100, only when both are above 0 */
+  ratingPeriod: { from: "2027-01-01", to: "2027-12-31" }
 };
+/* The form's Employee Performance Profile (classified on the overall % rounded to a whole number, half up) */
+const PERFORMANCE_BANDS = [
+  { min: 101, label: "Exceptional", range: "101% or more" },
+  { min: 86, label: "Very Good", range: "86% – 100%" },
+  { min: 76, label: "Good", range: "76% – 85%" },
+  { min: 60, label: "Needs Improvement", range: "60% – 75%" },
+  { min: -Infinity, label: "Unacceptable", range: "Less than 60%" }
+];
+const COMPETENCY_SCALE = RATING_SCALE;   /* defined in content.js */
+function performanceBand(overall) { if (overall == null) return null; const w = Math.round(overall); return PERFORMANCE_BANDS.find(b => w >= b.min); }
+const MONTH_RX = "(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\\.?";
+function stripDates(t) {
+  return String(t || "")
+    .replace(new RegExp(`\\b\\d{1,2}(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MONTH_RX}(?:,?\\s+\\d{4})?`, "gi"), " ")
+    .replace(new RegExp(`\\b${MONTH_RX}\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+\\d{4})?`, "gi"), " ")
+    .replace(/\b\d{1,4}[\/.-]\d{1,2}[\/.-]\d{1,4}\b/g, " ").replace(/\b(?:19|20)\d{2}\b/g, " ").replace(/\b[qh][1-4]\b/gi, " ");
+}
 const NUM_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12 };
 const NUM_RX = /(?<![a-z0-9])(?:(\d+(?:[.,]\d+)?)\s*(%|\s*\/\s*\d+)?|(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve))(?![a-z0-9])/gi;
 const LOWER_RX = /\b(at most|no more than|maximum of|max\.?|under|below|less than|fewer than|reduce[ds]?|reduction|decrease|lower|within)\b/i;
 const MILESTONE_RX = /\b(launch|implement(ed)?|complete[ds]?|completion|roll(ed)? out|by (q[1-4]|end of|january|february|march|april|may|june|july|august|september|october|november|december))\b/i;
 const SPLIT_RX = /\n|;|\s+(?:and|&)\s+(?=(?:(?:at least|at most|no more than|a minimum of|minimum of|maximum of|over|under|below|above|less than|more than)\s+)?(?:\d|one\b|two\b|three\b|four\b|five\b|six\b|seven\b|eight\b|nine\b|ten\b|eleven\b|twelve\b))/i;
 
-/* Split a January KPI text into KPIs and detect each target. */
+/* Split a measurement text into measures and detect each target (internal helper). */
 function parseKpis(text) {
   const segs = String(text || "").split(SPLIT_RX).map(s => s.trim().replace(/^[,.\-–—]+|[,.]+$/g, "").trim()).filter(Boolean);
   return (segs.length ? segs : [String(text || "").trim()]).map(seg => {
-    const numText = seg.replace(/(\d+(?:[.,]\d+)?)\s*out of\s*(\d+)/gi, "$1/$2");   /* read "4 out of 5" as 4/5; the KPI wording itself is never changed */
+    /* "4 out of 5" on a feedback/rating scale = 4/5; "11 of 12 reports" = a count of 11 (12 is the total). Dates are not targets. */
+    const scaleCtx = /(feedback|satisfaction|survey|rating|score|scale)/i.test(seg);
+    const numText = stripDates(seg).replace(/(\d+(?:[.,]\d+)?)\s*(out\s+)?of\s+(?:the\s+)?(\d+)\b/gi, (m0, x, out, y) => scaleCtx && out ? `${x}/${y}` : x);   /* read "4 out of 5" as 4/5; dates are not targets; the wording itself is never changed */
     const nums = [...numText.matchAll(NUM_RX)].filter(m => !/q$/i.test(numText.slice(0, m.index).trim().slice(-1)));
     const k = { name: seg, target: null, unit: "", dir: "higher", type: "numeric", reason: "" };
-    if (!nums.length) { k.type = "review"; k.reason = MILESTONE_RX.test(seg) ? "Milestone-based KPI (done / not done), so assess it manually." : "No numeric target found in the January KPI."; return k; }
+    if (!nums.length) { k.type = "review"; k.reason = MILESTONE_RX.test(seg) ? "Milestone or completion-based measurement." : "No numeric target found in the measurement."; return k; }
     const distinct = [...new Set(nums.map(m => m[0].replace(/\s+/g, "").toLowerCase()))];
-    if (distinct.length > 1) { k.type = "review"; k.reason = "More than one figure in this KPI, so the target is ambiguous."; return k; }
+    if (distinct.length > 1) { k.type = "review"; k.reason = "More than one figure, so the target is ambiguous."; return k; }
     const m = nums[0];
     k.target = m[3] ? NUM_WORDS[m[3].toLowerCase()] : Number(m[1].replace(",", "."));
     k.unit = m[2] ? m[2].replace(/\s+/g, "") : "";
     if (LOWER_RX.test(seg)) k.dir = "lower";
-    if (MILESTONE_RX.test(seg) && !/\d/.test(seg.replace(/\bq[1-4]\b/gi, ""))) { k.type = "review"; k.reason = "Milestone-based KPI."; }
+    if (MILESTONE_RX.test(seg) && !/\d/.test(seg.replace(/\bq[1-4]\b/gi, ""))) { k.type = "review"; k.reason = "Milestone or completion-based measurement."; }
     if (k.target === 0) { k.type = "review"; k.reason = "Target is zero, so a percentage cannot be calculated."; }
     if (k.dir === "lower" && APPRAISAL_CONFIG.lowerIsBetter === "review") { k.type = "review"; k.reason = "Lower-is-better measure: assess manually."; }
     return k;
@@ -1386,67 +1510,98 @@ function unitProblem(k, a) {
   if (/^\//.test(a.unit)) return "Enter a number in the same unit as the target.";
   return "";
 }
-/* Achievement of one KPI. Returns { raw, pct, status, note }; status ∈ ok | blank | invalid | review. No cap unless configured. */
-function kpiAchievement(k, entry) {
-  const C = APPRAISAL_CONFIG, e = entry || {};
-  const type = e.type || k.type, dir = e.dir || k.dir;
-  const done = (raw, note) => { const capped = C.kpiCap != null && raw > C.kpiCap; const v = capped ? C.kpiCap : raw; return { raw: v, pct: round1(v), status: "ok", note: capped ? `Capped at ${C.kpiCap}% (calculated ${round1(raw)}%)` : note }; };
-  if (type === "review") {
-    /* Manager review: included in the score only when RESOLVED = evidence reviewed + documented measurement basis + assessed % */
-    const v = parseActual(e.manual), miss = [];
-    if (e.manual != null && String(e.manual).trim() && (Number.isNaN(v) || v < 0 || v > C.manualMax)) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
-    if (!e.reviewed) miss.push("confirm the evidence review");
-    if (String(e.basis || "").trim().length < C.basisMin) miss.push("document the measurement basis");
-    if (v == null) miss.push("enter the assessed achievement %");
-    if (miss.length) return { raw: null, pct: null, status: "unresolved", note: `Unresolved: ${miss.join(", ")}` };
-    return done(v, "Manager review: resolved with a documented basis");
+/* ---------- Agreed target / calculation definition (from the objective and measurement) ---------- */
+const RELATIVE_RX = /\b(reduc|increas|improv|grow|rais|cut|lower|decreas|boost)\w*\b.{0,50}\bby\s+(?:at least\s+|a minimum of\s+)?\d/i;
+function deriveDefinition(o) {
+  const mText = String(o.measure != null ? o.measure : (o.kpi || "")).trim(), oText = String(o.objective || "").trim();
+  let source = "measurement", ks = parseKpis(mText);
+  if (!ks.some(k => k.target != null) && oText) { const ko = parseKpis(oText); if (ko.some(k => k.target != null)) { ks = ko; source = "objective"; } }
+  const numeric = ks.filter(k => k.target != null), text = source === "objective" ? oText : mText;
+  const base = { source, text, target: null, unit: "", dir: "higher" };
+  const milestone = MILESTONE_RX.test(`${mText} ${oText}`) || /\b(deliver(ed)?|complete|finali[sz]e|publish|launch|set up|establish|introduce|roll out)\b/i.test(`${mText} ${oText}`);
+  if (numeric.length > 1) return { ...base, type: "review", compound: true, reason: "The measurement contains more than one target. Use one target per objective (or split it into separate objectives)." };
+  if (numeric.length === 1) {
+    const k = numeric[0], d = { ...base, target: k.target, unit: k.unit, dir: k.dir };
+    if (RELATIVE_RX.test(text)) return { ...d, type: "review", reason: "It states a change (\"by …\") without the starting level. State the level Omar should reach, or the baseline." };
+    if (k.type === "review") return { ...d, type: "review", reason: k.reason };
+    return { ...d, type: "numeric" };
   }
-  if (k.target == null || k.target === 0) return { raw: null, pct: null, status: "review", note: "No usable target: switch to manager review" };
-  const a = parseActualU(e.actual);
-  if (a.n == null) return { raw: null, pct: null, status: "blank", note: "Enter the actual result" };
+  const unclear = ks.find(k => /More than one figure|zero/i.test(k.reason || ""));
+  if (unclear) return { ...base, type: "review", reason: unclear.reason };
+  if (milestone && o.due) return { ...base, type: "milestone", reason: "" };
+  return { ...base, type: "review", reason: "No target or completion rule could be identified." };
+}
+/* At plan submission the definition is stored with the objective (o.agreed), so year-end uses what was agreed. */
+const objectiveDefinition = (o) => o.agreed || deriveDefinition(o);
+function fmtDefinitionTarget(def) {
+  if (def.type === "milestone") return "Completed by the due date";
+  if (def.target == null) return "Not established";
+  return `${def.dir === "lower" ? "≤ " : ""}${def.target}${def.unit}`;
+}
+const MILESTONE_OPTIONS = [["done", "Completed by the due date (100%)"], ["late", "Completed after the due date"], ["partial", "Partly completed"], ["not", "Not completed (0%)"]];
+const METHOD_LABEL = { higher: "Actual ÷ target × 100", lower: "Lower is better: target ÷ actual × 100", milestone: "Completion rule", review: "Manager assessment with documented basis" };
+
+/* ---------- Year-end result for one objective ---------- */
+function manualResult(e, C) {
+  const v = parseActual(e.manual), miss = [];
+  if (e.manual != null && String(e.manual).trim() && (Number.isNaN(v) || v < 0 || v > C.manualMax)) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
+  if (!e.reviewed) miss.push("confirm the evidence review");
+  if (String(e.basis || "").trim().length < C.basisMin) miss.push("document the measurement basis");
+  if (v == null) miss.push("enter the % achieved");
+  if (miss.length) return { raw: null, pct: null, status: "unresolved", note: `Needs clarification: ${miss.join(", ")}` };
+  return { raw: v, pct: round1(v), status: "ok", note: "Manager assessment with a documented basis" };
+}
+function objectiveMethod(def, e) {
+  if (def.type === "numeric") return e.mode === "review" ? "review" : (e.dir || def.dir) === "lower" ? "lower" : "higher";
+  return def.type;                                   /* milestone | review */
+}
+function objectiveResult(o, entry) {
+  const C = APPRAISAL_CONFIG, e = entry || {}, def = objectiveDefinition(o), method = objectiveMethod(def, e);
+  const ok = (raw, note) => ({ raw, pct: round1(raw), status: "ok", note });
+  if (method === "review") return manualResult(e, C);
+  if (method === "milestone") {
+    if (!e.milestone) return { raw: null, pct: null, status: "blank", note: "Select the completion status" };
+    if (e.milestone === "done") return ok(100, "Completed by the due date = 100%");
+    if (e.milestone === "not") return ok(0, "Not completed = 0%");
+    return manualResult(e, C);                       /* late or partial: manager assessment with a basis */
+  }
+  const k = { target: def.target, unit: def.unit }, a = parseActualU(e.actual);
+  if (a.n == null) return { raw: null, pct: null, status: "blank", note: "Enter the actual achievement" };
   if (Number.isNaN(a.n) || a.n < 0) return { raw: null, pct: null, status: "invalid", note: "Enter a number, e.g. 9 or 75%" };
   const up = unitProblem(k, a); if (up) return { raw: null, pct: null, status: "invalid", note: up };
-  if (dir === "lower") {
-    if (C.lowerIsBetter === "review") return { raw: null, pct: null, status: "review", note: "Lower-is-better measure: switch to manager review" };
-    if (a.n === 0) return { raw: null, pct: null, status: "review", note: "Actual is 0, so a ratio can't be calculated: switch to manager review and state your rule" };
-    return done(k.target / a.n * 100, "Lower is better: target ÷ actual × 100");
+  if (method === "lower") {
+    if (a.n === 0) return { raw: null, pct: null, status: "unresolved", note: "The actual is 0, so a ratio can't be calculated: use a manager assessment with a documented basis" };
+    return ok(def.target / a.n * 100, METHOD_LABEL.lower);
   }
-  return done(a.n / k.target * 100, "Actual ÷ target × 100");
+  return ok(a.n / def.target * 100, METHOD_LABEL.higher);
 }
-/* Full appraisal calculation from the plan and the participant's entries.
-   Raw values are kept until display, so rounding never compounds. */
+
+/* ---------- The whole form ---------- */
 function appraisalCalc(r = rec()) {
   const a = r.r3.appraisal, C = APPRAISAL_CONFIG;
-  const objectives = r.goals.objectives.map(o => {
-    const kpis = parseKpis(o.kpi), entries = ((a.what[o.id] || {}).kpis) || {};
-    const rows = kpis.map((k, i) => {
-      const match = matchKpi(k), base = match.status === "supported" ? k : { ...k, type: "review", reason: match.reason || k.reason };
-      if (match.dir !== base.dir) base.dir = match.dir;
-      const raw = entries[i] || {}, e = match.numericAllowed ? raw : { ...raw, type: "review" };   /* unsupported KPIs can't be switched to a formula */
-      return { k: base, i, e, share: 100 / kpis.length, match, res: kpiAchievement(base, e) };
-    });
-    const done = rows.every(x => x.res.status === "ok");
-    const achRaw = done ? rows.reduce((s, x) => s + x.res.raw, 0) / rows.length : null;
-    const weight = num(o.weight);
-    return { o, rows, achRaw, ach: achRaw == null ? null : round1(achRaw), weight, contribRaw: achRaw == null ? null : achRaw * weight / 100, contrib: achRaw == null ? null : round1(achRaw * weight / 100), done };
+  const objectives = r.goals.objectives.map((o, i) => {
+    const def = objectiveDefinition(o), e = a.what[o.id] || {}, res = objectiveResult(o, e), weight = num(o.weight);
+    const match = matchKpi({ name: `${def.text || ""}`, target: def.target, unit: def.unit || "", dir: def.dir, type: def.type === "numeric" ? "numeric" : "review", reason: def.reason || "" });
+    return { o, i, def, e, res, match, method: objectiveMethod(def, e), weight, weightedRaw: res.raw == null ? null : res.raw * weight / 100, weighted: res.raw == null ? null : round1(res.raw * weight / 100), done: res.status === "ok" };
   });
   const totalWeight = objectives.reduce((s, x) => s + x.weight, 0), weightOK = Math.abs(totalWeight - 100) < 0.01;
-  const doneObjs = objectives.filter(x => x.done);
-  const whatRaw = objectives.length && weightOK && doneObjs.length === objectives.length ? objectives.reduce((s, x) => s + x.contribRaw, 0) : null;
-  const whatPartial = round1(doneObjs.reduce((s, x) => s + x.contribRaw, 0));
-  const comps = r.goals.comps.map(c => ({ c, rating: (a.how[c.id] || {}).rating || null }));
+  const objDone = objectives.filter(x => x.done).length;
+  const objRaw = objectives.length && weightOK && objDone === objectives.length ? objectives.reduce((s, x) => s + x.weightedRaw, 0) : null;
+  const comps = r.goals.comps.map(c => { const h = a.how[c.id] || {}; return { c, rating: COMPETENCY_SCALE.some(x => x.v === h.rating) ? h.rating : null, h }; });
   const rated = comps.filter(x => x.rating);
-  const howRaw = comps.length && rated.length === comps.length ? rated.reduce((s, x) => s + x.rating, 0) / rated.length / C.howScale * 100 : null;
-  const overallRaw = whatRaw != null && howRaw != null ? whatRaw * C.whatWeight / 100 + howRaw * C.howWeight / 100 : null;
+  const avgRating = comps.length && rated.length === comps.length ? rated.reduce((s, x) => s + x.rating, 0) / rated.length : null;
+  const compRaw = avgRating == null ? null : avgRating / C.meetsRating * 100;
+  const overallRaw = objRaw != null && compRaw != null ? objRaw * C.objectivesWeight / 100 + compRaw * C.competenciesWeight / 100 : null;
   const r1 = (x) => x == null ? null : round1(x);
-  const unresolved = objectives.reduce((n, x) => n + x.rows.filter(y => y.res.status === "unresolved").length, 0);
-  return { objectives, unresolved, totalWeight, weightOK, whatPct: r1(whatRaw), whatPartial, objDone: doneObjs.length, comps, howPct: r1(howRaw), rated: rated.length, overall: r1(overallRaw),
-    whatContrib: whatRaw == null ? null : round1(whatRaw * C.whatWeight / 100), howContrib: howRaw == null ? null : round1(howRaw * C.howWeight / 100) };
+  const unresolved = objectives.filter(x => x.res.status === "unresolved").length;
+  return { objectives, totalWeight, weightOK, objDone, unresolved, objectivesScore: r1(objRaw), objectivesContrib: objRaw == null ? null : round1(objRaw * C.objectivesWeight / 100),
+    comps, rated: rated.length, avgRating: avgRating == null ? null : Math.round(avgRating * 100) / 100, competenciesScore: r1(compRaw), competenciesContrib: compRaw == null ? null : round1(compRaw * C.competenciesWeight / 100),
+    overall: r1(overallRaw), overallRaw, band: performanceBand(overallRaw) };
 }
 
 /* =========================================================
-   KPI → EVIDENCE MATCHING (deterministic, auditable)
-   Maps each KPI (parsed from the January text) to the kind of record that
+   OBJECTIVE MEASUREMENT → EVIDENCE MATCHING (deterministic, auditable)
+   Maps each measurement (from the January objective and measurement) to the kind of record that
    will exist at year-end. Holds measure DEFINITIONS and record IDs only:
    no year-end values (those stay on the server until December).
    Order matters: the first matching rule wins.
@@ -1455,7 +1610,7 @@ const EVIDENCE_MEASURES = [
   { id: "rep_escalate", label: "Deadline conflicts escalated in advance", rx: /(escalat|flag(s|ged)?|raise[ds]?)\b.{0,40}(deadline|conflict|risk|priorit)|(deadline|conflict)s?.{0,40}(escalat|flag)/, refs: ["EV-REP-05", "Register 1"], units: ["count", "pct"] },
   { id: "rep_late", label: "Reporting deadlines missed", rx: /(late|missed|overdue|delayed)\b.{0,30}(report|deadline|deliver)|(report|deadline|deliver)\w*.{0,30}\b(late|missed|overdue)/, refs: ["EV-REP-03", "Register 1"], units: ["count", "pct"], dir: "lower" },
   { id: "rep_quality", label: "Reports passing quality review", rx: /(quality|\bqa\b|pass(ing|ed|es)?\b.{0,20}review|without (major )?correction|error[- ]free)/, refs: ["EV-REP-04", "Register 1"], units: ["count", "pct"], max: 12 },
-  { id: "rep_ontime", label: "Reports submitted on time", rx: /(on[- ]time|timel|by the deadline|before the deadline|within the deadline)/, refs: ["EV-REP-02", "Register 1"], units: ["count", "pct"], max: 12 },
+  { id: "rep_ontime", label: "Reports submitted on time", rx: /(on[- ]time|timel|(by|before|within|meet(ing)?) (the |their |its |agreed )?deadlines?)/, refs: ["EV-REP-02", "Register 1"], units: ["count", "pct"], max: 12 },
   { id: "rep_count", label: "Monthly reports submitted", rx: /\breports?\b/, refs: ["EV-REP-01", "Register 1"], units: ["count", "pct"], max: 12 },
   { id: "rec_adopt", label: "Management decisions on recommendations", rx: /recommend.{0,60}(adopt|accept|approv|implement)|(adopt|accept|approv|implement)\w*.{0,40}recommend/, refs: ["EV-REC-03", "Register 2"], units: ["count", "pct"], business: "Adoption is decided by management." },
   { id: "rec_action", label: "Recommendations with a proposed action", rx: /recommend.{0,80}(action|next step)|actionab.{0,30}recommend|(action|next step)s?.{0,40}recommend/, refs: ["EV-REC-01", "EV-REC-02", "Register 2"], units: ["pct", "count"], standard: true },
@@ -1467,12 +1622,12 @@ const EVIDENCE_MEASURES = [
   { id: "business", label: "Department business results", rx: /(win rate|revenue|sales (growth|target|volume|result)|pipeline|opportunit|objection|market share|retention|new customers|conversion|profit|margin)/, refs: ["EV-BIZ-01", "EV-BIZ-02", "EV-BIZ-03"], units: [], business: "This is a department result; the records won't isolate Omar's individual contribution." }
 ];
 const EVIDENCE_VERSION = "2027.2";   /* the year-end record version this build expects (older saves reload it) */
-/* Measure families, used to spot one KPI that combines two separate measures under a single target */
+/* Measure families, used to spot one measurement that combines two separate measures under a single target */
 const MEASURE_FAMILY = { rep_escalate: "escalation", rep_late: "timeliness", rep_ontime: "timeliness", rep_quality: "quality", rec_adopt: "adoption", rec_action: "recommendations", feedback: "feedback", development: "development", consult: "consultations", intelligence: "intelligence", business: "business" };
 const FAMILY_LABEL = { escalation: "escalation", timeliness: "timeliness", quality: "quality review", adoption: "adoption", recommendations: "recommendations", feedback: "stakeholder feedback", development: "development activity", consultations: "consultations", intelligence: "competitive intelligence", business: "business results" };
 function measureFamilies(t) {
   const fams = new Set(EVIDENCE_MEASURES.filter(m => MEASURE_FAMILY[m.id] && (m.id === "feedback" ? /(feedback|satisfaction|survey)/.test(t) : m.rx.test(t))).map(m => MEASURE_FAMILY[m.id]));
-  if (fams.has("escalation")) fams.delete("timeliness");     /* escalation KPIs are about deadlines by nature */
+  if (fams.has("escalation")) fams.delete("timeliness");     /* escalation measures are about deadlines by nature */
   return [...fams];
 }
 const REF_LABEL = {
@@ -1486,7 +1641,7 @@ const PERIOD_RX = { quarter: /(per|each|every|a) quarter|quarterly|\bq[1-4]\b/, 
 const kpiUnitKind = (k) => k.unit === "%" ? "pct" : /^\/\d/.test(k.unit) ? "scale" : "count";
 function kpiPeriod(text) { const t = String(text).toLowerCase(); return Object.keys(PERIOD_RX).find(p => PERIOD_RX[p].test(t)) || "year"; }
 
-/* Match one parsed KPI. Returns an auditable record: which rule matched, why, and the coverage status. */
+/* Match one parsed measurement. Returns an auditable record: which rule matched, why, and the coverage status. */
 function matchKpi(k) {
   const t = String(k.name || "").toLowerCase();
   const m = EVIDENCE_MEASURES.find(x => x.rx.test(t)) || null;
@@ -1495,13 +1650,13 @@ function matchKpi(k) {
   const out = { measure: m ? m.id : null, label: m ? m.label : "No matching record", refs: m ? m.refs : [], unit, period, dir: m && m.dir ? m.dir : k.dir, business: m ? (m.business || "") : "", status: "supported", reason: "", notes: [], families: fams, compound: fams.length > 1, numericAllowed: true };
   const unavailable = (why) => Object.assign(out, { status: "unavailable", reason: why, numericAllowed: false });
   const clarify = (why, numeric = false) => Object.assign(out, { status: "clarify", reason: why, numericAllowed: numeric });
-  if (out.compound) return clarify(`This KPI combines ${fams.length} separate measures (${fams.map(f => FAMILY_LABEL[f]).join(", ")}) under one target. Consider splitting it into ${fams.length} KPIs, each with its own target.`);
+  if (out.compound) return clarify(`This measurement combines ${fams.length} separate measures (${fams.map(f => FAMILY_LABEL[f]).join(", ")}) under one target. Consider splitting it into ${fams.length} objectives, each with its own target.`);
   if (!m) return unavailable(k.target != null ? "The measure is clear, but the available records may not support this result." : "The available records may not support this measure.");
   if (m.id === "business") return unavailable(m.business);
-  if (m.uncounted && k.target != null) return unavailable("Records won't count analyses or findings; consider a measure that will be recorded.");
+  if (m.uncounted && k.target != null) return unavailable("Records won't count analyses or findings; consider a measurement that will be recorded.");
   if (k.type === "review") {
     const r = k.reason || "";
-    if (/No numeric target/.test(r)) return clarify("This KPI needs a measurable target.");
+    if (/No numeric target/.test(r)) return clarify("This objective needs a measurable target.");
     if (/Milestone/.test(r)) return clarify("Define how completion will be judged (for example a date or a yes/no rule).");
     if (/More than one figure/.test(r)) return clarify("More than one figure: make clear which one is the target.");
     if (/zero/i.test(r)) return clarify("A target of zero can't be turned into an achievement %; state a different rule.");
@@ -1514,27 +1669,58 @@ function matchKpi(k) {
   if (m.id === "feedback" && unit === "scale" && !/\/5$/.test(k.unit)) return clarify("Stakeholder feedback is recorded on a 1–5 scale: state the target on that scale.");
   if (m.max && unit === "count" && k.target > m.max) return clarify(`Only ${m.max} monthly reports are scheduled in the year: check the target.`, true);
   if (m.business) out.notes.push(m.business);
-  if (m.standard && unit === "count") out.notes.push("Your KPI sets a standard each recommendation must meet: decide which records qualify.");
-  if (m.id === "consult" && /(action|follow)/.test(t)) out.notes.push("Your KPI sets a standard (documented actions): decide which consultations qualify.");
+  if (m.standard && unit === "count") out.notes.push("The measurement sets a standard each recommendation must meet: decide which records qualify.");
+  if (m.id === "consult" && /(action|follow)/.test(t)) out.notes.push("The measurement sets a standard (documented actions): decide which consultations qualify.");
   if (period !== "year") out.notes.push(`Your target is ${period === "quarter" ? "per quarter" : period === "month" ? "per month" : "for half a year"}: enter the actual for the same period.`);
   else if (m.periods === "quarter") out.notes.push("Feedback is recorded by quarter: decide which period your target refers to (e.g. the year or H2).");
   if (m.periods === "h2") out.notes.push("Consultation records cover July – December only.");
   return out;
 }
-/* January wording: never mentions results, incidents or values */
 const COVERAGE_LABEL = { supported: "Supported", clarify: "Needs clarification", unavailable: "Evidence unavailable" };
-function kpiCoverageJanuary(k) {
-  const c = matchKpi(k);
-  return { status: c.status, label: COVERAGE_LABEL[c.status], message: c.status === "supported" ? "Measurable, and records for this measure will be available." : c.reason };
+
+/* =========================================================
+   SMART CHECK (January) — objective, measurement and due date read together.
+   Gives feedback only; never rewrites the participant's wording. Never mentions year-end results.
+   status: ok | warn | fail | info. "fail" on M or T blocks finalising the objective.
+   ========================================================= */
+const VAGUE_START = /^(improve|enhance|support|help|work on|focus on|continue|try to|assist|contribute|be |do |ensure good|maintain good|develop)\b/i;
+const OUTCOME_WORDS = /\b(deliver|submit|achieve|reach|complete|launch|produce|present|publish|reduce|increase|run|hold|provide|prepare|identify|establish|introduce|secure)\w*/i;
+const ROLE_WORDS = /(report|analys|intelligence|market|competitor|recommend|stakeholder|insight|customer|commercial|sales|research|pricing|segment|briefing|consult|feedback|operations|deadline|escalat)/i;
+const inPeriod = (d) => d >= APPRAISAL_CONFIG.ratingPeriod.from && d <= APPRAISAL_CONFIG.ratingPeriod.to;
+function smartCheck(o) {
+  const oT = String(o.objective || "").trim(), mT = String(o.measure || "").trim(), due = String(o.due || "").trim();
+  const def = deriveDefinition(o), both = `${oT} ${mT}`;
+  const match = def.type === "numeric" ? matchKpi({ name: def.text, target: def.target, unit: def.unit, dir: def.dir, type: "numeric", reason: "" }) : matchKpi({ name: both, target: null, unit: "", dir: "higher", type: "review", reason: "No numeric target" });
+  const c = {};
+  /* S — Specific */
+  if (!oT) c.S = { status: "fail", msg: "Write the objective: what should Omar accomplish this year?" };
+  else if (VAGUE_START.test(oT) && !OUTCOME_WORDS.test(oT) && def.type !== "numeric") c.S = { status: "warn", msg: "Your objective describes the activity, but the expected result is not yet clear. What specific outcome should Omar achieve?" };
+  else if (words(oT) < 5) c.S = { status: "warn", msg: "The objective is very short. Describe the result Omar should achieve, not just the topic." };
+  else c.S = { status: "ok", msg: "States what Omar should accomplish." };
+  /* M — Measurable (blocking when no reliable target or completion rule) */
+  if (!mT) c.M = { status: "fail", msg: "Add the measurement: how will you and Omar know the objective has been achieved?" };
+  else if (def.type === "review") c.M = { status: "fail", msg: def.compound ? "The measurement contains more than one target. Keep one target per objective, or split it into separate objectives." : /change/.test(def.reason) ? "The measurement states a change without the level to reach. State the target level (or the starting point) so the result can be calculated." : /ambiguous/.test(def.reason) ? "The measurement contains more than one figure, so the target isn't clear. Which number is the target?" : /zero/i.test(def.reason) ? "A target of zero can't be turned into a % achieved. State the rule you'll use to assess it." : "A target isn't clear yet. Add a number, percentage or completion standard so the result can be assessed at year-end." };
+  else if (def.type === "milestone") c.M = { status: "ok", msg: "Completion-based: it will be assessed as completed by the due date (100%) or not completed (0%); late or partial completion needs a documented assessment." };
+  else if (match.status === "clarify" && /1–5 scale/.test(match.reason)) c.M = { status: "warn", msg: "Stakeholder feedback is recorded on a 1–5 scale: state the target on that scale." };
+  else c.M = { status: "ok", msg: `Target identified: ${fmtDefinitionTarget(def)}${def.source === "objective" ? " (from the objective statement)" : ""}.` };
+  /* A — Achievable (only obvious problems are flagged; realism is for you and Omar to agree) */
+  if (def.type === "numeric" && def.unit === "%" && def.target > 100 && def.dir !== "lower") c.A = { status: "warn", msg: "A percentage target above 100% can't be reached. Check the target." };
+  else if (def.type === "numeric" && /^\/(\d+)/.test(def.unit) && def.target > Number(def.unit.slice(1))) c.A = { status: "warn", msg: "The target is higher than the scale allows. Check the target." };
+  else if (match.status === "clarify" && /monthly reports are scheduled/.test(match.reason)) c.A = { status: "warn", msg: match.reason };
+  else c.A = { status: "info", msg: "Agree with Omar that the target is challenging but realistic for his role." };
+  /* R — Relevant */
+  if (match.measure === "business") c.R = { status: "warn", msg: "This is a department result. Omar's own contribution to it may be hard to show; consider what he directly controls." };
+  else if (match.status === "unavailable" && !ROLE_WORDS.test(both)) c.R = { status: "warn", msg: "Check how this objective links to Omar's role and the Commercial priorities. The measure is clear, but the available records may not support this result." };
+  else if (match.status === "unavailable") c.R = { status: "info", msg: "Relevant to Omar's role. The measure is clear, but the available records may not support this result." };
+  else c.R = { status: "ok", msg: "Linked to Omar's role and responsibilities." };
+  /* T — Time-bound (blocking) */
+  if (!due) c.T = { status: "fail", msg: "Add a due date." };
+  else if (!inPeriod(due)) c.T = { status: "fail", msg: "The due date must fall within the 2027 rating period (1 January – 31 December 2027)." };
+  else c.T = { status: "ok", msg: `Due ${fmtDue(due)}.` };
+  return { checks: c, def, blocking: ["M", "T"].filter(k => c[k].status === "fail"), notes: Object.keys(c).filter(k => c[k].status === "warn").length };
 }
-function objectiveCoverage(o) {
-  const ks = parseKpis(o.kpi).map(k => ({ k, c: kpiCoverageJanuary(k) }));
-  const rank = { unavailable: 2, clarify: 1, supported: 0 };
-  const worst = ks.reduce((w, x) => rank[x.c.status] > rank[w] ? x.c.status : w, "supported");
-  /* Two measurable targets in one KPI text: suggest splitting (the wording is never rewritten) */
-  const split = ks.length > 1 ? `This KPI contains ${ks.length} separate measures. Consider writing them as ${ks.length} KPIs so each has its own target and is clear to assess. It will be kept exactly as you wrote it.` : "";
-  return { status: worst, label: COVERAGE_LABEL[worst], kpis: ks, split };
-}
+const SMART_LABEL = { S: "Specific", M: "Measurable", A: "Achievable", R: "Relevant", T: "Time-bound" };
+function fmtDue(iso) { if (!iso) return "—"; const d = new Date(iso + "T00:00:00Z"); if (isNaN(d)) return iso; return `${d.getUTCDate()} ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getUTCMonth()]} ${d.getUTCFullYear()}`; }
 
 /* =========================================================
    SCORE PERFORMANCE HUB — UI CORE
@@ -1937,7 +2123,7 @@ const CEO_INDICATOR = { growth: "Commercial revenue growth", conversion: "Propos
 function profileObjectives() {
   return `<div class="stack"><p class="small t2">Your ${APP.cycleYear} objectives, set by the Chief Executive Officer. They are read-only and give the strategic context for the objectives you agree with your team.</p>
     <div class="obj-grid">${CEO_OBJECTIVES.map((o, i) => { const on = UI.ceoOpen === o.id; return `<div class="ceo-card ${on ? "open" : ""}"><button class="ceo-btn" data-act="ceoToggle" data-id="${o.id}" aria-expanded="${on}"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span><span class="xs ceo-more">${on ? "Hide details" : "View details"} ${icon(on ? "chevdown" : "chev", "i-xs")}</span></button>
-      ${on ? `<div class="ceo-detail small"><div><span class="muted">KPI</span>${esc(o.kpi)}</div><div><span class="muted">Target</span>${esc(o.target)}</div><div><span class="muted">Tracked through</span>${esc(CEO_INDICATOR[o.id])}</div><div><span class="muted">Strategic context</span>One of the CEO's ${APP.cycleYear} priorities for the Commercial Department. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
+      ${on ? `<div class="ceo-detail small"><div><span class="muted">Measure</span>${esc(o.kpi)}</div><div><span class="muted">Target</span>${esc(o.target)}</div><div><span class="muted">Tracked through</span>${esc(CEO_INDICATOR[o.id])}</div><div><span class="muted">Strategic context</span>One of the CEO's ${APP.cycleYear} priorities for the Commercial Department. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
 }
 MODALS.profile = function (m) {
   const e = m.emp || S.emp, E = EMPLOYEES[e], active = PILOT.active.includes(e);
@@ -2007,7 +2193,7 @@ VIEWS.facilitator = function () {
       <div class="row between"><span class="small">End Omar's mid-year conversation</span><button class="btn sm" data-act="facEnd" data-k="diag" ${r2Status(r) === "locked" || r.r2.diag.ended ? "disabled" : ""}>End conversation</button></div>
       <div class="row between"><span class="small">Set the Round 2 pathway (overrides the AI classification; applies the matching coaching Pulse event if none was applied)</span><div class="seg">${["A", "B", "C"].map(p => `<button class="${r.r2.pathway === p ? "on" : ""}" data-act="facPathway" data-v="${p}" ${!S.released.r2 ? "disabled" : ""}>${p}</button>`).join("")}</div></div>
       <div class="row between"><span class="small">End Omar's appraisal conversation</span><button class="btn sm" data-act="facEnd" data-k="appraisal" ${r.r3.appraisal.status !== "submitted" || r.r3.conv.ended ? "disabled" : ""}>End conversation</button></div>
-      <div class="row between"><span class="small">Finalise the appraisal without AI assessment</span><button class="btn sm" data-act="facFinal" ${!r.r3.conv.ended || r.r3.done ? "disabled" : ""}>Finalise</button></div>
+      <div class="row between"><span class="small">Finalize the appraisal without AI assessment</span><button class="btn sm" data-act="facFinal" ${!r.r3.conv.ended || r.r3.done ? "disabled" : ""}>Finalize</button></div>
     </div></div>
     <div class="card"><div class="card-h"><h3>Criterion scores</h3><span class="xs muted">Enter a score to override the AI assessment; clear it to restore</span></div><div class="card-b" style="overflow-x:auto">
       ${AIS.scoring ? `<table class="tbl" style="min-width:720px"><thead><tr><th>Round</th><th>Criterion</th><th>AI</th><th>Max</th><th>Override</th></tr></thead><tbody>${crit.map(c => `<tr><td>${c.round}</td><td>${esc(c.groupLabel)} · ${esc(c.label)}</td><td class="num">${c.a ? c.a.score : "—"}</td><td class="num">${c.max}</td><td><input class="inp" style="width:80px" type="number" min="0" max="${c.max}" data-fac="${c.id}" value="${r.fac[c.id] != null ? r.fac[c.id] : ""}"></td></tr>`).join("")}</tbody></table>` : `<p class="small muted">Scoring structure unavailable: the SCORE server could not be reached.</p>`}
@@ -2026,7 +2212,7 @@ MODALS.newSession = function () {
 
 /* =========================================================
    PERFORMANCE MANAGEMENT → OBJECTIVES
-   Two tabs: Performance Objectives · Competencies. Validation sits under each tab.
+   Two tabs: Objectives of the Year (HR form) · Competencies. Validation sits under each tab.
    ========================================================= */
 const goalsEditable = (r = rec()) => r.goals.status === "not_started" || r.goals.status === "draft";
 
@@ -2054,56 +2240,67 @@ function validationBlock(title, v, okText) {
     ${v.tips.map(t => `<div class="ck note">${icon("info", "i-sm")}<span>${esc(t)}</span></div>`).join("")}
   </div></section>`;
 }
-function weightSummary(r) {
-  const wt = weightTotal(r), n = r.goals.objectives.length;
-  return `<div class="summary-bar">
-    <div class="sb-item"><span class="xs muted">Objectives</span><b class="num">${n}</b><span class="xs muted">Recommended ${OBJ_RANGE.min}–${OBJ_RANGE.max}</span></div>
-    <div class="sb-item"><span class="xs muted">Total weight</span><b class="num" style="color:${wt === 100 ? "var(--good)" : wt > 100 ? "var(--risk)" : "var(--text)"}">${wt}%</b><div class="meter ${wt === 100 ? "ok" : wt > 100 ? "over" : ""}"><i style="width:${Math.min(100, wt)}%"></i></div></div>
-  </div>`;
+/* ---------- Objectives of the Year (NextWave HR form) ---------- */
+function formHeadTable(rows) {
+  return `<table class="hr-head"><tbody>${rows.map(r => `<tr>${r.map(([k, v]) => `<th>${k}</th><td>${v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+const managerName = () => esc((S.session && S.session.name) || "Commercial Director");
+function smartChips(sc) {
+  return `<span class="smart-chips" aria-label="SMART check">${Object.keys(SMART_LABEL).map(k => `<span class="smk smk-${sc.checks[k].status}" title="${SMART_LABEL[k]}: ${esc(sc.checks[k].msg)}">${k}</span>`).join("")}</span>`;
+}
+function smartFeedback(sc) {
+  return `<div class="smart-fb">${Object.keys(SMART_LABEL).map(k => { const x = sc.checks[k]; return `<div class="smart-row smk-row-${x.status}"><span class="smk smk-${x.status}">${k}</span><span class="xs"><b>${SMART_LABEL[k]}.</b> ${esc(x.msg)}</span></div>`; }).join("")}</div>`;
 }
 function objTab(r, ed) {
-  const g = r.goals;
+  const g = r.goals, E = EMP(), wt = weightTotal(r), tried = g.tried;
+  const rows = g.objectives.map((o, i) => objRow(o, i, ed, tried)).join("");
   return `<div class="stack">
-    <div class="row between"><h2>Performance Objectives</h2>${ed ? (g.objectives.length < OBJ_RANGE.hardMax ? `<button class="btn primary" data-act="addObj" id="add-obj">${icon("plus", "i-sm")} Add Objective</button>` : `<span class="xs muted">Maximum of ${OBJ_RANGE.hardMax} objectives reached.</span>`) : ""}</div>
-    ${weightSummary(r)}
-    ${g.objectives.length ? g.objectives.map((o, i) => objCard(o, i, ed, g.tried)).join("") : `<div class="card"><div class="empty">${icon("target")}<b>No objectives yet</b><span class="small">Use Add Objective to create the first one.</span></div></div>`}
-    ${ed ? validationBlock("Objective validation", objectiveValidation(r), "All objectives are complete and the weights total 100%.") : ""}
-    ${ed ? coverageSummary(r) : ""}
+    <section class="hr-form" id="objectives-form">
+      <div class="hr-title">Objectives of the Year ${APP.cycleYear}</div>
+      ${formHeadTable([[["Employee Name", esc(E.name)], ["Job Title", esc(E.title)]], [["BU / Department", "Commercial"], ["Direct Manager", `${managerName()} · Commercial Director`]], [["Performance Year", String(APP.cycleYear)], ["Rating Period", "1 January – 31 December 2027"]]])}
+      <p class="hr-sub"><b>PERFORMANCE STANDARDS AND EXPECTATIONS:</b> Objectives to be accomplished during this rating period.</p>
+      <div class="table-wrap"><table class="hr-tbl obj-tbl"><thead><tr><th class="c-no">No.</th><th>Objective / Project</th><th>Measurement</th><th class="c-due shade">Due date</th><th class="c-w">Weight</th><th class="c-act"><span class="sr">Actions</span></th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="6" class="muted small" style="text-align:center;padding:18px">No objectives yet. Use Add Objective to write the first one.</td></tr>`}</tbody>
+        <tfoot><tr><td colspan="4" class="right"><b>Total weight</b></td><td class="c-w"><b class="num" style="color:${wt === 100 ? "var(--good)" : wt > 100 ? "var(--risk)" : "var(--text)"}">${wt}%</b></td><td></td></tr></tfoot></table></div>
+      ${ed ? `<div class="row between" style="margin-top:8px">${g.objectives.length < OBJ_RANGE.hardMax ? `<button class="btn primary sm" data-act="addObj" id="add-obj">${icon("plus", "i-sm")} Add Objective</button>` : `<span class="xs muted">Maximum of ${OBJ_RANGE.hardMax} objectives reached.</span>`}<span class="xs muted">${OBJ_RANGE.min}–${OBJ_RANGE.max} objectives recommended · weights must total 100%</span></div>` : ""}
+      ${ackBlock(r)}
+    </section>
+    ${ed ? validationBlock("Objective validation", objectiveValidation(r), "All objectives are complete, SMART checks needing a target or due date are resolved, and the weights total 100%.") : ""}
   </div>`;
 }
-/* KPI evidence check (January): informative, never blocks submission, never reveals year-end results */
-function coverageBlock(o) {
-  if (!String(o.kpi || "").trim()) return "";
-  const c = objectiveCoverage(o);
-  return `<div class="cov-list">${c.split ? `<div class="cov-row"><span class="cov cov-suggest">Suggestion</span><span class="xs t2">${esc(c.split)}</span></div>` : ""}${c.kpis.map(({ k, c: x }) => `<div class="cov-row"><span class="cov cov-${x.status}">${x.label}</span><span class="xs t2">${c.kpis.length > 1 ? `<b>${esc(k.name)}</b> · ` : ""}${esc(x.message)}</span></div>`).join("")}</div>`;
-}
-function coverageSummary(r) {
-  const all = r.goals.objectives.filter(o => String(o.kpi || "").trim()).flatMap(o => objectiveCoverage(o).kpis.map(x => x.c.status));
-  if (!all.length) return "";
-  const n = (s) => all.filter(x => x === s).length, splits = r.goals.objectives.filter(o => objectiveCoverage(o).split).length;
-  return `<section class="card" id="kpi-coverage"><div class="card-h"><h3>KPI evidence check</h3><span class="xs muted">Advisory · you decide</span></div><div class="card-b stack-sm">
-    <div class="row" style="gap:8px">${["supported", "clarify", "unavailable"].map(s => `<span class="cov cov-${s}">${COVERAGE_LABEL[s]}: ${n(s)}</span>`).join("")}${splits ? `<span class="cov cov-suggest">Could be split: ${splits}</span>` : ""}</div>
-    <p class="xs muted">Checks whether each KPI has a measurable target and whether NextWave's records will be able to measure it. You can revise your KPIs before submitting.</p>
-  </div></section>`;
-}
-function objCard(o, i, ed, tried) {
+function objRow(o, i, ed, tried) {
   const base = P("goals", "objectives", i), miss = objMissing(o), editing = ed && UI.edit === o.id, bad = (f) => tried && miss.some(m => m.startsWith(f)) ? "err" : "";
-  const meta = `<div class="goal-meta one"><div><div class="k">KPI / Performance measure</div>${o.kpi ? esc(o.kpi) : `<span class="muted">Not set</span>`}</div></div>${coverageBlock(o)}`;
-  const form = `<div class="goal-form">
-      <div class="field full"><label class="lbl" for="${base}.objective">Objective <span class="req">*</span></label><textarea class="ta ${bad("Objective")}" rows="2" id="${base}.objective" ${bind(base + ".objective")} placeholder="What must be achieved this year?">${esc(o.objective)}</textarea></div>
-      <div class="field full"><label class="lbl" for="${base}.kpi">KPI / Performance measure <span class="req">*</span></label><textarea class="ta ${bad("KPI")}" rows="2" id="${base}.kpi" ${bind(base + ".kpi")} placeholder="How will performance be measured? Write the target into the measure.">${esc(o.kpi)}</textarea></div>
-      <div class="field"><label class="lbl" for="${base}.weight">Weight (%) <span class="req">*</span></label><input class="inp ${bad("Weight")}" type="number" min="1" max="100" step="1" inputmode="numeric" id="${base}.weight" ${bind(base + ".weight", "num")} value="${esc(o.weight)}"></div>
-      <div class="field" style="justify-content:flex-end"><span class="row" style="justify-content:flex-end"><button class="btn sm danger" data-act="delObj" data-id="${o.id}">${icon("trash", "i-sm")} Remove</button><button class="btn sm primary" data-act="doneObj">${icon("check", "i-sm")} Done</button></span></div>
-    </div>`;
-  return `<div class="goal ${editing ? "editing" : ""} ${miss.length && !editing ? "incomplete" : ""}" id="obj-${o.id}">
-    <div class="goal-top"><span class="goal-n">${i + 1}</span><div class="grow"><div class="goal-title">${o.objective ? esc(o.objective) : `<span class="muted">Untitled objective</span>`}</div>${miss.length && !editing ? `<div class="xs" style="color:var(--warn);margin-top:2px">Incomplete: ${miss.join(", ")}</div>` : ""}</div>
-      <span class="weight-badge num">${o.weight !== "" ? num(o.weight) : "–"}%</span>
-      ${ed && !editing ? `<button class="icon-btn" data-act="editObj" data-id="${o.id}" aria-label="Edit objective ${i + 1}">${icon("edit")}</button><button class="icon-btn" data-act="delObj" data-id="${o.id}" aria-label="Remove objective ${i + 1}">${icon("trash")}</button>` : ""}
-    </div>
-    ${editing ? form : meta}
-  </div>`;
+  const filled = String(o.objective || "").trim() || String(o.measure || "").trim(), sc = filled ? smartCheck(o) : null;
+  const top = `<tr class="obj-row ${editing ? "editing" : ""} ${miss.length && !editing && tried ? "incomplete" : ""}" id="obj-${o.id}">
+      <td class="c-no"><span class="goal-n">${i + 1}</span></td>
+      <td><div class="clamp">${o.objective ? esc(o.objective) : `<span class="muted">Not written yet</span>`}</div>${sc ? smartChips(sc) : ""}</td>
+      <td><div class="clamp">${o.measure ? esc(o.measure) : `<span class="muted">—</span>`}</div></td>
+      <td class="c-due shade">${o.due ? esc(fmtDue(o.due)) : `<span class="muted">—</span>`}</td>
+      <td class="c-w"><b class="num">${o.weight !== "" && o.weight != null ? num(o.weight) + "%" : "–"}</b></td>
+      <td class="c-act">${ed && !editing ? `<button class="icon-btn" data-act="editObj" data-id="${o.id}" aria-label="Edit objective ${i + 1}">${icon("edit")}</button><button class="icon-btn" data-act="delObj" data-id="${o.id}" aria-label="Remove objective ${i + 1}">${icon("trash")}</button>` : ""}</td>
+    </tr>`;
+  if (!editing) return top + (miss.length && tried ? `<tr class="obj-note"><td></td><td colspan="5" class="xs" style="color:var(--warn)">Incomplete: ${miss.join(", ")}</td></tr>` : "");
+  return top + `<tr class="obj-edit"><td colspan="6"><div class="obj-edit-b">
+      <div class="field full"><label class="lbl" for="${base}.objective">Objective / Project <span class="req">*</span></label><textarea class="ta ${bad("Objective")}" rows="3" id="${base}.objective" ${bind(base + ".objective")} placeholder="Write a SMART objective: what Omar should accomplish this year.">${esc(o.objective)}</textarea></div>
+      <div class="field full"><label class="lbl" for="${base}.measure">Measurement <span class="req">*</span></label><textarea class="ta ${bad("Measurement")}" rows="2" id="${base}.measure" ${bind(base + ".measure")} placeholder="How will achievement be measured? Include the target level or completion standard.">${esc(o.measure)}</textarea></div>
+      <div class="grid2"><div class="field"><label class="lbl" for="${base}.due">Due date <span class="req">*</span></label><input class="inp ${bad("Due")}" type="date" min="${APPRAISAL_CONFIG.ratingPeriod.from}" max="${APPRAISAL_CONFIG.ratingPeriod.to}" id="${base}.due" ${bind(base + ".due")} value="${esc(o.due)}"></div>
+      <div class="field"><label class="lbl" for="${base}.weight">Weight (%) <span class="req">*</span></label><div class="inp-suffix"><input class="inp ${bad("Weight")}" type="number" min="1" max="100" step="1" inputmode="numeric" id="${base}.weight" ${bind(base + ".weight", "num")} value="${esc(o.weight)}"><span>%</span></div></div></div>
+      ${sc ? `<div class="stack-sm"><span class="lbl">SMART check</span>${smartFeedback(sc)}</div>` : `<p class="xs muted">The SMART check appears once you start writing.</p>`}
+      <div class="row" style="justify-content:flex-end"><button class="btn sm danger" data-act="delObj" data-id="${o.id}">${icon("trash", "i-sm")} Remove</button><button class="btn sm primary" data-act="doneObj">${icon("check", "i-sm")} Done</button></div>
+    </div></td></tr>`;
 }
-
+/* Acknowledgement (wording from the Objectives of the Year form). Never marks Omar as agreeing without the discussion. */
+function ackBlock(r) {
+  const g = r.goals, confirmed = g.status === "approved" && r.align.confirmed, shared = g.status === "pending_alignment";
+  const mgr = confirmed ? `<b>Acknowledged</b> · ${SIM_DATES.approved}` : shared ? `Shared with Omar for discussion · ${SIM_DATES.submitted}` : "Not yet acknowledged";
+  const emp = confirmed ? (r.align.manual ? "Confirmed by HR / facilitator · no employee acknowledgement recorded" : `<b>Acknowledged</b> in the expectations discussion · ${SIM_DATES.approved}`) : shared ? (r.align.ready ? "Omar is ready to acknowledge · awaiting confirmation" : "Pending discussion with Omar") : "Pending";
+  return `<div class="ack-box" id="ack-box">
+      <p class="small"><b>ACKNOWLEDGEMENT:</b> A discussion of duties, responsibilities, performance standards, and expectations for the current period took place on the date below. We acknowledge our understanding of these duties, responsibilities, standards, and expectations, and how they will be used to measure work-related performance during this period.</p>
+      <div class="ack-grid"><div><span class="xs muted">Supervisor / Manager</span><div class="small">${managerName()}</div><div class="xs t2" id="ack-manager">${mgr}</div></div>
+      <div><span class="xs muted">Employee</span><div class="small">Omar Hassan</div><div class="xs t2" id="ack-employee">${emp}</div></div></div>
+      <p class="xs muted">Digital acknowledgement replaces handwritten signatures. It is recorded only after the discussion with Omar.</p>
+    </div>`;
+}
 function compTab(r, ed) {
   const g = r.goals, selIds = g.comps.map(c => c.id), avail = competencyLibrary().filter(c => !selIds.includes(c.id)), full = g.comps.length >= COMP_RANGE.max;
   return `<div class="stack">
@@ -2189,10 +2386,10 @@ VIEWS.evidence = function () {
   <div class="stack">
     <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${r3Status(r) !== "locked" ? `<button class="btn ghost sm" data-act="go" data-go="yearend">${icon("calendar", "i-sm")} Year-end update</button>` : ""}</div>
     <div class="row between">
-      <div class="row nowrap" style="gap:8px">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by KPI or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:260px"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>
+      <div class="row nowrap" style="gap:8px">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by objective or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:260px"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>
       <span class="xs muted">${plural(rows.length, "entry", "entries")} shown</span>
     </div>
-    <div class="table-wrap"><table class="tbl"><thead><tr><th style="width:110px">Date / Period</th><th style="width:170px">KPI / Competency</th><th>Evidence / Observation</th><th style="width:130px">Source</th><th style="width:160px">Impact</th><th style="width:170px">Manager action / Follow-up</th><th style="width:96px">Status</th><th style="width:84px"><span class="sr">Actions</span></th></tr></thead><tbody>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th style="width:110px">Date / Period</th><th style="width:170px">Objective / Competency</th><th>Evidence / Observation</th><th style="width:130px">Source</th><th style="width:160px">Impact</th><th style="width:170px">Manager action / Follow-up</th><th style="width:96px">Status</th><th style="width:84px"><span class="sr">Actions</span></th></tr></thead><tbody>
       ${rows.length ? rows.map(e => `<tr id="ev-${e.id}"><td>${esc(e.period)}</td><td>${esc(linkLabel(e.link))}</td><td>${esc(e.text)}</td><td>${esc(e.source === "Other" ? e.sourceOther || "Other" : e.source)}</td><td>${esc(e.impact) || "<span class='muted'>—</span>"}</td><td>${esc(e.action) || "<span class='muted'>—</span>"}</td><td><span class="chip ${e.status === "Completed" ? "st-completed" : e.status === "Ongoing" ? "st-in_progress" : "st-draft"}">${esc(e.status)}</span></td><td><span class="row nowrap" style="gap:0"><button class="icon-btn" data-act="evEdit" data-id="${e.id}" aria-label="Edit entry">${icon("edit", "i-sm")}</button><button class="icon-btn" data-act="evDel" data-id="${e.id}" aria-label="Delete entry">${icon("trash", "i-sm")}</button></span></td></tr>`).join("")
         : `<tr><td colspan="8"><div class="empty">${icon("log")}<b>${r.evidence.length ? "No entries for this filter" : "No evidence recorded yet"}</b><span class="small">Use <b>Add evidence entry</b> to document each item from your handouts.</span></div></td></tr>`}
     </tbody></table></div>
@@ -2205,7 +2402,7 @@ MODALS.evidence = function (m) {
   return modalWrap(d.id ? "Edit evidence entry" : "Add evidence entry", `
     <div class="grid2">
       <div class="field"><label class="lbl" for="ev-period">Date / Period <span class="req">*</span></label><input class="inp ${bad(!d.period.trim())}" id="ev-period" list="periods" data-ev="period" value="${esc(d.period)}" placeholder="e.g. March, Q2, H1"><datalist id="periods">${PERIODS.map(p => `<option value="${p}">`).join("")}</datalist></div>
-      <div class="field"><label class="lbl" for="ev-link">KPI / Competency <span class="req">*</span></label><select class="sel ${bad(!d.link)}" id="ev-link" data-ev="link"><option value="">Select…</option><optgroup label="Objectives">${items.filter(i => i.kind === "obj").map(i => `<option value="${i.id}" ${d.link === i.id ? "selected" : ""}>${esc(i.l)}</option>`).join("")}</optgroup><optgroup label="Competencies">${items.filter(i => i.kind === "comp").map(i => `<option value="${i.id}" ${d.link === i.id ? "selected" : ""}>${esc(i.short)}</option>`).join("")}</optgroup><option value="general" ${d.link === "general" ? "selected" : ""}>General / other</option></select></div>
+      <div class="field"><label class="lbl" for="ev-link">Objective / Competency <span class="req">*</span></label><select class="sel ${bad(!d.link)}" id="ev-link" data-ev="link"><option value="">Select…</option><optgroup label="Objectives">${items.filter(i => i.kind === "obj").map(i => `<option value="${i.id}" ${d.link === i.id ? "selected" : ""}>${esc(i.l)}</option>`).join("")}</optgroup><optgroup label="Competencies">${items.filter(i => i.kind === "comp").map(i => `<option value="${i.id}" ${d.link === i.id ? "selected" : ""}>${esc(i.short)}</option>`).join("")}</optgroup><option value="general" ${d.link === "general" ? "selected" : ""}>General / other</option></select></div>
     </div>
     <div class="field"><label class="lbl" for="ev-text">Evidence / Observation <span class="req">*</span></label><textarea class="ta ${bad(!d.text.trim())}" id="ev-text" data-ev="text" rows="3" placeholder="What happened or was measured, as stated in the handout.">${esc(d.text)}</textarea></div>
     <div class="grid2">
@@ -2218,7 +2415,7 @@ MODALS.evidence = function (m) {
     ${t && evMissing(d).length ? `<div class="notice risk">${icon("alert", "i-sm")}<span>Complete: ${evMissing(d).join(", ")}.</span></div>` : ""}`,
     `<button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="evSave" id="ev-save">${icon("check", "i-sm")} Save entry</button>`, true);
 };
-function evMissing(d) { const m = []; if (!d.period.trim()) m.push("Date / Period"); if (!d.link) m.push("KPI / Competency"); if (!d.text.trim()) m.push("Evidence / Observation"); if (!d.source) m.push("Source"); else if (d.source === "Other" && !d.sourceOther.trim()) m.push("Other source"); return m; }
+function evMissing(d) { const m = []; if (!d.period.trim()) m.push("Date / Period"); if (!d.link) m.push("Objective / Competency"); if (!d.text.trim()) m.push("Evidence / Observation"); if (!d.source) m.push("Source"); else if (d.source === "Other" && !d.sourceOther.trim()) m.push("Other source"); return m; }
 
 
 /* =========================================================
@@ -2428,103 +2625,171 @@ function rateSeg(path, cur, err) {
 function rateRO(v) { return v ? `<div><span class="tag blue">${esc(ratingLabel(v))}</span></div>` : `<span class="muted small">Not rated</span>`; }
 const apEditable = (r = rec()) => ["not_started", "draft"].includes(r.r3.appraisal.status) && !r.r3.done;
 
+/* ---------- PERFORMANCE APPRAISAL FORM (one activity: Parts I, II and III) ---------- */
+const AP_PARTS = [["I", "Part I · Competencies", "40%"], ["II", "Part II · Objectives", "60%"], ["III", "Part III · Development Plan", ""]];
+const pdpEditable = (r = rec()) => !r.r3.done;
+const pctTxt = (v) => v == null ? "—" : `${v}%`;
+function apPartStatus(r, c, v) {
+  return {
+    I: { done: !v.I.length, label: `${c.rated}/${c.comps.length} rated` },
+    II: { done: !v.II.length, label: `${c.objDone}/${c.objectives.length} assessed` },
+    III: { done: !v.III.length, label: v.III.length ? `${plural(v.III.length, "item", "items")} open` : "Complete" }
+  };
+}
+function apHeader(r) {
+  const E = EMP();
+  return `<div class="hr-title">Performance Appraisal Form</div>
+    ${formHeadTable([[["Employee Name", esc(E.name)], ["Time in Present Position", "Not recorded · 4 years at NextWave"]], [["Position", esc(E.title)], ["Type of Rating", `<span class="rt-type"><span class="on">☑ Annual</span><span>☐ Probationary</span><span>☐ Interim</span></span>`]], [["Department", "Commercial"], ["Rating Period", "From 1 January 2027 to 31 December 2027"]], [["Supervisor / Manager Name", managerName()], ["Supervisor / Manager Title", "Commercial Director"]]])}
+    <details class="hr-instr"><summary>Instructions</summary><div class="xs t2 stack-sm">
+      <p>This form is to be used for annual evaluations, and at other times during the year when formal feedback is needed.</p>
+      <p><b>Part I – Competencies (represent 40% of the overall score).</b> These include competencies common to the employee's position job standards. Rate each competency based on performance during the period identified above.</p>
+      <p><b>Part II – Goals from last year or last evaluation period (represent 60% of the overall score).</b> Rate the progress made on each of the goals established at the beginning of the period. Also include any new goals established during the evaluation period and note any modifications to the original goals.</p>
+      <p><b>Part III – Professional Development Plan.</b> Enter any actions that will be taken by the employee or his manager/supervisor to support the employee's development. The plan may include career growth, job mastery, or actions to correct performance.</p>
+      <p><i>*Remember that these are behavioral elements and that your judgment in each case must be supported by fact.</i></p>
+    </div></details>`;
+}
 VIEWS.appraisal = function () {
   const r = rec(), E = EMP(), st = appraisalStatus(r);
-  if (r3Status(r) === "locked") return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Not yet open", "The year-end appraisal opens in December, together with the year-end performance update.");
-  if (!r.r3.dataset) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Year-End Performance Appraisal", empChip()) + lockedPanel("Year-end update not received", "The appraisal opens with the year-end performance update from HR.") + `<div style="margin-top:12px"><button class="btn primary" data-act="go" data-go="inbox/yearend">Open HR email</button></div>`;
-  const ed = apEditable(r), c = appraisalCalc(r), C = APPRAISAL_CONFIG, tab = ["how", "summary"].includes(UI.apTab) ? UI.apTab : "what";
-  const pct = (v) => v == null ? "—" : `${v}%`;
-  const cards = `<div class="ap-summary">
-    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} points (weight ${C.whatWeight}%)` : !c.weightOK && c.objectives.length ? `Weights total ${c.totalWeight}%, not 100%` : `${c.objDone} of ${c.objectives.length} objectives assessed${c.unresolved ? ` · ${plural(c.unresolved, "KPI", "KPIs")} unresolved` : ""}`}</span></div>
-    <div class="ap-sc how"><span class="xs">HOW Achievement</span><b class="num">${pct(c.howPct)}</b><span class="xs">${c.howPct != null ? `Contributes ${c.howContrib} points (weight ${C.howWeight}%)` : `${c.rated} of ${c.comps.length} competencies rated`}</span></div>
-    <div class="ap-sc overall"><span class="xs">Overall Performance Score</span><b class="num">${c.overall != null ? c.overall + "%" : "—"}</b><span class="xs">WHAT ${C.whatWeight}% · HOW ${C.howWeight}%</span></div>
-  </div>`;
-  const tabs = [["what", `WHAT — Performance Objectives (${C.whatWeight}%)`], ["how", `HOW — Competencies (${C.howWeight}%)`], ["summary", "Final Performance Summary"]];
-  return pageHead(`Performance Management / Final Appraisal`, `Final Appraisal · ${esc(E.name)}`, `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Evidence</button>`, `${APP.cycleLabel} · Results against the plan agreed in January.`) + `
+  if (r3Status(r) === "locked") return pageHead(`Final Appraisal / ${esc(E.name)}`, "Performance Appraisal Form", empChip()) + lockedPanel("Not yet open", "The year-end appraisal opens in December, together with the year-end performance record.");
+  if (!r.r3.dataset) return pageHead(`Final Appraisal / ${esc(E.name)}`, "Performance Appraisal Form", empChip()) + lockedPanel("Year-end record not received", "The appraisal opens with the year-end performance record from HR.") + `<div style="margin-top:12px"><button class="btn primary" data-act="go" data-go="inbox/yearend">Open HR email</button></div>`;
+  const ed = apEditable(r), c = appraisalCalc(r), v = appraisalValidation(r), ps = apPartStatus(r, c, v), a = r.r3.appraisal;
+  const part = ["I", "II", "III"].includes(UI.apPart) ? UI.apPart : a.status === "submitted" ? "III" : "I";
+  const nav = `<div class="ap-parts" role="tablist">${AP_PARTS.map(([id, l, w]) => `<button class="ap-part ${part === id ? "on" : ""} ${ps[id].done ? "done" : ""}" role="tab" aria-selected="${part === id}" data-act="apPart" data-v="${id}">${icon(ps[id].done ? "check" : "clock", "i-xs")}<span class="grow"><b>${l}</b>${w ? ` <span class="xs muted">(${w})</span>` : ""}<span class="xs muted ap-part-s">${ps[id].label}</span></span></button>`).join("")}</div>`;
+  const strip = `<div class="ap-strip">
+      <div><span class="xs muted">Competencies score</span><b class="num">${pctTxt(c.competenciesScore)}</b></div>
+      <div><span class="xs muted">Objectives score</span><b class="num">${pctTxt(c.objectivesScore)}</b></div>
+      <div><span class="xs muted">Overall score</span><b class="num">${pctTxt(c.overall)}</b></div>
+      <div><span class="xs muted">Performance rating</span><b>${c.band ? esc(c.band.label) : "—"}</b></div></div>`;
+  const flags = (a.flags || []).length ? `<div class="notice warn">${icon("alert", "i-sm")}<div class="stack-sm"><b>Saved entries that need your review</b><ul class="list-plain small">${a.flags.map(f => `<li>${esc(f)}</li>`).join("")}</ul></div></div>` : "";
+  const body = part === "I" ? apPartI(r, c, ed) : part === "II" ? apPartII(r, c, ed) : apPartIII(r, c, pdpEditable(r));
+  const partErrs = v[part];
+  return pageHead(`Performance Management / Final Appraisal`, `Final Appraisal · ${esc(E.name)}`, `${statusChip(st)}<button class="btn" data-act="evDrawer" data-id="all">${icon("log", "i-sm")} Year-end evidence</button>`, `${APP.cycleLabel} · Evaluated against the objectives and competencies agreed in January.`) + `
   <div class="stack">
-    ${r.r3.appraisal.revisions && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You are reconsidering the appraisal. Update it, then submit the revision.</span></div>` : ""}
+    ${a.revisions && ed ? `<div class="notice warn">${icon("edit", "i-sm")}<span>You are reconsidering the appraisal. Update it, then submit the revision.</span></div>` : ""}
     ${!ed ? appraisalStatusNotice(r) : ""}
-    ${cards}
-    <div class="tabs" role="tablist">${tabs.map(([id, l]) => `<button class="tab ${tab === id ? "on" : ""}" role="tab" aria-selected="${tab === id}" data-act="apTab" data-v="${id}">${l}</button>`).join("")}</div>
-    ${tab === "how" ? apHow(r, c, ed) : tab === "summary" ? apSummary(r, c, ed) : apWhat(r, c, ed)}
+    ${flags}
+    <section class="hr-form" id="appraisal-form">
+      ${apHeader(r)}
+      ${nav}${strip}
+      <div class="ap-body">${body}</div>
+      ${partErrs.length && (ed || part === "III") ? `<div class="notice warn ap-errs">${icon("alert", "i-sm")}<div class="stack-sm"><b>To complete ${AP_PARTS.find(x => x[0] === part)[1]}:</b><ul class="list-plain small">${partErrs.slice(0, 10).map(e => `<li>${esc(e)}</li>`).join("")}${partErrs.length > 10 ? `<li>…and ${partErrs.length - 10} more</li>` : ""}</ul></div></div>` : ""}
+      <div class="ap-actions">
+        <button class="btn" data-act="saveDraft" id="save-draft">${icon("check", "i-sm")} Save draft</button>
+        <span class="grow xs muted">Entries save automatically as you type.</span>
+        ${ed ? `<button class="btn primary" data-act="submitAppraisal" id="submit-appraisal" ${v.shareOK && !UI.busy ? "" : "disabled"} title="${v.shareOK ? "" : "Complete Parts I and II first"}">${icon("send", "i-sm")} ${a.revisions ? "Submit revised appraisal" : "Share Parts I–II with Omar"}</button>` : ""}
+        ${!ed && !r.r3.done && r.r3.conv.ended ? `<button class="btn primary" data-act="go" data-go="reflection" id="go-review">${icon("clipboard", "i-sm")} Review & finalize</button>` : ""}
+        ${r.r3.done ? `<button class="btn" data-act="go" data-go="reflection">${icon("eye", "i-sm")} View final appraisal</button>` : ""}
+      </div>
+    </section>
   </div>`;
 };
-function apWhat(r, c, ed) {
-  const open = UI.apOpen === undefined ? (c.objectives[0] && c.objectives[0].o.id) : UI.apOpen;
-  return `<div class="stack-sm">${c.objectives.map((x, oi) => {
-    const isOpen = open === x.o.id, base = P("r3", "appraisal", "what", x.o.id, "kpis");
-    return `<section class="ap-obj ${isOpen ? "open" : ""}" id="apobj-${x.o.id}">
-      <button class="ap-obj-h" data-act="apOpen" data-id="${x.o.id}" aria-expanded="${isOpen}"><span class="goal-n">${oi + 1}</span><span class="grow"><b>${esc(x.o.objective)}</b><span class="xs muted">${plural(x.rows.length, "KPI", "KPIs")}${x.rows.length > 1 ? ` · ${Math.round(100 / x.rows.length * 10) / 10}% each` : ""}</span></span><span class="tag">Weight ${x.weight}%</span><span class="ap-ach ${x.ach == null ? "na" : ""}">${x.ach == null ? "—" : x.ach + "%"}</span>${icon("chevdown", "i-sm")}</button>
-      ${isOpen ? `<div class="ap-obj-b">
-        <div class="xs muted">January KPI: <span class="t2">“${esc(x.o.kpi)}”</span></div>
-        ${x.rows.map(y => kpiRow(y, base, ed)).join("")}
-        <div class="ap-obj-f"><span>Objective achievement <b class="num">${x.ach == null ? "—" : x.ach + "%"}</b></span><span>× weight ${x.weight}% = <b class="num">${x.contrib == null ? "—" : x.contrib + " pts"}</b> towards WHAT</span></div>
-      </div>` : ""}
-    </section>`; }).join("")}
-    <p class="xs muted">KPIs, targets and weights are taken from the January plan and can't be changed. Several measurable targets in one KPI become separate KPIs with equal shares. Achievement is not capped.</p></div>`;
-}
-function kpiRow(y, base, ed) {
-  const k = y.k, e = y.e, p = `${base}.${y.i}`, type = e.type || k.type, dir = e.dir || k.dir, res = y.res;
-  const mode = type === "review" ? "review" : dir;
-  const sel = ed ? `<select class="sel sm" data-kpi-mode="${p}" aria-label="How this KPI is measured">${[["higher", "Higher is better"], ["lower", "Lower is better"], ["review", "Manager review"]].map(([v, l]) => `<option value="${v}" ${mode === v ? "selected" : ""} ${v !== "review" && (k.target == null || !y.match.numericAllowed) ? "disabled" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${mode === "review" ? "Manager review" : mode === "lower" ? "Lower is better" : "Higher is better"}</span>`;
-  const inputErr = res.status === "invalid" ? "err" : "";
-  return `<div class="kpi-item ${type === "review" ? "flagged" : ""}">
-    <div class="kpi-item-h"><span class="kpi-num">KPI ${y.i + 1}</span><span class="grow small">${esc(k.name)}</span>${y.share < 100 ? `<span class="xs muted">${Math.round(y.share * 10) / 10}% of objective</span>` : ""}</div>
-    <div class="kpi-match"><span class="cov cov-${y.match.status}">${COVERAGE_LABEL[y.match.status]}</span><span class="xs t2">Relevant evidence: ${y.match.refs.length ? y.match.refs.map(ref => `<button class="ev-ref" data-act="evRef" data-ref="${ref}">${esc(ref)} · ${esc(REF_LABEL[ref] || "")}</button>`).join(" ") : "none identified"}</span></div>
-    ${y.match.notes.length ? `<div class="xs t2 kpi-notes">${y.match.notes.map(n => `<div>${icon("info", "i-xs")} ${esc(n)}</div>`).join("")}</div>` : ""}
-    ${type === "review" ? `<div class="kpi-flag ${res.status === "ok" ? "resolved" : ""}">${icon(res.status === "ok" ? "check" : "alert", "i-xs")} <span><b>${res.status === "ok" ? "Resolved by manager review" : "Unresolved: not included in the score"}</b> · ${esc(k.reason || "Measured by manager judgment.")}${y.match.numericAllowed ? "" : " A formula can't be applied to this KPI."}</span></div>` : ""}
-    <div class="kpi-grid">
-      <div class="kg"><span class="kg-l">Target</span><b class="kg-target">${esc(fmtTarget(k))}</b><span class="xs muted">From January · locked</span></div>
-      <div class="kg"><span class="kg-l">${type === "review" ? "Assessed achievement %" : "Actual result"}</span>${ed ? (type === "review" ? `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.manual" ${bind(p + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.manualMax}">` : `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.actual" ${bind(p + ".actual")} value="${esc(e.actual || "")}" placeholder="${k.unit === "%" ? "Percentage, e.g. 80%" : k.unit ? `Score, e.g. 3.5${k.unit}` : "Number, e.g. 7"}">`) : `<b>${esc(type === "review" ? (e.manual ? e.manual + "%" : "—") : (e.actual || "—"))}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>
-      <div class="kg"><span class="kg-l">Achievement</span><b class="kg-ach ${res.pct == null ? "na" : res.pct >= 100 ? "good" : "low"}">${res.pct == null ? "—" : res.pct + "%"}</b><span class="xs muted">${res.status === "ok" ? esc(res.note) : ""}</span></div>
-      <div class="kg"><span class="kg-l">Measure</span>${sel}</div>
-    </div>
-    ${type === "review" ? `<div class="review-box">
-      <label class="check"><input type="checkbox" id="${p}.reviewed" ${bind(p + ".reviewed")} ${e.reviewed ? "checked" : ""} ${ed ? "" : "disabled"}> I have reviewed the relevant evidence records for this KPI <span class="req">*</span></label>
-      <div class="field"><label class="lbl" for="${p}.basis">Measurement basis <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.basis" ${bind(p + ".basis")} placeholder="How did you determine the %? Which records did you count, against what, and why is this a fair reading of the January KPI?">${esc(e.basis || "")}</textarea>` : `<div class="small t2">${esc(e.basis || "—")}</div>`}</div>
-    </div>` : ""}
-    <div class="field"><label class="lbl" for="${p}.evidence">Supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.evidence" ${bind(p + ".evidence")} placeholder="Which year-end evidence or Evidence Log entries support this result?">${esc(e.evidence || "")}</textarea>` : `<div class="small t2">${esc(e.evidence || "—")}</div>`}</div>
-  </div>`;
-}
-function apHow(r, c, ed) {
+function partBand(t) { return `<div class="part-band">${t}</div>`; }
+function apPartI(r, c, ed) {
   const a = r.r3.appraisal, open = UI.compOpen === undefined ? (r.goals.comps[0] && r.goals.comps[0].id) : UI.compOpen;
-  return `<div class="stack-sm">${r.goals.comps.map(k => {
-    const x = a.how[k.id] || {}, isOpen = open === k.id, base = P("r3", "appraisal", "how", k.id), t = a.tried;
-    return `<section class="ap-obj ${isOpen ? "open" : ""}"><button class="ap-obj-h" data-act="compOpen" data-id="${k.id}" aria-expanded="${isOpen}"><span class="goal-n">${icon("layers", "i-xs")}</span><span class="grow"><b>${esc(compName(k.id))}</b><span class="xs muted">Expected level: ${levelLabel(k.level)}</span></span><span class="ap-ach ${x.rating ? "" : "na"}">${x.rating ? `${x.rating}/5` : "—"}</span>${icon("chevdown", "i-sm")}</button>
-      ${isOpen ? `<div class="ap-obj-b">
-        <div class="std-box"><span class="kg-l">Expected behavioral standard (January)</span><div class="small">${k.standard ? esc(k.standard) : "<span class='muted'>None written</span>"}</div></div>
-        <div class="field"><label class="lbl" for="${base}.observed">Observed behavior <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.observed" ${bind(base + ".observed")} placeholder="What did Omar actually do? Use the year-end evidence and your Evidence Log.">${esc(x.observed || "")}</textarea>` : `<div class="small t2">${esc(x.observed || "—")}</div>`}</div>
-        <div class="field"><span class="lbl">Performance rating (1–5) <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, t && !x.rating) : rateRO(x.rating)}<span class="hint">Rate the behavior against the agreed standard and the expected ${levelLabel(k.level)} level.</span></div>
-        <div class="field"><label class="lbl" for="${base}.just">Supporting evidence and justification <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.just" ${bind(base + ".just")}>${esc(x.just || "")}</textarea>` : `<div class="small t2">${esc(x.just || "—")}</div>`}</div>
-      </div>` : ""}</section>`; }).join("")}
-    <p class="xs muted">HOW Achievement = average rating ÷ ${APPRAISAL_CONFIG.howScale} × 100.</p></div>`;
+  const rows = c.comps.map((x, i) => {
+    const k = x.c, h = x.h, isOpen = open === k.id, base = P("r3", "appraisal", "how", k.id), tried = a.tried;
+    return `<tr class="ap-row ${isOpen ? "open" : ""}" data-act="compOpen" data-id="${k.id}" id="comp-row-${k.id}"><td><b>${esc(compName(k.id))}</b></td><td>${levelLabel(k.level)}</td><td class="c-rate">${x.rating ? `<b class="num">${x.rating}</b> <span class="xs muted">${esc(ratingLabel(x.rating).split(" · ")[1])}</span>` : `<span class="muted">—</span>`}</td><td><div class="clamp xs">${h.comments ? esc(h.comments) : `<span class="muted">—</span>`}</div></td><td class="c-exp">${icon("chevdown", "i-sm")}</td></tr>
+      ${isOpen ? `<tr class="ap-edit"><td colspan="5"><div class="ap-edit-b">
+        <div class="grid2"><div><span class="kg-l">Competency</span><div class="small"><b>${esc(compName(k.id))}</b></div></div><div><span class="kg-l">Expected proficiency</span><div class="small">${levelLabel(k.level)}</div></div></div>
+        <div class="std-box"><span class="kg-l">Agreed behavioral standard (January)</span><div class="small">${k.standard ? esc(k.standard) : "<span class='muted'>None written</span>"}</div></div>
+        ${h.legacyRating && !x.rating ? `<div class="notice warn xs">${icon("alert", "i-xs")}<span>Earlier rating ${h.legacyRating} on the former 1–5 scale was not converted. Rate again on the 1–4 scale.</span></div>` : ""}
+        <div class="field"><span class="lbl">Rating <span class="req">*</span></span>${ed ? rateSeg(base + ".rating", x.rating, tried && !x.rating) : rateRO(x.rating)}</div>
+        <div class="field"><label class="lbl" for="${base}.comments">Comments / supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="3" id="${base}.comments" ${bind(base + ".comments")} placeholder="What did Omar do that supports this rating? Refer to the agreed standard and the evidence.">${esc(h.comments || "")}</textarea>` : `<div class="small t2" style="white-space:pre-line">${esc(h.comments || "—")}</div>`}</div>
+      </div></td></tr>` : ""}`;
+  }).join("");
+  const ratings = c.comps.map(x => x.rating == null ? "__" : x.rating);
+  return `${partBand("PART I. COMPETENCIES EVALUATION")}
+    <table class="hr-tbl scale-tbl"><thead><tr><th colspan="3">Performance Rating</th></tr></thead><tbody>${RATING_SCALE.map(x => `<tr><td><b>${x.l}</b></td><td class="num c-no"><b>${x.v}</b></td><td class="xs">${esc(x.d)}</td></tr>`).join("")}</tbody></table>
+    <p class="xs t2">Rate the appraisee's competencies in the following areas in terms of their current role requirements. If appropriate provide evidence to support your assessment.</p>
+    <div class="table-wrap"><table class="hr-tbl ap-tbl"><thead><tr><th>Competencies</th><th>Expected proficiency</th><th>Rating</th><th>Comments</th><th class="c-exp"></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="formula-box"><div class="xs"><b>Your score is 100% at 3.</b> To identify the overall competencies score, divide the average of the competency ratings by 3, then multiply by 100.<div class="formula num">{[(${ratings.join(" + ")}) / ${c.comps.length}] / 3} × 100</div></div><b class="num formula-res" id="comp-score">${pctTxt(c.competenciesScore)}</b></div>`;
 }
-function apSummary(r, c, ed) {
-  const a = r.r3.appraisal, C = APPRAISAL_CONFIG, v = appraisalValidation(r), ta = (path, val, ph, rows = 2) => ed ? `<textarea class="ta" rows="${rows}" id="${path}" ${bind(path)} placeholder="${ph}">${esc(val || "")}</textarea>` : `<div class="small t2">${esc(val || "—")}</div>`;
-  const row = (l, ach, w, contrib) => `<tr><td>${l}</td><td class="num">${ach == null ? "—" : ach + "%"}</td><td class="num">${w}%</td><td class="num"><b>${contrib == null ? "—" : contrib}</b></td></tr>`;
-  return `<div class="stack">
-    <div class="card"><div class="card-h"><h3>Score calculation</h3></div><div class="card-b"><div class="table-wrap"><table class="tbl" style="min-width:0"><thead><tr><th>Component</th><th>Achievement</th><th>Weight</th><th>Contribution</th></tr></thead><tbody>
-      ${row("WHAT — Performance Objectives", c.whatPct, C.whatWeight, c.whatContrib)}${row("HOW — Competencies", c.howPct, C.howWeight, c.howContrib)}
-      <tr class="total"><td><b>Overall Performance Score</b></td><td></td><td class="num">100%</td><td class="num"><b>${c.overall == null ? "—" : c.overall + "%"}</b></td></tr>
-    </tbody></table></div>
-    <details class="xs muted" style="margin-top:8px"><summary style="cursor:pointer">How it is calculated</summary><p style="margin-top:6px">KPI achievement = actual ÷ target × 100 (lower is better: target ÷ actual × 100, only when both are above 0). No cap: overachievement stays visible. Objective achievement = average of its KPIs (equal shares; no subweights were set in January). WHAT = Σ objective achievement × objective weight. HOW = average competency rating × 20 (1 = 20% … 5 = 100%). Overall = WHAT × ${C.whatWeight}% + HOW × ${C.howWeight}% (can exceed 100). Blank results are never treated as zero; figures are rounded only for display.</p></details></div></div>
-    <div class="card"><div class="card-b stack">
-      <div class="grid2"><div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "strengths")}">Key strengths <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "strengths"), a.overall.strengths, "")}</div>
-      <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "dev")}">Development priorities <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "dev"), a.overall.dev, "")}</div></div>
-      <div class="field"><label class="lbl" for="${P("r3", "appraisal", "overall", "just")}">Evidence-based overall justification <span class="req">*</span></label>${ta(P("r3", "appraisal", "overall", "just"), a.overall.just, "What does the score reflect? Cite the evidence that matters most.", 3)}</div>
-    </div></div>
-    ${ed ? `<div class="card"><div class="card-b stack">
-      ${v.ok ? `<div class="notice good">${icon("check", "i-sm")}<span>Everything required is complete.</span></div>` : `<div class="notice warn">${icon("alert", "i-sm")}<div class="stack-sm"><b>Complete before submitting (${v.errors.length}):</b><ul class="list-plain">${v.errors.slice(0, 12).map(e => `<li>${esc(e)}</li>`).join("")}${v.errors.length > 12 ? `<li>…and ${v.errors.length - 12} more</li>` : ""}</ul></div></div>`}
-      <div class="row between"><span class="xs muted">Your progress saves automatically. ${r.r3.appraisal.revisions ? "Submitting records the revised appraisal." : "Submitting shares the appraisal with Omar."}</span><button class="btn primary" data-act="submitAppraisal" id="submit-appraisal" ${v.ok && !UI.busy ? "" : "disabled"}>${icon("send", "i-sm")} ${r.r3.appraisal.revisions ? "Submit revised appraisal" : "Submit appraisal"}</button></div>
-    </div></div>` : ""}
-  </div>`;
+function objMethodSelect(x, base, ed) {
+  if (x.def.type !== "numeric") return `<span class="tag">${x.def.type === "milestone" ? "Completion rule" : "Manager assessment"}</span>`;
+  const cur = x.method;
+  return ed ? `<select class="sel sm" data-obj-mode="${base}" aria-label="How achievement is calculated">${[["higher", "Actual ÷ target × 100"], ["lower", "Lower is better (target ÷ actual)"], ["review", "Manager assessment (documented basis)"]].map(([v, l]) => `<option value="${v}" ${cur === v ? "selected" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${METHOD_LABEL[cur]}</span>`;
+}
+function manualBox(x, base, ed) {
+  const e = x.e;
+  return `<div class="review-box">
+      ${x.def.type === "review" ? `<div class="kpi-flag ${x.res.status === "ok" ? "resolved" : ""}">${icon(x.res.status === "ok" ? "check" : "alert", "i-xs")} <span><b>${x.res.status === "ok" ? "Assessed with a documented basis" : "Needs clarification: not yet in the score"}</b> · ${esc(x.def.reason || "")}</span></div>` : ""}
+      <div class="grid2"><div class="field"><label class="lbl" for="${base}.manual">% achieved (your assessment) <span class="req">*</span></label>${ed ? `<input class="inp" inputmode="decimal" id="${base}.manual" ${bind(base + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.manualMax}">` : `<b>${esc(e.manual ? e.manual + "%" : "—")}</b>`}</div>
+      <label class="check" style="align-self:end"><input type="checkbox" id="${base}.reviewed" ${bind(base + ".reviewed")} ${e.reviewed ? "checked" : ""} ${ed ? "" : "disabled"}> I have reviewed the relevant year-end evidence <span class="req">*</span></label></div>
+      <div class="field"><label class="lbl" for="${base}.basis">Measurement basis <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.basis" ${bind(base + ".basis")} placeholder="How did you reach this %? What did you compare with what, and why is it a fair reading of the agreed objective? Note any limitation in the evidence.">${esc(e.basis || "")}</textarea>` : `<div class="small t2">${esc(e.basis || "—")}</div>`}</div>
+    </div>`;
+}
+function apPartII(r, c, ed) {
+  const open = UI.apOpen === undefined ? (c.objectives[0] && c.objectives[0].o.id) : UI.apOpen;
+  const rows = c.objectives.map(x => {
+    const o = x.o, e = x.e, isOpen = open === o.id, base = P("r3", "appraisal", "what", o.id), res = x.res;
+    const actualCell = x.method === "milestone" ? (e.milestone ? esc((MILESTONE_OPTIONS.find(m => m[0] === e.milestone) || [, ""])[1].replace(/ \(.*\)$/, "")) : "—") : x.method === "review" ? (e.manual ? `Assessed ${esc(e.manual)}%` : "—") : (e.actual ? esc(e.actual) : "—");
+    const input = x.method === "milestone"
+      ? `<div class="field"><label class="lbl" for="${base}.milestone">Actual achievement: completion status <span class="req">*</span></label>${ed ? `<select class="sel" id="${base}.milestone" ${bind(base + ".milestone")}><option value="">Select…</option>${MILESTONE_OPTIONS.map(([v, l]) => `<option value="${v}" ${e.milestone === v ? "selected" : ""}>${l}</option>`).join("")}</select>` : `<b>${actualCell}</b>`}</div>${["late", "partial"].includes(e.milestone) ? manualBox(x, base, ed) : ""}`
+      : x.method === "review" ? manualBox(x, base, ed)
+      : `<div class="field"><label class="lbl" for="${base}.actual">Actual achievement <span class="req">*</span></label>${ed ? `<input class="inp ${res.status === "invalid" ? "err" : ""}" inputmode="decimal" id="${base}.actual" ${bind(base + ".actual")} value="${esc(e.actual || "")}" placeholder="${x.def.unit === "%" ? "Percentage, e.g. 80%" : x.def.unit ? `Score, e.g. 3.5${x.def.unit}` : "Number, e.g. 9"}">` : `<b>${esc(e.actual || "—")}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>`;
+    return `<tr class="ap-row ${isOpen ? "open" : ""}" data-act="apOpen" data-id="${o.id}" id="apobj-${o.id}">
+        <td class="c-no">${x.i + 1}</td><td><div class="clamp">${esc(o.objective)}</div></td><td><div class="clamp xs">${esc(o.measure || "")}</div></td><td class="num">${esc(fmtDefinitionTarget(x.def))}</td><td class="xs">${esc(fmtDue(o.due))}</td>
+        <td class="xs">${actualCell}</td><td class="num shade c-pct">${pctTxt(res.pct)}</td><td class="num shade">${x.weight}%</td><td class="num calc c-ws">${pctTxt(x.weighted)}</td><td><div class="clamp xs">${e.comments ? esc(e.comments) : `<span class="muted">—</span>`}</div></td></tr>
+      ${isOpen ? `<tr class="ap-edit"><td colspan="10"><div class="ap-edit-b">
+        <div class="agreed-grid">
+          <div class="full"><span class="kg-l">Objective (as agreed in January)</span><div class="small">${esc(o.objective)}</div></div>
+          <div class="full"><span class="kg-l">Measurement</span><div class="small">${esc(o.measure || "—")}</div></div>
+          <div><span class="kg-l">Target</span><b class="kg-target">${esc(fmtDefinitionTarget(x.def))}</b></div><div><span class="kg-l">Due date</span><div class="small">${esc(fmtDue(o.due))}</div></div><div><span class="kg-l">Weight</span><div class="small"><b>${x.weight}%</b></div></div><div><span class="kg-l">Calculation</span>${objMethodSelect(x, base, ed)}</div>
+        </div>
+        <div class="xs t2">Relevant year-end evidence: ${x.match.refs.length ? x.match.refs.map(ref => `<button class="ev-ref" data-act="evRef" data-ref="${ref}">${esc(ref)} · ${esc(REF_LABEL[ref] || "")}</button>`).join(" ") : "none identified: explain how you assessed the result"}</div>
+        ${x.match.notes.map(n => `<div class="xs t2">${icon("info", "i-xs")} ${esc(n.replace(/Your target/, "The target"))}</div>`).join("")}
+        <div class="res-grid">
+          <div>${input}</div>
+          <div class="calc-cell"><span class="kg-l">% achieved</span><b class="kg-ach num ${res.pct == null ? "na" : res.pct >= 100 ? "good" : "low"}">${pctTxt(res.pct)}</b><span class="xs muted">${res.status === "ok" ? esc(res.note) : ""}</span></div>
+          <div class="calc-cell ws"><span class="kg-l">Weighted score</span><b class="kg-ach num">${pctTxt(x.weighted)}</b><span class="xs muted">% achieved × ${x.weight}%</span></div>
+        </div>
+        <div class="field"><label class="lbl" for="${base}.comments">Comments / supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${base}.comments" ${bind(base + ".comments")} placeholder="Which evidence supports the actual achievement? Note any limitation or modification to the original goal.">${esc(e.comments || "")}</textarea>` : `<div class="small t2" style="white-space:pre-line">${esc(e.comments || "—")}</div>`}</div>
+      </div></td></tr>` : ""}`;
+  }).join("");
+  const ws = c.objectives.map(x => x.weighted == null ? "__" : x.weighted);
+  const C = APPRAISAL_CONFIG;
+  return `${partBand("PART II. OBJECTIVES EVALUATION")}
+    <p class="xs t2">Rate the progress made on each of the goals established at the beginning of the period and any new goals. Note any modifications to the original goals.</p>
+    <div class="table-wrap"><table class="hr-tbl ap-tbl obj-eval"><thead><tr><th class="c-no">No.</th><th>Objective(s)</th><th>Measure</th><th>Target</th><th>Due date</th><th>Actual achievement</th><th class="shade">% Achieved</th><th class="shade">Weight</th><th class="calc">Weighted score</th><th>Comments</th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="7" class="right"><b>Total</b></td><td class="num shade"><b>${c.totalWeight}%</b></td><td class="num calc"><b>${pctTxt(c.objectivesScore)}</b></td><td></td></tr></tfoot></table></div>
+    <div class="formula-box"><div class="xs"><b>Your overall objectives score is equal to the total of your weighted scores.</b><div class="formula num">${ws.join(" + ")} =</div></div><b class="num formula-res" id="obj-score">${pctTxt(c.objectivesScore)}</b></div>
+    <div class="formula-box"><div class="xs"><b>OVERALL RATING (based on Parts I and II)</b> · Relative weights of competencies and performance objectives are considered.<div class="formula num">${pctTxt(c.objectivesScore)} × (${C.objectivesWeight}/100) + ${pctTxt(c.competenciesScore)} × (${C.competenciesWeight}/100) =</div></div><b class="num formula-res" id="overall-score">${pctTxt(c.overall)}</b></div>
+    ${bandTable(c)}`;
+}
+function bandTable(c) {
+  return `<table class="hr-tbl band-tbl" id="band-table"><thead><tr><th colspan="3">Employee Performance Profile <span class="xs muted" style="font-weight:500;text-transform:none;letter-spacing:0">· the overall score, rounded to a whole %, falls in one band</span></th></tr></thead><tbody>${PERFORMANCE_BANDS.map(b => { const on = c.band && c.band.label === b.label; return `<tr class="${on ? "on" : ""}"><td class="c-tick">${on ? "✓" : ""}</td><td><b>${b.label}</b></td><td class="num">${b.range}</td></tr>`; }).join("")}</tbody></table>`;
+}
+function pdpRows(list, cols, path, ed, addLabel) {
+  const rows = list.map((x, i) => `<tr>${cols.map(([k, l, type]) => `<td>${ed ? (type === "date" ? `<input class="inp sm" type="date" aria-label="${l} ${i + 1}" ${bind(`${path}.${i}.${k}`)} value="${esc(x[k] || "")}">` : `<textarea class="ta sm" rows="2" aria-label="${l} ${i + 1}" ${bind(`${path}.${i}.${k}`)}>${esc(x[k] || "")}</textarea>`) : `<span class="small">${esc(x[k] || "—")}</span>`}</td>`).join("")}${ed ? `<td class="c-act"><button class="icon-btn" data-act="pdpDel" data-k="${path.split(".").pop()}" data-i="${i}" aria-label="Remove row ${i + 1}">${icon("trash", "i-sm")}</button></td>` : ""}</tr>`).join("");
+  return `${rows || `<tr><td colspan="${cols.length + 1}" class="xs muted">No entries.</td></tr>`}${ed ? `<tr><td colspan="${cols.length + 1}"><button class="btn sm" data-act="pdpAdd" data-k="${path.split(".").pop()}">${icon("plus", "i-sm")} ${addLabel}</button></td></tr>` : ""}`;
+}
+function apPartIII(r, c, ed) {
+  const p = r.r3.appraisal.pdp, base = P("r3", "appraisal", "pdp");
+  const ta = (k, ph, rows = 4) => ed ? `<textarea class="ta" rows="${rows}" id="${base}.${k}" ${bind(`${base}.${k}`)} placeholder="${ph}">${esc(p[k] || "")}</textarea>` : `<div class="small t2" style="white-space:pre-line">${esc(p[k] || "—")}</div>`;
+  const signed = r.r3.done;
+  return `${partBand("PART III. DEVELOPMENT PLAN")}
+    ${r.r3.appraisal.status !== "submitted" && !signed ? `<p class="xs muted">Complete Part III after your appraisal discussion with Omar, so the plan reflects what you agree together. You can draft it at any time.</p>` : ""}
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="2" class="grey">Career planning</th></tr><tr><th>Short term <span class="req">*</span></th><th>Long term <span class="req">*</span></th></tr></thead><tbody><tr><td>${ta("short", "Career goals for the next 12 months")}</td><td>${ta("long", "Longer-term career direction")}</td></tr></tbody></table>
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="3" class="grey">Learning & development plan</th></tr><tr><th>Improvement area(s) <i>(if any)</i></th><th>Action</th>${ed ? "<th></th>" : ""}</tr></thead><tbody>${pdpRows(p.ld || [], [["area", "Improvement area"], ["action", "Action"]], `${base}.ld`, ed, "Add development action")}</tbody></table>
+    <p class="xs muted">Actions can include coaching, mentoring, stretch assignments, on-the-job learning, stakeholder exposure, structured feedback or formal training. Be specific: what, who supports it, and by when.</p>
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="4" class="grey">Training & development section</th></tr><tr><th>Training course</th><th>Institute or source</th><th>Preferred date</th>${ed ? "<th></th>" : ""}</tr></thead><tbody>${pdpRows(p.training || [], [["course", "Training course"], ["source", "Institute or source"], ["date", "Preferred date", "date"]], `${base}.training`, ed, "Add training")}</tbody></table>
+    <table class="hr-tbl pdp-tbl"><thead><tr><th colspan="2" class="grey">Additional comments</th></tr><tr><th>Employee</th><th>Direct manager <span class="req">*</span></th></tr></thead><tbody><tr><td>${ta("employee", "Omar's own comments, if he shared any in the discussion (optional)", 5)}</td><td>${ta("manager", "Your overall comments on Omar's performance and development", 5)}</td></tr></tbody></table>
+    ${signatureBlock(r)}`;
+}
+function signatureBlock(r) {
+  const done = r.r3.done;
+  return `<table class="hr-tbl sig-tbl"><tbody><tr>
+      <td><span class="kg-l">Employee signature</span><div class="small">Pending employee acknowledgement</div><div class="xs muted">Date: —</div></td>
+      <td><span class="kg-l">Manager / supervisor signature</span><div class="small">${done ? `${managerName()} · finalized digitally` : "Not yet signed"}</div><div class="xs muted">Date: ${done ? SIM_DATES.closed : "—"}</div></td>
+      <td><span class="kg-l">Department manager signature</span><div class="small">Pending</div><div class="xs muted">Date: —</div></td>
+    </tr></tbody></table>`;
 }
 function appraisalStatusNotice(r) {
   if (r.r3.done) return `<div class="notice good">${icon("check", "i-sm")}<span>The appraisal is final and recorded.</span></div>`;
-  if (r.r3.conv.ended) return `<div class="notice">${icon("info", "i-sm")}<span class="grow">Appraisal shared with Omar.</span><button class="btn sm primary" data-act="go" data-go="reflection">Bias reflection</button></div>`;
+  if (r.r3.conv.ended) return `<div class="notice">${icon("info", "i-sm")}<span class="grow">Appraisal discussion held${r.r3.conv.outcome === "incomplete" ? " (closed before next steps were agreed)" : ""}. Complete Part III, then review and finalize.</span><button class="btn sm primary" data-act="go" data-go="reflection">Review & finalize</button></div>`;
   const c = r.r3.conv, answered = managerCount(c.log) >= CHAT_LIMITS.appraisalMin;
   if (UI.endConfirm && !c.completed) return `<div class="notice warn">${icon("alert", "i-sm")}<span class="grow">You and Omar haven't agreed next steps yet. End the discussion anyway? It will be recorded as not completed.</span><button class="btn sm" data-act="endCancel">Keep talking</button><button class="btn sm primary" data-act="appraisalContinue" id="appraisal-end-confirm">End discussion</button></div>`;
-  return `<div class="notice ${c.completed ? "good" : ""}">${icon(c.completed ? "check" : "chat", "i-sm")}<span class="grow">${c.completed ? "Appraisal Discussion Completed." : answered ? "Appraisal shared with Omar. Continue the discussion in the chat." : "Appraisal shared with Omar."}</span>${c.completed ? "" : `<button class="btn sm" data-act="openChat">Open chat</button>`}${answered ? `<button class="btn sm primary" data-act="appraisalContinue" id="appraisal-continue">${c.completed ? "Continue to bias reflection" : "End discussion"}</button>` : ""}</div>`;
+  return `<div class="notice ${c.completed ? "good" : ""}">${icon(c.completed ? "check" : "chat", "i-sm")}<span class="grow">${c.completed ? "Appraisal Discussion Completed. Complete Part III, then review and finalize." : answered ? "Parts I–II shared with Omar. Continue the discussion in the chat." : "Parts I–II shared with Omar."}</span>${c.completed ? "" : `<button class="btn sm" data-act="openChat">Open chat</button>`}${answered ? `<button class="btn sm primary" data-act="appraisalContinue" id="appraisal-continue">${c.completed ? "Close the discussion" : "End discussion"}</button>` : ""}</div>`;
 }
 DRAWERS.evidence = function (d) {
   const r = rec(), list = r.evidence.filter(e => d.id === "all" || e.link === d.id);
@@ -2534,12 +2799,40 @@ DRAWERS.evidence = function (d) {
 };
 
 /* ---------- Bias reflection ---------- */
+/* ---------- Review & finalize: summary of the whole form + bias reflection ---------- */
+function appraisalSummary(r) {
+  const c = appraisalCalc(r), v = appraisalValidation(r), p = r.r3.appraisal.pdp || blankPdp(), E = EMP();
+  const ck = (ok, t) => `<div class="ck ${ok ? "ok" : "no"}">${icon(ok ? "check" : "x", "i-sm")}<span>${t}</span></div>`;
+  return `<section class="hr-form" id="appraisal-summary">
+    <div class="hr-title">Performance Appraisal Form · Review</div>
+    ${formHeadTable([[["Employee Name", esc(E.name)], ["Position", esc(E.title)]], [["Department", "Commercial"], ["Rating Period", "1 January – 31 December 2027 · Annual"]], [["Supervisor / Manager", `${managerName()} · Commercial Director`], ["Status", r.r3.done ? "<b>Finalized</b>" : v.ok ? "Ready to finalize" : "In progress"]]])}
+    <div class="sum-scores">
+      <div><span class="xs muted">Competencies score</span><b class="num">${pctTxt(c.competenciesScore)}</b><span class="xs muted">Contribution (40%): ${pctTxt(c.competenciesContrib)}</span></div>
+      <div><span class="xs muted">Objectives score</span><b class="num">${pctTxt(c.objectivesScore)}</b><span class="xs muted">Contribution (60%): ${pctTxt(c.objectivesContrib)}</span></div>
+      <div><span class="xs muted">Overall performance score</span><b class="num" id="sum-overall">${pctTxt(c.overall)}</b></div>
+      <div class="band"><span class="xs muted">Performance rating</span><b id="sum-rating">${c.band ? esc(c.band.label) : "—"}</b><span class="xs muted">${c.band ? esc(c.band.range) : ""}</span></div>
+    </div>
+    <h4>Part I · Competencies evaluation</h4>
+    <div class="table-wrap"><table class="hr-tbl"><thead><tr><th>Competency</th><th>Expected proficiency</th><th>Rating</th><th>Comments</th></tr></thead><tbody>${c.comps.map(x => `<tr><td><b>${esc(compName(x.c.id))}</b></td><td>${levelLabel(x.c.level)}</td><td>${x.rating ? esc(ratingLabel(x.rating)) : "—"}</td><td class="xs">${esc(x.h.comments || "—")}</td></tr>`).join("")}</tbody></table></div>
+    <h4>Part II · Objectives evaluation</h4>
+    <div class="table-wrap"><table class="hr-tbl"><thead><tr><th>No.</th><th>Objective</th><th>Target</th><th>Actual</th><th class="shade">% Achieved</th><th class="shade">Weight</th><th class="calc">Weighted score</th></tr></thead><tbody>${c.objectives.map(x => `<tr><td>${x.i + 1}</td><td class="xs">${esc(x.o.objective)}</td><td class="num">${esc(fmtDefinitionTarget(x.def))}</td><td class="xs">${esc(x.method === "milestone" ? ((MILESTONE_OPTIONS.find(m => m[0] === x.e.milestone) || [, "—"])[1]) : x.method === "review" ? (x.e.manual ? `Assessed ${x.e.manual}%` : "—") : (x.e.actual || "—"))}</td><td class="num shade">${pctTxt(x.res.pct)}</td><td class="num shade">${x.weight}%</td><td class="num calc">${pctTxt(x.weighted)}</td></tr>`).join("")}</tbody></table></div>
+    <h4>Part III · Development plan</h4>
+    <div class="grid2"><div><span class="kg-l">Career planning · short term</span><div class="small t2" style="white-space:pre-line">${esc(p.short || "—")}</div></div><div><span class="kg-l">Career planning · long term</span><div class="small t2" style="white-space:pre-line">${esc(p.long || "—")}</div></div></div>
+    <div><span class="kg-l">Learning & development actions</span>${(p.ld || []).filter(x => x.area || x.action).length ? `<ul class="list-plain small">${p.ld.filter(x => x.area || x.action).map(x => `<li><b>${esc(x.area)}</b> · ${esc(x.action)}</li>`).join("")}</ul>` : `<div class="small muted">—</div>`}</div>
+    <div><span class="kg-l">Training & development</span>${(p.training || []).filter(x => x.course).length ? `<ul class="list-plain small">${p.training.filter(x => x.course).map(x => `<li>${esc(x.course)}${x.source ? ` · ${esc(x.source)}` : ""}${x.date ? ` · ${esc(fmtDue(x.date))}` : ""}</li>`).join("")}</ul>` : `<div class="small muted">None listed</div>`}</div>
+    <div class="grid2"><div><span class="kg-l">Employee comments</span><div class="small t2" style="white-space:pre-line">${esc(p.employee || "None recorded")}</div></div><div><span class="kg-l">Direct manager comments</span><div class="small t2" style="white-space:pre-line">${esc(p.manager || "—")}</div></div></div>
+    <div class="checklist">${ck(!v.I.length, "Part I complete: every competency rated with comments")}${ck(!v.II.length, "Part II complete: every objective result entered and calculated, with comments")}${ck(!v.III.length, "Part III complete: career planning, development actions and manager comments")}${ck(r.r3.conv.ended, `Appraisal discussion held with Omar${r.r3.conv.outcome === "incomplete" ? " (closed before next steps were agreed)" : ""}`)}${ck(c.overall != null, "Final score calculated")}</div>
+    ${!v.ok && !r.r3.done ? `<div class="row"><button class="btn sm" data-act="apGoto" data-v="${v.I.length ? "I" : v.II.length ? "II" : "III"}">${icon("edit", "i-sm")} Complete the form</button></div>` : ""}
+    ${signatureBlock(r)}
+  </section>`;
+}
 VIEWS.reflection = function () {
   const r = rec(), b = r.r3.bias;
-  if (!r.r3.conv.ended) return pageHead("Final Appraisal", "Bias reflection") + lockedPanel("Not yet", "The bias reflection follows the appraisal conversation with Omar.");
+  if (!r.r3.conv.ended) return pageHead("Final Appraisal / Review", "Review & finalize") + lockedPanel("Not yet", "The review follows your appraisal discussion with Omar.");
   const res = b.result, busy = UI.busy === "bias" || UI.busy === "round3";
-  return pageHead("Final Appraisal / Bias reflection", "Appraisal bias reflection", empChip(), "A short check on possible rating biases before your appraisal is final.") + `<div class="stack-lg">
-    <div class="card"><div class="card-h"><h3>What your reasoning suggests</h3>${res && aiReady() && !r.r3.done ? `<button class="btn ghost sm" data-act="runBias">Check again</button>` : ""}</div><div class="card-b stack">
+  return pageHead("Final Appraisal / Review", "Review & finalize", `${empChip()}<button class="btn sm" data-act="apGoto" data-v="III">${icon("clipboard", "i-sm")} Open the form</button>`, "Check the complete appraisal and reflect on possible rating biases before it is final.") + `<div class="stack-lg">
+    ${appraisalSummary(r)}
+    <div class="card"><div class="card-h"><h3>Bias check · what your reasoning suggests</h3>${res && aiReady() && !r.r3.done ? `<button class="btn ghost sm" data-act="runBias">Check again</button>` : ""}</div><div class="card-b stack">
       ${busy && !res ? `<p class="small t2">Reviewing your appraisal…</p>` : ""}
       ${b.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(b.error)}</span>${aiReady() ? `<button class="btn sm" data-act="runBias">Retry</button>` : ""}</div>` : ""}
       ${res ? `${res.flags.length ? res.flags.map(f => `<div class="bias"><b>${esc(BIAS_LABEL[f.bias] || f.bias)}</b><div class="small">Your reasoning: <q>${esc(f.evidence)}</q></div><div class="small t2">${esc(f.explanation)}</div></div>`).join("") : `<div class="notice good">${icon("check", "i-sm")}<span>Your reasoning does not show clear signs of a rating bias.</span></div>`}
@@ -2552,7 +2845,7 @@ VIEWS.reflection = function () {
       ${r.r3.done ? `<div class="small t2" style="white-space:pre-line">${esc(b.reflection)}</div>` : `<textarea class="ta ${b.tried && b.reflection.trim().length < 15 ? "err" : ""}" rows="4" id="${P("r3", "bias", "reflection")}" ${bind(P("r3", "bias", "reflection"))} placeholder="Which biases could have influenced your ratings? What did you check, and what, if anything, would you change?">${esc(b.reflection)}</textarea>`}
       ${r.r3.sbii.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.sbii.error)}</span>${aiReady() ? `<button class="btn sm" data-act="sbiiRetry">Retry</button>` : ""}</div>` : ""}
       ${r.r3.final.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.final.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round3">Retry assessment</button>` : ""}</div>` : ""}
-      ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review">View feedback report</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalise appraisal"}</button></div>`}
+      ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review">View feedback report</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalize appraisal"}</button></div>`}
     </div></div>
   </div>`;
 };
@@ -2620,7 +2913,7 @@ function critRow(c) {
 function planFeedback(r, fb) {
   const V = { strong: ["st-approved", "Strong"], adequate: ["st-in_progress", "Adequate"], needs_improvement: ["st-draft", "Needs improvement"] };
   return `<div class="card"><div class="card-h"><h3>Feedback on your plan</h3></div><div class="card-b stack">
-    ${(fb.objectives || []).map(o => { const ob = r.goals.objectives[o.index - 1]; const v = V[o.verdict] || V.adequate; return ob ? `<div class="crit-row"><div class="row between nowrap"><b class="small">Objective ${o.index}: ${esc(ob.objective)}</b><span class="chip ${v[0]}">${v[1]}</span></div><div class="xs muted">KPI: ${esc(ob.kpi)}</div><p class="small t2">${esc(o.comment)}</p></div>` : ""; }).join("")}
+    ${(fb.objectives || []).map(o => { const ob = r.goals.objectives[o.index - 1]; const v = V[o.verdict] || V.adequate; return ob ? `<div class="crit-row"><div class="row between nowrap"><b class="small">Objective ${o.index}: ${esc(ob.objective)}</b><span class="chip ${v[0]}">${v[1]}</span></div><div class="xs muted">Measurement: ${esc(ob.measure || "")}</div><p class="small t2">${esc(o.comment)}</p></div>` : ""; }).join("")}
     ${(fb.competencies || []).length ? `<div class="stack-sm"><h4>Competencies</h4>${fb.competencies.map(c => `<p class="small t2"><b>${esc(c.name)}:</b> ${esc(c.comment)}</p>`).join("")}</div>` : ""}
     ${fb.overall ? `<p class="small t2">${esc(fb.overall)}</p>` : ""}
   </div></div>`;
@@ -2685,8 +2978,8 @@ async function assessRound3() {
     if (res.events.length) applyEvents(r, res.events, clsReason(res, "Final appraisal assessed."));
     else pulseNote(r, "appraisal", "Final appraisal: mixed", "Appraisal partly evidence-based: no Pulse change.", 3);
     r.r3.done = true;
-    UI.busy = null; save(); toast("Appraisal finalised."); go("inbox", "closed"); return;
-  } catch (e) { r.r3.final.error = `The appraisal could not be finalised: ${e.message}`; }
+    UI.busy = null; save(); toast("Appraisal finalized."); go("inbox", "closed"); return;
+  } catch (e) { r.r3.final.error = `The appraisal could not be finalized: ${e.message}`; }
   UI.busy = null; save(); render();
 }
 /* Behind-the-scenes assessment of the appraisal discussion (never shown in the chat) */
@@ -2791,8 +3084,7 @@ const ACTIONS = {
   orgToggle() { UI.orgOpen = UI.orgOpen === false; render(); },
   respToggle(el) { UI.respOpen = UI.respOpen || { strategy: true }; UI.respOpen[el.dataset.id] = !UI.respOpen[el.dataset.id]; render(); },
   ceoToggle(el) { UI.ceoOpen = UI.ceoOpen === el.dataset.id ? null : el.dataset.id; render(); },
-  apTab(el) { UI.apTab = el.dataset.v; render(); },
-  apOpen(el) { const cur = UI.apOpen === undefined ? (rec().goals.objectives[0] || {}).id : UI.apOpen; UI.apOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
+  apOpen(el, ev) { if (ev && ev.target.closest("input,select,textarea,button:not(.ap-row)")) return; const cur = UI.apOpen === undefined ? (rec().goals.objectives[0] || {}).id : UI.apOpen; UI.apOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   compOpen(el) { const cur = UI.compOpen === undefined ? (rec().goals.comps[0] || {}).id : UI.compOpen; UI.compOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },
   kpi(el) { UI.kpiOpen = UI.kpiOpen === el.dataset.id ? null : el.dataset.id; render(); },
@@ -2820,6 +3112,7 @@ const ACTIONS = {
     if (r.goals.status !== "not_started" && r.goals.status !== "draft") return;   /* repeated clicks */
     r.goals.tried = true;
     if (!v.ok) { save(); toast(`${plural(v.errors.length, "item needs", "items need")} attention before submitting.`); UI.edit = null; render(); return; }
+    r.goals.objectives.forEach(o => { o.agreed = deriveDefinition(o); });   /* agreed target / calculation definition used at year-end */
     r.goals.status = "pending_alignment"; r.goals.submits++; r.goals.tried = false; UI.edit = null; r.align.ready = false;
     r.align.log.push({ from: "sys", text: r.goals.submits === 1 ? `Performance plan shared with Omar · ${SIM_DATES.submitted}` : "Revised performance plan shared with Omar" });
     ensureChatOpenings(r);
@@ -2856,7 +3149,7 @@ const ACTIONS = {
     UI.endConfirm = false;
     r.r3.conv.ended = true; r.r3.conv.outcome = r.r3.conv.completed ? "completed" : "incomplete";
     r.r3.conv.log.push({ from: "sys", text: r.r3.conv.completed ? "Conversation closed" : "Conversation closed before an agreement was reached" });
-    UI.chatOpen = false; save(); go("reflection"); if (aiReady()) { runSbii(); runBias(); }
+    UI.chatOpen = false; UI.apPart = "III"; save(); go("appraisal"); toast("Discussion closed. Complete Part III, then review and finalize."); if (aiReady()) { runSbii(); runBias(); }
   },
 
   /* --- evidence --- */
@@ -2884,19 +3177,26 @@ const ACTIONS = {
   submitAppraisal() {
     const r = rec(), v = appraisalValidation(r), a = r.r3.appraisal;
     a.tried = true; if (a.status === "not_started") a.status = "draft";
-    if (!v.ok) { save(); render(); const err = document.querySelector(".ta.err, .rate.err"); if (err) err.scrollIntoView({ block: "center" }); toast(`${plural(v.errors.length, "section needs", "sections need")} attention before submitting.`); return; }
+    if (!v.shareOK) { const n = v.I.length + v.II.length; UI.apPart = v.I.length ? "I" : "II"; save(); render(); toast(n ? `${plural(n, "item needs", "items need")} attention in Parts I–II before sharing.` : "The overall score could not be calculated yet."); return; }
     a.status = "submitted"; a.tried = false;
     if (a.revisions) { r.r3.conv.log.push({ from: "sys", text: "Revised appraisal recorded" }); r.r3.bias.result = null; save(); go("reflection"); if (aiReady()) runBias(); return; }
-    r.r3.conv.log.push({ from: "sys", text: `Appraisal shared with Omar · ${SIM_DATES.yearend}` });
+    r.r3.conv.log.push({ from: "sys", text: `Appraisal Parts I–II shared with Omar · ${SIM_DATES.yearend}` });
     ensureChatOpenings(r);   /* Omar's neutral opening: once, in the same thread; the chat is not opened automatically */
-    save(); toast("Appraisal shared with Omar."); render();
+    save(); toast("Parts I–II shared with Omar."); render();
   },
+  apGoto(el) { UI.apPart = el.dataset.v; go("appraisal"); },
+  saveDraft() { save(true); toast("Draft saved."); },
+  apPart(el) { UI.apPart = el.dataset.v; UI.endConfirm = false; render(); const f = document.getElementById("appraisal-form"); if (f) f.scrollIntoView({ block: "start" }); },
+  pdpAdd(el) { const p = rec().r3.appraisal.pdp, k = el.dataset.k; (p[k] = p[k] || []).push(k === "ld" ? { area: "", action: "" } : { course: "", source: "", date: "" }); save(); render(); },
+  pdpDel(el) { const p = rec().r3.appraisal.pdp, k = el.dataset.k, i = +el.dataset.i; if (!p[k]) return; const [row] = p[k].splice(i, 1); _undo = () => rec().r3.appraisal.pdp[k].splice(i, 0, row); save(); toast("Row removed.", true); render(); },
   reconsider() { const r = rec(); if (r.r3.done) return; r.r3.appraisal.status = "draft"; r.r3.appraisal.revisions++; save(); go("appraisal"); },
   runBias() { runBias(); },
   finalize() {
     const r = rec(); if (r.r3.done || UI.busy) return;
-    if (r.r3.bias.reflection.trim().length < 15) { r.r3.bias.tried = true; toast("Write a short reflection before finalising."); return render(); }
-    if (!aiReady()) { toast("AI assessment is unavailable. Your facilitator can finalise the appraisal."); return; }
+    const v = appraisalValidation(r);
+    if (!v.ok) { UI.apPart = v.I.length ? "I" : v.II.length ? "II" : "III"; toast(`${plural(v.errors.length, "item needs", "items need")} attention before finalizing.`); return go("appraisal"); }
+    if (r.r3.bias.reflection.trim().length < 15) { r.r3.bias.tried = true; toast("Write a short reflection before finalizing."); return render(); }
+    if (!aiReady()) { toast("AI assessment is unavailable. Your facilitator can finalize the appraisal."); return; }
     assessRound3();
   },
   assessRetry(el) { const k = el.dataset.k; if (k === "round1") assessRound1(); else if (k === "round2") assessRound2(); else assessRound3(); },
@@ -2917,7 +3217,7 @@ const ACTIONS = {
     if (!r.pulse.slots.coaching) { if (p === "A") applyPulse(r, "constructive", "Pathway A set by the facilitator."); else if (p === "C") applyPulse(r, "punitive", "Pathway C set by the facilitator."); else pulseNote(r, "coaching", "Pathway B set by the facilitator", "Partially effective management: no Pulse change.", 2); }
     save(); toast(`Pathway ${p} set.`); render();
   },
-  facFinal() { const r = rec(); if (r.r3.done) return; r.r3.done = true; pulseNote(r, "appraisal", "Appraisal finalised by the facilitator", "No assessed appraisal: no Pulse change.", 3); save(); toast("Appraisal finalised."); render(); },
+  facFinal() { const r = rec(); if (r.r3.done) return; r.r3.done = true; pulseNote(r, "appraisal", "Appraisal finalized by the facilitator", "No assessed appraisal: no Pulse change.", 3); save(); toast("Appraisal finalized."); render(); },
   pc(el) { rec().pc[el.dataset.i] = el.dataset.v; save(); render(); }
 };
 
@@ -2950,7 +3250,7 @@ document.addEventListener("change", (ev) => {
   if (el.dataset.bind && (el.tagName === "SELECT" || el.type === "checkbox")) { handleBind(el); render(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) { UI.modal.d[el.dataset.ev] = el.value; if (el.tagName === "SELECT") render(); return; }
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
-  if (el.dataset.kpiMode) { const v = el.value, base = el.dataset.kpiMode; setPath(S, base + ".type", v === "review" ? "review" : "numeric"); if (v !== "review") setPath(S, base + ".dir", v); afterBind(base); save(); render(); return; }
+  if (el.dataset.objMode) { const v = el.value, base = el.dataset.objMode; setPath(S, base + ".mode", v === "review" ? "review" : ""); if (v !== "review") setPath(S, base + ".dir", v); afterBind(base); save(); render(); return; }
   if (el.dataset.actChange === "compPick") { if (el.value) ACTIONS.compAdd({ dataset: { id: el.value } }); return; }
   if (el.dataset.fac) { const r = rec(), id = el.dataset.fac, max = +el.max; if (el.value === "") delete r.fac[id]; else r.fac[id] = Math.max(0, Math.min(max, Math.round(+el.value))); save(); render(); }
 });

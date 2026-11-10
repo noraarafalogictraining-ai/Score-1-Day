@@ -61,7 +61,7 @@ function critRow(c) {
 function planFeedback(r, fb) {
   const V = { strong: ["st-approved", "Strong"], adequate: ["st-in_progress", "Adequate"], needs_improvement: ["st-draft", "Needs improvement"] };
   return `<div class="card"><div class="card-h"><h3>Feedback on your plan</h3></div><div class="card-b stack">
-    ${(fb.objectives || []).map(o => { const ob = r.goals.objectives[o.index - 1]; const v = V[o.verdict] || V.adequate; return ob ? `<div class="crit-row"><div class="row between nowrap"><b class="small">Objective ${o.index}: ${esc(ob.objective)}</b><span class="chip ${v[0]}">${v[1]}</span></div><div class="xs muted">KPI: ${esc(ob.kpi)}</div><p class="small t2">${esc(o.comment)}</p></div>` : ""; }).join("")}
+    ${(fb.objectives || []).map(o => { const ob = r.goals.objectives[o.index - 1]; const v = V[o.verdict] || V.adequate; return ob ? `<div class="crit-row"><div class="row between nowrap"><b class="small">Objective ${o.index}: ${esc(ob.objective)}</b><span class="chip ${v[0]}">${v[1]}</span></div><div class="xs muted">Measurement: ${esc(ob.measure || "")}</div><p class="small t2">${esc(o.comment)}</p></div>` : ""; }).join("")}
     ${(fb.competencies || []).length ? `<div class="stack-sm"><h4>Competencies</h4>${fb.competencies.map(c => `<p class="small t2"><b>${esc(c.name)}:</b> ${esc(c.comment)}</p>`).join("")}</div>` : ""}
     ${fb.overall ? `<p class="small t2">${esc(fb.overall)}</p>` : ""}
   </div></div>`;

@@ -5,7 +5,8 @@
 let _uid = 0;
 const uid = (p = "x") => p + Date.now().toString(36) + (_uid++).toString(36);
 
-function blankObjective() { return { id: uid("o"), objective: "", kpi: "", weight: "" }; }
+function blankObjective() { return { id: uid("o"), objective: "", measure: "", due: "", weight: "" }; }
+function blankPdp() { return { short: "", long: "", ld: [{ area: "", action: "" }], training: [], employee: "", manager: "" }; }
 function freshRecord() {
   return {
     goals: { status: "not_started", objectives: [], comps: [], tried: false, submits: 0 },
@@ -15,7 +16,7 @@ function freshRecord() {
     r2: { seenDashboard: false, interpretation: "", diag: { log: [], ended: false }, submitted: false, assessment: null, error: null, pathway: null, manual: false },
     r3: {
       dataset: null, error: null,
-      appraisal: { status: "not_started", what: {}, how: {}, overall: { what: null, how: null, final: null, just: "", strengths: "", dev: "" }, tried: false, revisions: 0 },
+      appraisal: { v: 2, status: "not_started", what: {}, how: {}, pdp: blankPdp(), tried: false, revisions: 0, flags: [] },
       conv: { log: [], ended: false, completed: false, outcome: null },
       sbii: { result: null, error: null },
       bias: { result: null, error: null, reflection: "", tried: false },
@@ -42,8 +43,39 @@ function storageGet(k) { try { return localStorage.getItem(k); } catch (e) { ret
 function storageSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
 function loadState() {
   const raw = storageGet(APP.storeKey);
-  if (raw) { try { const s = JSON.parse(raw); if (s && s.v === 2) return deepMerge(freshState(), s); } catch (e) { /* unreadable: start fresh */ } }
+  if (raw) { try { const s = JSON.parse(raw); if (s && s.v === 2) { Object.values(s.recs || {}).forEach(migrateRecord); return deepMerge(freshState(), s); } } catch (e) { /* unreadable: start fresh */ } }
   return freshState();
+}
+/* ---------- Migration of sessions saved before the Objectives / Performance Appraisal forms ----------
+   Keeps every participant-written text. Never converts old 1–5 ratings to the 1–4 scale: they are cleared
+   and flagged for re-rating. Several year-end results for one objective are kept for review, not merged. */
+function migrateRecord(r) {
+  if (!r || !r.goals) return;
+  (r.goals.objectives || []).forEach(o => {
+    if (o.measure == null) o.measure = o.kpi || "";
+    if (o.due == null) o.due = "";
+    delete o.kpi;
+  });
+  const a = r.r3 && r.r3.appraisal;
+  if (!a || a.v === 2) return;
+  a.flags = a.flags || [];
+  Object.keys(a.what || {}).forEach(id => {
+    const w = a.what[id] || {}, ks = w.kpis ? Object.values(w.kpis) : null;
+    if (!ks) return;
+    if (ks.length === 1) { const k = ks[0]; a.what[id] = { actual: k.actual || "", comments: k.evidence || "", manual: k.manual || "", basis: k.basis || "", reviewed: !!k.reviewed, mode: k.type === "review" ? "review" : "", dir: k.dir || "" }; }
+    else { a.what[id] = { actual: "", comments: ks.map(k => k.evidence).filter(Boolean).join("\n"), legacy: ks }; a.flags.push(`Objective results entered before the form change were kept for review (objective ${id}).`); }
+  });
+  Object.keys(a.how || {}).forEach(id => {
+    const h = a.how[id] || {}, comments = [h.observed, h.just].filter(x => String(x || "").trim()).join("\n");
+    a.how[id] = { rating: null, comments: h.comments || comments, legacyRating: h.rating || null };
+    if (h.rating) a.flags.push(`${compName(id)}: the earlier rating (${h.rating} on the former 1–5 scale) was not converted. Please rate again on the 1–4 scale.`);
+  });
+  const o = a.overall || {};
+  a.pdp = a.pdp || blankPdp();
+  if (!a.pdp.manager) a.pdp.manager = [o.strengths && `Strengths: ${o.strengths}`, o.dev && `Development priorities: ${o.dev}`, o.just && o.just].filter(Boolean).join("\n");
+  delete a.overall;
+  if (a.flags.length && a.status === "submitted" && !r.r3.done) { a.status = "draft"; a.flags.push("The appraisal was returned to draft because it needs re-rating."); }
+  a.v = 2;
 }
 let S = loadState();
 let _saveT = null;
@@ -102,27 +134,27 @@ const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
 function weightTotal(r = rec()) { return r.goals.objectives.reduce((a, o) => a + num(o.weight), 0); }
 function objMissing(o) {
   const m = [];
-  if (!o.objective.trim()) m.push("Objective");
-  if (!o.kpi.trim()) m.push("KPI / Performance measure");
+  if (!String(o.objective || "").trim()) m.push("Objective / Project");
+  if (!String(o.measure || "").trim()) m.push("Measurement");
+  if (!String(o.due || "").trim()) m.push("Due date");
   if (o.weight === "" || o.weight == null) m.push("Weight");
   else if (!(num(o.weight) > 0) || num(o.weight) > 100) m.push("Weight between 1 and 100");
   return m;
 }
-const HAS_TARGET = /\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|half|all|every)\b/i;
 const words = (t) => String(t || "").trim().split(/\s+/).filter(Boolean).length;
-/* Objectives tab: completeness (blocking) and quality prompts (advisory, never scored here) */
+/* Objectives: completeness and SMART blocking checks (target/completion rule; due date in the rating period) */
 function objectiveValidation(r = rec()) {
   const g = r.goals, errors = [], tips = [], n = g.objectives.length, wt = weightTotal(r);
   if (!n) errors.push("Add at least one objective.");
-  g.objectives.forEach((o, i) => { const m = objMissing(o); if (m.length) errors.push(`Objective ${i + 1}: ${m.join(", ")}.`); });
-  if (n && wt !== 100) errors.push(`Weights total ${wt}%. They must total 100%.`);
-  if (n && (n < OBJ_RANGE.min || n > OBJ_RANGE.max)) tips.push(`${n} objective${n === 1 ? "" : "s"}: ${OBJ_RANGE.min}–${OBJ_RANGE.max} is the recommended range.`);
   g.objectives.forEach((o, i) => {
-    if (o.kpi.trim() && !HAS_TARGET.test(o.kpi)) tips.push(`Objective ${i + 1}: the KPI has no target figure. State the target in the KPI wording if it can be measured.`);
-    if (o.kpi.trim() && words(o.kpi) < 5) tips.push(`Objective ${i + 1}: the KPI is very short. Would you and Omar judge it the same way at year-end?`);
-    if (o.objective.trim() && words(o.objective) < 2) tips.push(`Objective ${i + 1}: describe what must be achieved more clearly.`);
-    if (num(o.weight) > 0 && num(o.weight) < 10) tips.push(`Objective ${i + 1}: a weight under 10% suggests it may not be a priority for the year.`);
+    const m = objMissing(o);
+    if (m.length) { errors.push(`Objective ${i + 1}: complete ${m.join(", ")}.`); return; }
+    const sc = smartCheck(o);
+    sc.blocking.forEach(k => errors.push(`Objective ${i + 1} · ${SMART_LABEL[k]}: ${sc.checks[k].msg}`));
   });
+  if (n && wt !== 100) errors.push(`Objective weights total ${wt}%. They must total 100%.`);
+  if (n && (n < OBJ_RANGE.min || n > OBJ_RANGE.max)) tips.push(`${n} objective${n === 1 ? "" : "s"}: ${OBJ_RANGE.min}–${OBJ_RANGE.max} is the recommended range.`);
+  g.objectives.forEach((o, i) => { if (num(o.weight) > 0 && num(o.weight) < 10) tips.push(`Objective ${i + 1}: a weight under 10% suggests it may not be a priority for the year.`); });
   return { errors, tips, ok: errors.length === 0 };
 }
 /* Competencies tab */
@@ -156,17 +188,21 @@ const levelLabel = (id) => (LEVELS.find(l => l.id === id) || {}).l || "Not set";
 /* ---------- Payloads for the server ---------- */
 function planPayload(r = rec()) {
   return {
-    objectives: r.goals.objectives.map(o => ({ objective: o.objective, kpi: o.kpi, weight: num(o.weight) })),
+    objectives: r.goals.objectives.map(o => ({ objective: o.objective, measure: o.measure, due: o.due, weight: num(o.weight) })),
     comps: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "" }))
   };
 }
 function evidencePayload(r = rec()) { return r.evidence.map(e => ({ period: e.period, link: linkLabel(e.link, r), text: e.text, source: e.source === "Other" ? e.sourceOther : e.source, impact: e.impact, action: e.action, status: e.status })); }
 function appraisalPayload(r = rec()) {
-  const a = r.r3.appraisal, c = appraisalCalc(r);
+  const a = r.r3.appraisal, c = appraisalCalc(r), p = a.pdp || blankPdp();
+  const actualText = (x) => x.method === "review" || (x.method === "milestone" && ["late", "partial"].includes(x.e.milestone))
+    ? `${x.method === "milestone" ? (MILESTONE_OPTIONS.find(m => m[0] === x.e.milestone) || [, ""])[1] + "; " : ""}manager-assessed ${x.e.manual || "—"}%${x.e.basis ? `; basis: ${String(x.e.basis).slice(0, 400)}` : ""}${x.res.status === "unresolved" ? " (needs clarification)" : ""}`
+    : x.method === "milestone" ? (MILESTONE_OPTIONS.find(m => m[0] === x.e.milestone) || [, ""])[1] : (x.e.actual || "");
   return {
-    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? (y.e.manual ? `manager-assessed ${y.e.manual}%${y.e.basis ? `; basis: ${String(y.e.basis).slice(0, 400)}` : ""}${y.res.status === "unresolved" ? " (unresolved)" : ""}` : "") : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "", matched: `${y.match.label} (${COVERAGE_LABEL[y.match.status]})` })) })),
-    how: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "", observed: (a.how[c.id] || {}).observed || "", rating: (a.how[c.id] || {}).rating || null, just: (a.how[c.id] || {}).just || "" })),
-    overall: { whatPct: c.whatPct, howPct: c.howPct, score: c.overall, just: a.overall.just, strengths: a.overall.strengths, dev: a.overall.dev }
+    what: c.objectives.map(x => ({ objective: x.o.objective, measure: x.o.measure || "", target: fmtDefinitionTarget(x.def), due: fmtDue(x.o.due), weight: x.weight, method: METHOD_LABEL[x.method], actual: actualText(x), achievement: x.res.pct, weighted: x.weighted, comments: x.e.comments || "", matched: `${x.match.label}` })),
+    how: r.goals.comps.map(k => { const h = a.how[k.id] || {}; return { name: compName(k.id), level: levelLabel(k.level), standard: k.standard || "", rating: COMPETENCY_SCALE.some(s => s.v === h.rating) ? h.rating : null, comments: h.comments || "" }; }),
+    overall: { objectivesScore: c.objectivesScore, competenciesScore: c.competenciesScore, score: c.overall, rating: c.band ? c.band.label : "", managerComments: p.manager || "", employeeComments: p.employee || "" },
+    pdp: { short: p.short || "", long: p.long || "", ld: (p.ld || []).filter(x => (x.area || "").trim() || (x.action || "").trim()).map(x => ({ area: x.area || "", action: x.action || "" })), training: (p.training || []).filter(x => (x.course || "").trim()).map(x => ({ course: x.course || "", source: x.source || "", date: x.date || "" })) }
   };
 }
 const managerWords = (log, max) => { const t = log.filter(m => m.from === "manager").map(m => m.text).join(" / "); return t.length > max ? "…" + t.slice(-max) : t; };
@@ -179,24 +215,27 @@ function priorPayload(r = rec()) {
     coachingSummary: managerWords(r.r2.diag.log, 2400)
   };
 }
+/* Validation by part. Parts I–II must be complete to share the appraisal with Omar; all three to finalise. */
 function appraisalValidation(r = rec()) {
-  const a = r.r3.appraisal, c = appraisalCalc(r), errors = [];
-  c.objectives.forEach((x, oi) => x.rows.forEach(y => {
-    const tag = `Objective ${oi + 1}${x.rows.length > 1 ? `, KPI ${y.i + 1}` : ""}`;
-    if (y.res.status === "blank") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
-    if (y.res.status === "invalid") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
-    if (y.res.status === "unresolved") errors.push(`${tag}: unresolved KPI, not yet in the score (${y.res.note.replace(/^Unresolved: /, "")}).`);
-    if (y.res.status === "review") errors.push(`${tag}: ${y.res.note.charAt(0).toLowerCase() + y.res.note.slice(1)}.`);
-    if (!String(y.e.evidence || "").trim()) errors.push(`${tag}: add the supporting evidence.`);
-  }));
-  if (c.objectives.length && !c.weightOK) errors.push(`Objective weights total ${c.totalWeight}%, not 100%: WHAT can't be calculated. Weights were agreed in January and can't be changed here; ask your facilitator.`);
-  r.goals.comps.forEach(k => { const x = a.how[k.id] || {}, miss = []; if (!(x.observed || "").trim()) miss.push("observed behavior"); if (!x.rating) miss.push("rating"); if (!(x.just || "").trim()) miss.push("justification"); if (miss.length) errors.push(`${compName(k.id)}: ${miss.join(", ")}.`); });
-  const o = a.overall, miss = [];
-  if (!o.strengths.trim()) miss.push("key strengths"); if (!o.dev.trim()) miss.push("development priorities"); if (!o.just.trim()) miss.push("evidence-based justification");
-  if (miss.length) errors.push(`Summary: ${miss.join(", ")}.`);
-  return { errors, ok: errors.length === 0 };
+  const a = r.r3.appraisal, c = appraisalCalc(r), p = a.pdp || blankPdp(), I = [], II = [], III = [];
+  c.comps.forEach(x => { const miss = []; if (!x.rating) miss.push("rating (1–4)"); if (!String(x.h.comments || "").trim()) miss.push("comments supporting the rating"); if (miss.length) I.push(`${compName(x.c.id)}: add the ${miss.join(" and ")}.`); });
+  c.objectives.forEach(x => {
+    const tag = `Objective ${x.i + 1}`;
+    if (["blank", "invalid", "unresolved"].includes(x.res.status)) II.push(`${tag}: ${x.res.note.charAt(0).toLowerCase() + x.res.note.slice(1)}.`);
+    if (!String(x.e.comments || "").trim()) II.push(`${tag}: add comments or supporting evidence for the result.`);
+  });
+  if (c.objectives.length && !c.weightOK) II.push(`Objective weights total ${c.totalWeight}%, not 100%, so the objectives score can't be calculated. Weights were agreed in January and can't be changed here; contact HR.`);
+  if (!String(p.short || "").trim()) III.push("Career planning: add the short-term plan.");
+  if (!String(p.long || "").trim()) III.push("Career planning: add the long-term plan.");
+  const ld = (p.ld || []).filter(x => (x.area || "").trim() || (x.action || "").trim());
+  if (!ld.length) III.push("Learning & development plan: add at least one improvement area with an action.");
+  ld.forEach((x, i) => { if (!(x.area || "").trim() || !(x.action || "").trim()) III.push(`Learning & development plan, row ${i + 1}: complete both the improvement area and the action.`); });
+  (p.training || []).forEach((x, i) => { if (((x.source || "").trim() || x.date) && !(x.course || "").trim()) III.push(`Training & development, row ${i + 1}: add the training course.`); });
+  if (!String(p.manager || "").trim()) III.push("Additional comments: add the direct manager's comments.");
+  const scoreOK = c.overall != null;
+  return { I, II, III, errors: [...I, ...II, ...III], shareOK: !I.length && !II.length && scoreOK, ok: !I.length && !II.length && !III.length && scoreOK };
 }
-const ratingLabel = (v) => { const r = RATING_SCALE.find(x => x.v === v); return r ? `${r.v} · ${r.l}` : "Not rated"; };
+const ratingLabel = (v) => { const r = COMPETENCY_SCALE.find(x => x.v === v); return r ? `${r.v} · ${r.l}` : "Not rated"; };
 
 /* ---------- Omar chat: one visible thread built from the internal contexts ---------- */
 function chatThread(r = rec()) {

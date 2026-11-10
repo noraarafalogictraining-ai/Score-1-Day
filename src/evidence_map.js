@@ -1,6 +1,6 @@
 /* =========================================================
-   KPI → EVIDENCE MATCHING (deterministic, auditable)
-   Maps each KPI (parsed from the January text) to the kind of record that
+   OBJECTIVE MEASUREMENT → EVIDENCE MATCHING (deterministic, auditable)
+   Maps each measurement (from the January objective and measurement) to the kind of record that
    will exist at year-end. Holds measure DEFINITIONS and record IDs only:
    no year-end values (those stay on the server until December).
    Order matters: the first matching rule wins.
@@ -9,7 +9,7 @@ const EVIDENCE_MEASURES = [
   { id: "rep_escalate", label: "Deadline conflicts escalated in advance", rx: /(escalat|flag(s|ged)?|raise[ds]?)\b.{0,40}(deadline|conflict|risk|priorit)|(deadline|conflict)s?.{0,40}(escalat|flag)/, refs: ["EV-REP-05", "Register 1"], units: ["count", "pct"] },
   { id: "rep_late", label: "Reporting deadlines missed", rx: /(late|missed|overdue|delayed)\b.{0,30}(report|deadline|deliver)|(report|deadline|deliver)\w*.{0,30}\b(late|missed|overdue)/, refs: ["EV-REP-03", "Register 1"], units: ["count", "pct"], dir: "lower" },
   { id: "rep_quality", label: "Reports passing quality review", rx: /(quality|\bqa\b|pass(ing|ed|es)?\b.{0,20}review|without (major )?correction|error[- ]free)/, refs: ["EV-REP-04", "Register 1"], units: ["count", "pct"], max: 12 },
-  { id: "rep_ontime", label: "Reports submitted on time", rx: /(on[- ]time|timel|by the deadline|before the deadline|within the deadline)/, refs: ["EV-REP-02", "Register 1"], units: ["count", "pct"], max: 12 },
+  { id: "rep_ontime", label: "Reports submitted on time", rx: /(on[- ]time|timel|(by|before|within|meet(ing)?) (the |their |its |agreed )?deadlines?)/, refs: ["EV-REP-02", "Register 1"], units: ["count", "pct"], max: 12 },
   { id: "rep_count", label: "Monthly reports submitted", rx: /\breports?\b/, refs: ["EV-REP-01", "Register 1"], units: ["count", "pct"], max: 12 },
   { id: "rec_adopt", label: "Management decisions on recommendations", rx: /recommend.{0,60}(adopt|accept|approv|implement)|(adopt|accept|approv|implement)\w*.{0,40}recommend/, refs: ["EV-REC-03", "Register 2"], units: ["count", "pct"], business: "Adoption is decided by management." },
   { id: "rec_action", label: "Recommendations with a proposed action", rx: /recommend.{0,80}(action|next step)|actionab.{0,30}recommend|(action|next step)s?.{0,40}recommend/, refs: ["EV-REC-01", "EV-REC-02", "Register 2"], units: ["pct", "count"], standard: true },
@@ -21,12 +21,12 @@ const EVIDENCE_MEASURES = [
   { id: "business", label: "Department business results", rx: /(win rate|revenue|sales (growth|target|volume|result)|pipeline|opportunit|objection|market share|retention|new customers|conversion|profit|margin)/, refs: ["EV-BIZ-01", "EV-BIZ-02", "EV-BIZ-03"], units: [], business: "This is a department result; the records won't isolate Omar's individual contribution." }
 ];
 const EVIDENCE_VERSION = "2027.2";   /* the year-end record version this build expects (older saves reload it) */
-/* Measure families, used to spot one KPI that combines two separate measures under a single target */
+/* Measure families, used to spot one measurement that combines two separate measures under a single target */
 const MEASURE_FAMILY = { rep_escalate: "escalation", rep_late: "timeliness", rep_ontime: "timeliness", rep_quality: "quality", rec_adopt: "adoption", rec_action: "recommendations", feedback: "feedback", development: "development", consult: "consultations", intelligence: "intelligence", business: "business" };
 const FAMILY_LABEL = { escalation: "escalation", timeliness: "timeliness", quality: "quality review", adoption: "adoption", recommendations: "recommendations", feedback: "stakeholder feedback", development: "development activity", consultations: "consultations", intelligence: "competitive intelligence", business: "business results" };
 function measureFamilies(t) {
   const fams = new Set(EVIDENCE_MEASURES.filter(m => MEASURE_FAMILY[m.id] && (m.id === "feedback" ? /(feedback|satisfaction|survey)/.test(t) : m.rx.test(t))).map(m => MEASURE_FAMILY[m.id]));
-  if (fams.has("escalation")) fams.delete("timeliness");     /* escalation KPIs are about deadlines by nature */
+  if (fams.has("escalation")) fams.delete("timeliness");     /* escalation measures are about deadlines by nature */
   return [...fams];
 }
 const REF_LABEL = {
@@ -40,7 +40,7 @@ const PERIOD_RX = { quarter: /(per|each|every|a) quarter|quarterly|\bq[1-4]\b/, 
 const kpiUnitKind = (k) => k.unit === "%" ? "pct" : /^\/\d/.test(k.unit) ? "scale" : "count";
 function kpiPeriod(text) { const t = String(text).toLowerCase(); return Object.keys(PERIOD_RX).find(p => PERIOD_RX[p].test(t)) || "year"; }
 
-/* Match one parsed KPI. Returns an auditable record: which rule matched, why, and the coverage status. */
+/* Match one parsed measurement. Returns an auditable record: which rule matched, why, and the coverage status. */
 function matchKpi(k) {
   const t = String(k.name || "").toLowerCase();
   const m = EVIDENCE_MEASURES.find(x => x.rx.test(t)) || null;
@@ -49,13 +49,13 @@ function matchKpi(k) {
   const out = { measure: m ? m.id : null, label: m ? m.label : "No matching record", refs: m ? m.refs : [], unit, period, dir: m && m.dir ? m.dir : k.dir, business: m ? (m.business || "") : "", status: "supported", reason: "", notes: [], families: fams, compound: fams.length > 1, numericAllowed: true };
   const unavailable = (why) => Object.assign(out, { status: "unavailable", reason: why, numericAllowed: false });
   const clarify = (why, numeric = false) => Object.assign(out, { status: "clarify", reason: why, numericAllowed: numeric });
-  if (out.compound) return clarify(`This KPI combines ${fams.length} separate measures (${fams.map(f => FAMILY_LABEL[f]).join(", ")}) under one target. Consider splitting it into ${fams.length} KPIs, each with its own target.`);
+  if (out.compound) return clarify(`This measurement combines ${fams.length} separate measures (${fams.map(f => FAMILY_LABEL[f]).join(", ")}) under one target. Consider splitting it into ${fams.length} objectives, each with its own target.`);
   if (!m) return unavailable(k.target != null ? "The measure is clear, but the available records may not support this result." : "The available records may not support this measure.");
   if (m.id === "business") return unavailable(m.business);
-  if (m.uncounted && k.target != null) return unavailable("Records won't count analyses or findings; consider a measure that will be recorded.");
+  if (m.uncounted && k.target != null) return unavailable("Records won't count analyses or findings; consider a measurement that will be recorded.");
   if (k.type === "review") {
     const r = k.reason || "";
-    if (/No numeric target/.test(r)) return clarify("This KPI needs a measurable target.");
+    if (/No numeric target/.test(r)) return clarify("This objective needs a measurable target.");
     if (/Milestone/.test(r)) return clarify("Define how completion will be judged (for example a date or a yes/no rule).");
     if (/More than one figure/.test(r)) return clarify("More than one figure: make clear which one is the target.");
     if (/zero/i.test(r)) return clarify("A target of zero can't be turned into an achievement %; state a different rule.");
@@ -68,24 +68,55 @@ function matchKpi(k) {
   if (m.id === "feedback" && unit === "scale" && !/\/5$/.test(k.unit)) return clarify("Stakeholder feedback is recorded on a 1–5 scale: state the target on that scale.");
   if (m.max && unit === "count" && k.target > m.max) return clarify(`Only ${m.max} monthly reports are scheduled in the year: check the target.`, true);
   if (m.business) out.notes.push(m.business);
-  if (m.standard && unit === "count") out.notes.push("Your KPI sets a standard each recommendation must meet: decide which records qualify.");
-  if (m.id === "consult" && /(action|follow)/.test(t)) out.notes.push("Your KPI sets a standard (documented actions): decide which consultations qualify.");
+  if (m.standard && unit === "count") out.notes.push("The measurement sets a standard each recommendation must meet: decide which records qualify.");
+  if (m.id === "consult" && /(action|follow)/.test(t)) out.notes.push("The measurement sets a standard (documented actions): decide which consultations qualify.");
   if (period !== "year") out.notes.push(`Your target is ${period === "quarter" ? "per quarter" : period === "month" ? "per month" : "for half a year"}: enter the actual for the same period.`);
   else if (m.periods === "quarter") out.notes.push("Feedback is recorded by quarter: decide which period your target refers to (e.g. the year or H2).");
   if (m.periods === "h2") out.notes.push("Consultation records cover July – December only.");
   return out;
 }
-/* January wording: never mentions results, incidents or values */
 const COVERAGE_LABEL = { supported: "Supported", clarify: "Needs clarification", unavailable: "Evidence unavailable" };
-function kpiCoverageJanuary(k) {
-  const c = matchKpi(k);
-  return { status: c.status, label: COVERAGE_LABEL[c.status], message: c.status === "supported" ? "Measurable, and records for this measure will be available." : c.reason };
+
+/* =========================================================
+   SMART CHECK (January) — objective, measurement and due date read together.
+   Gives feedback only; never rewrites the participant's wording. Never mentions year-end results.
+   status: ok | warn | fail | info. "fail" on M or T blocks finalising the objective.
+   ========================================================= */
+const VAGUE_START = /^(improve|enhance|support|help|work on|focus on|continue|try to|assist|contribute|be |do |ensure good|maintain good|develop)\b/i;
+const OUTCOME_WORDS = /\b(deliver|submit|achieve|reach|complete|launch|produce|present|publish|reduce|increase|run|hold|provide|prepare|identify|establish|introduce|secure)\w*/i;
+const ROLE_WORDS = /(report|analys|intelligence|market|competitor|recommend|stakeholder|insight|customer|commercial|sales|research|pricing|segment|briefing|consult|feedback|operations|deadline|escalat)/i;
+const inPeriod = (d) => d >= APPRAISAL_CONFIG.ratingPeriod.from && d <= APPRAISAL_CONFIG.ratingPeriod.to;
+function smartCheck(o) {
+  const oT = String(o.objective || "").trim(), mT = String(o.measure || "").trim(), due = String(o.due || "").trim();
+  const def = deriveDefinition(o), both = `${oT} ${mT}`;
+  const match = def.type === "numeric" ? matchKpi({ name: def.text, target: def.target, unit: def.unit, dir: def.dir, type: "numeric", reason: "" }) : matchKpi({ name: both, target: null, unit: "", dir: "higher", type: "review", reason: "No numeric target" });
+  const c = {};
+  /* S — Specific */
+  if (!oT) c.S = { status: "fail", msg: "Write the objective: what should Omar accomplish this year?" };
+  else if (VAGUE_START.test(oT) && !OUTCOME_WORDS.test(oT) && def.type !== "numeric") c.S = { status: "warn", msg: "Your objective describes the activity, but the expected result is not yet clear. What specific outcome should Omar achieve?" };
+  else if (words(oT) < 5) c.S = { status: "warn", msg: "The objective is very short. Describe the result Omar should achieve, not just the topic." };
+  else c.S = { status: "ok", msg: "States what Omar should accomplish." };
+  /* M — Measurable (blocking when no reliable target or completion rule) */
+  if (!mT) c.M = { status: "fail", msg: "Add the measurement: how will you and Omar know the objective has been achieved?" };
+  else if (def.type === "review") c.M = { status: "fail", msg: def.compound ? "The measurement contains more than one target. Keep one target per objective, or split it into separate objectives." : /change/.test(def.reason) ? "The measurement states a change without the level to reach. State the target level (or the starting point) so the result can be calculated." : /ambiguous/.test(def.reason) ? "The measurement contains more than one figure, so the target isn't clear. Which number is the target?" : /zero/i.test(def.reason) ? "A target of zero can't be turned into a % achieved. State the rule you'll use to assess it." : "A target isn't clear yet. Add a number, percentage or completion standard so the result can be assessed at year-end." };
+  else if (def.type === "milestone") c.M = { status: "ok", msg: "Completion-based: it will be assessed as completed by the due date (100%) or not completed (0%); late or partial completion needs a documented assessment." };
+  else if (match.status === "clarify" && /1–5 scale/.test(match.reason)) c.M = { status: "warn", msg: "Stakeholder feedback is recorded on a 1–5 scale: state the target on that scale." };
+  else c.M = { status: "ok", msg: `Target identified: ${fmtDefinitionTarget(def)}${def.source === "objective" ? " (from the objective statement)" : ""}.` };
+  /* A — Achievable (only obvious problems are flagged; realism is for you and Omar to agree) */
+  if (def.type === "numeric" && def.unit === "%" && def.target > 100 && def.dir !== "lower") c.A = { status: "warn", msg: "A percentage target above 100% can't be reached. Check the target." };
+  else if (def.type === "numeric" && /^\/(\d+)/.test(def.unit) && def.target > Number(def.unit.slice(1))) c.A = { status: "warn", msg: "The target is higher than the scale allows. Check the target." };
+  else if (match.status === "clarify" && /monthly reports are scheduled/.test(match.reason)) c.A = { status: "warn", msg: match.reason };
+  else c.A = { status: "info", msg: "Agree with Omar that the target is challenging but realistic for his role." };
+  /* R — Relevant */
+  if (match.measure === "business") c.R = { status: "warn", msg: "This is a department result. Omar's own contribution to it may be hard to show; consider what he directly controls." };
+  else if (match.status === "unavailable" && !ROLE_WORDS.test(both)) c.R = { status: "warn", msg: "Check how this objective links to Omar's role and the Commercial priorities. The measure is clear, but the available records may not support this result." };
+  else if (match.status === "unavailable") c.R = { status: "info", msg: "Relevant to Omar's role. The measure is clear, but the available records may not support this result." };
+  else c.R = { status: "ok", msg: "Linked to Omar's role and responsibilities." };
+  /* T — Time-bound (blocking) */
+  if (!due) c.T = { status: "fail", msg: "Add a due date." };
+  else if (!inPeriod(due)) c.T = { status: "fail", msg: "The due date must fall within the 2027 rating period (1 January – 31 December 2027)." };
+  else c.T = { status: "ok", msg: `Due ${fmtDue(due)}.` };
+  return { checks: c, def, blocking: ["M", "T"].filter(k => c[k].status === "fail"), notes: Object.keys(c).filter(k => c[k].status === "warn").length };
 }
-function objectiveCoverage(o) {
-  const ks = parseKpis(o.kpi).map(k => ({ k, c: kpiCoverageJanuary(k) }));
-  const rank = { unavailable: 2, clarify: 1, supported: 0 };
-  const worst = ks.reduce((w, x) => rank[x.c.status] > rank[w] ? x.c.status : w, "supported");
-  /* Two measurable targets in one KPI text: suggest splitting (the wording is never rewritten) */
-  const split = ks.length > 1 ? `This KPI contains ${ks.length} separate measures. Consider writing them as ${ks.length} KPIs so each has its own target and is clear to assess. It will be kept exactly as you wrote it.` : "";
-  return { status: worst, label: COVERAGE_LABEL[worst], kpis: ks, split };
-}
+const SMART_LABEL = { S: "Specific", M: "Measurable", A: "Achievable", R: "Relevant", T: "Time-bound" };
+function fmtDue(iso) { if (!iso) return "—"; const d = new Date(iso + "T00:00:00Z"); if (isNaN(d)) return iso; return `${d.getUTCDate()} ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][d.getUTCMonth()]} ${d.getUTCFullYear()}`; }

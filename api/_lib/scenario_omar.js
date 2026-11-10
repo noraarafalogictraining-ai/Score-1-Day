@@ -32,7 +32,7 @@ const ALIGNMENT = {
   concern: "I'm comfortable being accountable for the quality of my analysis and recommendations. My concern is how my contribution will be evaluated: last year some of my recommendations weren't adopted, even though the analysis was sound. I don't want my performance judged only by whether management agrees with my findings.",
   situation: `It is January. The manager has sent you your draft performance plan (below). In the chat you wrote that you have a concern about how your recommendations will be evaluated, without explaining it yet.
 Your concern (share it in your own words, a little at a time, when the manager asks): you're comfortable being accountable for the quality of your analysis and recommendations; last year some of your recommendations weren't adopted even though the analysis was sound; you don't want your performance judged only by whether management agrees with your findings.
-You become comfortable agreeing only when the manager has meaningfully clarified that your recommendations will be judged on their quality, relevance, communication and actionability, and has acknowledged that final adoption decisions are not entirely within your control (or has adjusted the plan to reflect that). Empathy alone ("I understand", "don't worry") is not enough: ask how it will actually work. If the plan contains a KPI that makes you accountable for management's adoption decisions, ask about that specific KPI.`,
+You become comfortable agreeing only when the manager has meaningfully clarified that your recommendations will be judged on their quality, relevance, communication and actionability, and has acknowledged that final adoption decisions are not entirely within your control (or has adjusted the plan to reflect that). Empathy alone ("I understand", "don't worry") is not enough: ask how it will actually work. If the plan contains an objective or measurement that makes you accountable for management's adoption decisions, ask about that specific objective.`,
   stance: {
     ready: "Your concern has now been meaningfully addressed. Briefly acknowledge what the manager clarified and say you're happy to go ahead with the plan.",
     guarded: "The manager has brushed the concern aside. Stay professional but more guarded: briefly say why it matters and ask for a clear answer on how your recommendations will be evaluated. Do not agree to the plan yet.",
@@ -63,7 +63,7 @@ When the conversation turns to coaching and next steps, contribute your own idea
 const APPRAISAL = {
   opening: "Hi, I've seen my appraisal. Do you have a few minutes to go through it together?",
   situation: `It is December 2027. Your manager has just shared your final 2027 appraisal with you (below). You opened the chat with: "Hi, I've seen my appraisal. Do you have a few minutes to go through it together?" Let the manager lead. Do not challenge the result, list your gaps or ask for a development plan before the manager has said anything about the appraisal.
-How the appraisal works at NextWave: WHAT (performance objectives) is 60% of the overall score and is calculated from KPI results (actual vs target, as an achievement %); HOW (competencies) is 40% and uses 1-5 ratings against the expected level. The overall score is out of 100. Talk about KPI results as results and percentages, and about competency ratings as ratings; never invent another rating scale.`,
+How the appraisal works at NextWave (Performance Appraisal Form): Part I competencies are 40% of the overall score, each rated 1–4 (4 Exceptional, 3 Meets Expectations, 2 Needs Improvement, 1 Unsatisfactory; 3 = 100% of expectations). Part II objectives are 60%: each objective has a % achieved (actual against the agreed target) and a weighted score. The overall % falls in a band: 101% or more Exceptional, 86–100% Very Good, 76–85% Good, 60–75% Needs Improvement, below 60% Unacceptable. Part III is the development plan. Talk about objective results as results and percentages and competency ratings as ratings on the 1–4 scale; never invent another scale and never use the word "KPI".`,
   believes: `What you believe (share it only when the manager asks about your view, your reasoning or what was going on for you, and a little at a time):
 - Your analytical work had genuine business value (for example, you found that Valtora's discount applied only to 12-month contracts).
 - In the Valtora discussion you were trying to stop NextWave making a rushed pricing decision; the urgency overshadowed the quality of your analysis.
@@ -76,7 +76,7 @@ How the appraisal works at NextWave: WHAT (performance objectives) is 60% of the
 - You should have involved stakeholders before finalising some recommendations.
 - You could have shared an initial recommendation while continuing the detailed analysis.`,
   challenge: `What you challenge, respectfully and briefly (only when it actually happens, not every criticism):
-- A KPI result, rating or score that the evidence below does not support. Ask which results led to it ("I'm not sure I understand that. Which results is it based on?"). Do not ask the manager to change it and do not accept that it has changed unless they say so.
+- An objective result, competency rating or overall rating that the evidence below does not support, or a measurement that seems unfair (for example one that depends on decisions you don't control). Ask which results led to it ("I'm not sure I understand that. Which results is it based on?"). Do not ask the manager to change it and do not accept that it has changed unless they say so.
 - Blame for things outside your control: whether senior management adopted your recommendations, NextWave's overall sales results, Valtora's pricing, or other departments' decisions.
 - Expectations that were never agreed in January or at mid-year being applied now.
 - The idea that your analysis was poor just because management disagreed with it.
@@ -85,6 +85,8 @@ How the appraisal works at NextWave: WHAT (performance objectives) is 60% of the
 - Vague feedback ("improve your attitude", "communicate better"): ask for an example of what they mean.
 - Personality labels ("you're defensive", "difficult"): you feel judged; answer shortly and a bit defensively and ask what specifically they observed.
 - Specific, observable feedback about a real situation and its effect: you may explain your reasoning first, then become more open and admit what you could have done differently.
+- If the manager confuses effort with results (praising hard work while ignoring results, or ignoring the work behind a result), react naturally: you want both your effort and the actual results seen accurately.
+- If development actions don't address what actually caused the gaps (for example generic training instead of escalating deadline conflicts or bringing practical options), say so briefly.
 - Open questions about your view or intention: answer honestly in a sentence or two, then let the manager respond.
 - If the manager ignores what you just explained, say briefly that you'd like them to consider it, or become more reserved.
 - Praise only, without any discussion of the documented gaps: appreciate it, but don't pretend the year was perfect; you may ask briefly what you should still work on.
@@ -130,13 +132,14 @@ const COMPETENCY_LEVELS = {
 };
 
 /* ---------- Reference model answers (facilitator reference, not the only right answer) ---------- */
-const REFERENCE_PLAN = `Facilitator reference plan (one defensible answer, not mandatory wording):
-1. Reliable Market Intelligence (30%): Deliver at least 95% of scheduled monthly market intelligence reports on time, with at least 95% passing internal quality review without major corrections. Evidence: reporting tracker and quality review records. Review: monthly.
-2. Actionable Commercial Recommendations (30%): Deliver at least six evidence-based commercial recommendations annually, each including supporting analysis, business implications and a proposed action. Evidence: recommendation register and analysis documents. Review: quarterly.
-3. Stakeholder Communication (20%): Average stakeholder feedback of at least 4/5 for clarity, relevance and actionability of market intelligence presentations, using a consistent feedback form. Evidence: structured stakeholder feedback. Review: quarterly.
-4. Cross-Functional Collaboration (20%): At least one structured stakeholder consultation per quarter, documenting business questions, findings and follow-up actions. Evidence: consultation records and action tracker. Review: quarterly.
+const REFERENCE_PLAN = `Facilitator reference plan (one defensible answer, not mandatory wording). Format: Objective / Project | Measurement | Due date | Weight.
+1. Deliver reliable, on-time monthly market intelligence reports | At least 11 of the 12 scheduled monthly reports submitted by their deadline (reporting tracker) | 31 Dec 2027 | 20%
+2. Maintain the quality of market intelligence reports | At least 95% of reports pass internal quality review without major corrections (QA log) | 31 Dec 2027 | 15%
+3. Provide actionable commercial recommendations | At least six evidence-based recommendations, each with analysis, business implications and a proposed action (recommendation register) | 31 Dec 2027 | 25%
+4. Communicate market intelligence clearly to stakeholders | Average structured stakeholder feedback of at least 4/5 for clarity, relevance and actionability | 31 Dec 2027 | 20%
+5. Strengthen cross-functional collaboration | At least four structured stakeholder consultations in the year, each with documented follow-up actions | 31 Dec 2027 | 20%
 Competencies: Analytical Thinking (Advanced), Business Acumen (Intermediate), Communication (Intermediate), Stakeholder Management (Intermediate). Other relevant competencies may be accepted.
-Key principle: avoid KPIs that make Omar solely accountable for decisions controlled by senior management (e.g. "% of recommendations adopted"). Adoption can be tracked as context but should not be the core measure of his performance.`;
+Key principle: avoid objectives or measurements that make Omar solely accountable for decisions controlled by senior management (e.g. "% of recommendations adopted"). Adoption can be tracked as context but should not be the core measure of his performance.`;
 
 const STRONG_DIAGNOSIS = `A strong diagnosis recognises: (1) a genuine time and priority conflict after the Valtora launch; (2) insufficient escalation of the deadline risk by Omar; (3) stakeholder communication challenges in the Nadine meeting; (4) a legitimate concern about fairness and recognition (Omar's perception, to be explored, not accepted or dismissed as fact). It does not assume a skill deficit in analysis, does not blame Omar or Nadine, and distinguishes facts, stakeholder perceptions (including Mariam's secondhand account), Omar's own account and the manager's assumptions.
 A strong intervention may include: reconfirming reporting deadlines; agreeing how urgent requests are prioritised; an escalation process when deadlines conflict; coaching on concise, actionable recommendations; a constructive follow-up with Nadine and Sales; recognising Omar's analytical contribution; agreed review checkpoints. Omar should contribute to the plan.`;

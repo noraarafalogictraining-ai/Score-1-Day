@@ -29,23 +29,24 @@ function cleanHistory(h) {
 function cleanPlan(p) {
   p = p || {};
   return {
-    objectives: arr(p.objectives, LIMITS.objectives).map(o => ({ objective: str(o.objective), kpi: str(o.kpi), weight: int(o.weight, 0, 100), evidence: str(o.evidence, 200), freq: str(o.freq, 60) })),
+    objectives: arr(p.objectives, LIMITS.objectives).map(o => ({ objective: str(o.objective), measure: str(o.measure != null ? o.measure : o.kpi), due: str(o.due, 20), weight: int(o.weight, 0, 100) })),
     comps: arr(p.comps, LIMITS.comps).map(c => ({ name: str(c.name, 120), level: str(c.level, 40), standard: str(c.standard) }))
   };
 }
 function cleanEvidence(e) {
   return arr(e, LIMITS.evidence).map(x => ({ period: str(x.period, 80), link: str(x.link, 200), text: str(x.text), source: str(x.source, 200), impact: str(x.impact), action: str(x.action), status: str(x.status, 40) }));
 }
-/* Year-end appraisal (prototype shape): WHAT = KPI results with achievement %, HOW = 1–5 ratings, overall = 0–100 score. */
-const pct = (v, hi = 200) => { const n = Number(v); return v === null || v === "" || !Number.isFinite(n) ? null : Math.max(0, Math.min(hi, Math.round(n * 10) / 10)); };
+/* Year-end Performance Appraisal Form: Part I competencies (1–4), Part II objectives (% achieved, weighted score),
+   overall % and rating band, Part III development plan. */
+const pct = (v, hi = 400) => { const n = Number(v); return v === null || v === "" || !Number.isFinite(n) ? null : Math.max(0, Math.min(hi, Math.round(n * 10) / 10)); };
 function cleanAppraisal(a) {
   a = a || {};
-  const o = a.overall || {};
+  const o = a.overall || {}, d = a.pdp || {};
   return {
-    what: arr(a.what, LIMITS.objectives).map(x => ({ objective: str(x.objective), weight: int(x.weight, 0, 100), achievement: pct(x.achievement),
-      kpis: arr(x.kpis, 6).map(k => ({ name: str(k.name), target: str(k.target, 60), type: str(k.type, 40), actual: str(k.actual, 60), achievement: pct(k.achievement), evidence: str(k.evidence), matched: str(k.matched, 160) })) })),
-    how: arr(a.how, LIMITS.comps).map(x => ({ name: str(x.name, 120), level: str(x.level, 40), standard: str(x.standard), observed: str(x.observed), rating: int(x.rating, 1, 5), just: str(x.just) })),
-    overall: { whatPct: pct(o.whatPct), howPct: pct(o.howPct), score: pct(o.score, 100), just: str(o.just, LIMITS.longText), strengths: str(o.strengths), dev: str(o.dev) }
+    what: arr(a.what, LIMITS.objectives).map(x => ({ objective: str(x.objective), measure: str(x.measure), target: str(x.target, 80), due: str(x.due, 40), weight: int(x.weight, 0, 100), method: str(x.method, 80), actual: str(x.actual, 600), achievement: pct(x.achievement), weighted: pct(x.weighted), comments: str(x.comments), matched: str(x.matched, 160) })),
+    how: arr(a.how, LIMITS.comps).map(x => ({ name: str(x.name, 120), level: str(x.level, 40), standard: str(x.standard), rating: int(x.rating, 1, 4), comments: str(x.comments) })),
+    overall: { objectivesScore: pct(o.objectivesScore), competenciesScore: pct(o.competenciesScore), score: pct(o.score), rating: str(o.rating, 40), managerComments: str(o.managerComments, LIMITS.longText), employeeComments: str(o.employeeComments) },
+    pdp: { short: str(d.short), long: str(d.long), ld: arr(d.ld, 12).map(x => ({ area: str(x.area, 400), action: str(x.action, 800) })), training: arr(d.training, 12).map(x => ({ course: str(x.course, 300), source: str(x.source, 200), date: str(x.date, 20) })) }
   };
 }
 const pathwayOf = (v) => ["A", "B", "C"].includes(v) ? v : null;

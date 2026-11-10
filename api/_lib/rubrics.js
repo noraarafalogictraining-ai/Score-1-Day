@@ -6,12 +6,12 @@
 
 const GROUPS = [
   /* ROUND 1 */
-  { id: "r1_kpi", round: 1, label: "Objectives and KPI quality", task: "plan", criteria: [
+  { id: "r1_kpi", round: 1, label: "SMART objectives and measurement", task: "plan", criteria: [
     { id: "r1_kpi_relevance", max: 3, label: "Relevance to Omar's responsibilities", desc: "Objectives reflect the Market Intelligence Analyst role and its main purpose." },
-    { id: "r1_kpi_clarity", max: 2, label: "Clarity of objectives", desc: "Each objective states clearly what must be achieved." },
-    { id: "r1_kpi_measurable", max: 4, label: "Measurability", desc: "KPIs can be measured and verified unambiguously; it is clear how the result would be known." },
-    { id: "r1_kpi_target", max: 3, label: "Target specificity and reasonableness", desc: "Each KPI states a specific target within its wording, realistic given Omar's track record (e.g. 11/12 on time, 95% quality, 6 recommendations) yet meaningful." },
-    { id: "r1_kpi_control", max: 3, label: "Controllability / influence", desc: "Omar can materially influence each KPI. KPIs that make him solely accountable for senior-management decisions (e.g. % of recommendations adopted) are NOT rewarded." },
+    { id: "r1_kpi_clarity", max: 2, label: "Clarity of objectives", desc: "Each objective states clearly and specifically what must be achieved." },
+    { id: "r1_kpi_measurable", max: 4, label: "Measurability", desc: "Each objective has a measurement that can be verified unambiguously; it is clear how the result would be known." },
+    { id: "r1_kpi_target", max: 3, label: "Target, due date and reasonableness", desc: "Each objective or measurement states a specific target and a due date within the rating period, realistic given Omar's track record (e.g. 11/12 on time, 95% quality, 6 recommendations) yet meaningful." },
+    { id: "r1_kpi_control", max: 3, label: "Controllability / influence", desc: "Omar can materially influence each objective. Measurements that make him solely accountable for senior-management decisions (e.g. % of recommendations adopted) are NOT rewarded." },
     { id: "r1_kpi_priorities", max: 2, label: "Alignment with commercial priorities", desc: "Objectives support the Commercial Department's priorities set by the CEO (growth, conversion, pipeline, market responsiveness, team performance), especially market responsiveness to competitors. Evidence sources and review frequencies are not part of the form and must not be required." },
     { id: "r1_kpi_balance", max: 3, label: "Logical weighting and overall balance", desc: "Weights total 100%, reflect priorities, and the plan balances reliable delivery, actionable recommendations and stakeholder communication/collaboration." }
   ] },
@@ -54,21 +54,21 @@ const GROUPS = [
     { id: "r2_log_followup", max: 1, label: "Clear follow-up", desc: "Manager actions/follow-ups are specific." }
   ] },
   /* ROUND 3 */
-  { id: "r3_what", round: 3, label: "WHAT evaluation", task: "round3", criteria: [
-    { id: "r3_what_grounded", max: 4, label: "Results grounded in available evidence", desc: "Each KPI actual and its supporting evidence come from the year-end evidence actually available; results are not invented." },
-    { id: "r3_what_limits", max: 2, label: "Limitations identified", desc: "Where the KPI does not match the available evidence (or the target is unclear), the manager notes the limitation instead of inventing results." },
+  { id: "r3_what", round: 3, label: "Objectives evaluation", task: "round3", criteria: [
+    { id: "r3_what_grounded", max: 4, label: "Results grounded in available evidence", desc: "Each objective's actual achievement and its supporting comments come from the year-end evidence actually available; results are not invented." },
+    { id: "r3_what_limits", max: 2, label: "Limitations identified", desc: "Where the measurement does not match the available evidence (or the target is unclear), the manager notes the limitation instead of inventing results." },
     { id: "r3_what_balance", max: 2, label: "Recognises results and gaps", desc: "Acknowledges positive results and documented gaps; does not penalise non-adoption of sound recommendations." },
-    { id: "r3_what_overall", max: 2, label: "Defensible WHAT result", desc: "The WHAT achievement follows from the KPI results and objective weights, and the evidence supports it." }
+    { id: "r3_what_overall", max: 2, label: "Defensible objectives score", desc: "The objectives score follows from the objective results and weights, and the evidence supports it." }
   ] },
-  { id: "r3_how", round: 3, label: "HOW evaluation", task: "round3", criteria: [
+  { id: "r3_how", round: 3, label: "Competencies evaluation", task: "round3", criteria: [
     { id: "r3_how_behaviour", max: 2, label: "Uses behavioural evidence", desc: "Competency ratings cite observed behaviours, not traits." },
-    { id: "r3_how_levels", max: 2, label: "Expected level vs rating", desc: "Distinguishes the expected proficiency level from the 1–5 performance rating against it." },
+    { id: "r3_how_levels", max: 2, label: "Expected level vs rating", desc: "Distinguishes the expected proficiency level from the 1–4 rating against it (3 = meets expectations)." },
     { id: "r3_how_balance", max: 1, label: "Balanced", desc: "Recognises strengths (analysis) and gaps (communication/stakeholder) fairly." }
   ] },
-  { id: "r3_overall", round: 3, label: "Overall rating and justification", task: "round3", criteria: [
-    { id: "r3_overall_defensible", max: 2, label: "Defensible overall score", desc: "The overall score is consistent with WHAT, HOW and the evidence; not anchored on the previous 4/5." },
+  { id: "r3_overall", round: 3, label: "Overall rating and development plan", task: "round3", criteria: [
+    { id: "r3_overall_defensible", max: 2, label: "Defensible overall score", desc: "The overall score and rating band are consistent with the objectives, competencies and evidence; not anchored on the previous-year rating." },
     { id: "r3_overall_justify", max: 2, label: "Evidence-based justification", desc: "The justification cites specific evidence from the whole year." },
-    { id: "r3_overall_specific", max: 1, label: "Specific strengths and development priorities", desc: "Strengths and priorities are specific and actionable." }
+    { id: "r3_overall_specific", max: 1, label: "Specific development plan", desc: "The development plan (Part III) addresses the identified gaps with specific, realistic actions and support; manager comments are specific." }
   ] },
   { id: "r3_conv", round: 3, label: "Appraisal feedback conversation and bias reflection", task: "round3", criteria: [
     { id: "r3_conv_feedback", max: 4, derived: "sbii", label: "Feedback conversation (situation, behaviour, impact, intent, fairness, development)", desc: "Calculated from the separate 12-point conversation assessment: round(total × 4 ÷ 12)." },

@@ -57,8 +57,8 @@ async function assessRound3() {
     if (res.events.length) applyEvents(r, res.events, clsReason(res, "Final appraisal assessed."));
     else pulseNote(r, "appraisal", "Final appraisal: mixed", "Appraisal partly evidence-based: no Pulse change.", 3);
     r.r3.done = true;
-    UI.busy = null; save(); toast("Appraisal finalised."); go("inbox", "closed"); return;
-  } catch (e) { r.r3.final.error = `The appraisal could not be finalised: ${e.message}`; }
+    UI.busy = null; save(); toast("Appraisal finalized."); go("inbox", "closed"); return;
+  } catch (e) { r.r3.final.error = `The appraisal could not be finalized: ${e.message}`; }
   UI.busy = null; save(); render();
 }
 /* Behind-the-scenes assessment of the appraisal discussion (never shown in the chat) */
@@ -163,8 +163,7 @@ const ACTIONS = {
   orgToggle() { UI.orgOpen = UI.orgOpen === false; render(); },
   respToggle(el) { UI.respOpen = UI.respOpen || { strategy: true }; UI.respOpen[el.dataset.id] = !UI.respOpen[el.dataset.id]; render(); },
   ceoToggle(el) { UI.ceoOpen = UI.ceoOpen === el.dataset.id ? null : el.dataset.id; render(); },
-  apTab(el) { UI.apTab = el.dataset.v; render(); },
-  apOpen(el) { const cur = UI.apOpen === undefined ? (rec().goals.objectives[0] || {}).id : UI.apOpen; UI.apOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
+  apOpen(el, ev) { if (ev && ev.target.closest("input,select,textarea,button:not(.ap-row)")) return; const cur = UI.apOpen === undefined ? (rec().goals.objectives[0] || {}).id : UI.apOpen; UI.apOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   compOpen(el) { const cur = UI.compOpen === undefined ? (rec().goals.comps[0] || {}).id : UI.compOpen; UI.compOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },
   kpi(el) { UI.kpiOpen = UI.kpiOpen === el.dataset.id ? null : el.dataset.id; render(); },
@@ -192,6 +191,7 @@ const ACTIONS = {
     if (r.goals.status !== "not_started" && r.goals.status !== "draft") return;   /* repeated clicks */
     r.goals.tried = true;
     if (!v.ok) { save(); toast(`${plural(v.errors.length, "item needs", "items need")} attention before submitting.`); UI.edit = null; render(); return; }
+    r.goals.objectives.forEach(o => { o.agreed = deriveDefinition(o); });   /* agreed target / calculation definition used at year-end */
     r.goals.status = "pending_alignment"; r.goals.submits++; r.goals.tried = false; UI.edit = null; r.align.ready = false;
     r.align.log.push({ from: "sys", text: r.goals.submits === 1 ? `Performance plan shared with Omar · ${SIM_DATES.submitted}` : "Revised performance plan shared with Omar" });
     ensureChatOpenings(r);
@@ -228,7 +228,7 @@ const ACTIONS = {
     UI.endConfirm = false;
     r.r3.conv.ended = true; r.r3.conv.outcome = r.r3.conv.completed ? "completed" : "incomplete";
     r.r3.conv.log.push({ from: "sys", text: r.r3.conv.completed ? "Conversation closed" : "Conversation closed before an agreement was reached" });
-    UI.chatOpen = false; save(); go("reflection"); if (aiReady()) { runSbii(); runBias(); }
+    UI.chatOpen = false; UI.apPart = "III"; save(); go("appraisal"); toast("Discussion closed. Complete Part III, then review and finalize."); if (aiReady()) { runSbii(); runBias(); }
   },
 
   /* --- evidence --- */
@@ -256,19 +256,26 @@ const ACTIONS = {
   submitAppraisal() {
     const r = rec(), v = appraisalValidation(r), a = r.r3.appraisal;
     a.tried = true; if (a.status === "not_started") a.status = "draft";
-    if (!v.ok) { save(); render(); const err = document.querySelector(".ta.err, .rate.err"); if (err) err.scrollIntoView({ block: "center" }); toast(`${plural(v.errors.length, "section needs", "sections need")} attention before submitting.`); return; }
+    if (!v.shareOK) { const n = v.I.length + v.II.length; UI.apPart = v.I.length ? "I" : "II"; save(); render(); toast(n ? `${plural(n, "item needs", "items need")} attention in Parts I–II before sharing.` : "The overall score could not be calculated yet."); return; }
     a.status = "submitted"; a.tried = false;
     if (a.revisions) { r.r3.conv.log.push({ from: "sys", text: "Revised appraisal recorded" }); r.r3.bias.result = null; save(); go("reflection"); if (aiReady()) runBias(); return; }
-    r.r3.conv.log.push({ from: "sys", text: `Appraisal shared with Omar · ${SIM_DATES.yearend}` });
+    r.r3.conv.log.push({ from: "sys", text: `Appraisal Parts I–II shared with Omar · ${SIM_DATES.yearend}` });
     ensureChatOpenings(r);   /* Omar's neutral opening: once, in the same thread; the chat is not opened automatically */
-    save(); toast("Appraisal shared with Omar."); render();
+    save(); toast("Parts I–II shared with Omar."); render();
   },
+  apGoto(el) { UI.apPart = el.dataset.v; go("appraisal"); },
+  saveDraft() { save(true); toast("Draft saved."); },
+  apPart(el) { UI.apPart = el.dataset.v; UI.endConfirm = false; render(); const f = document.getElementById("appraisal-form"); if (f) f.scrollIntoView({ block: "start" }); },
+  pdpAdd(el) { const p = rec().r3.appraisal.pdp, k = el.dataset.k; (p[k] = p[k] || []).push(k === "ld" ? { area: "", action: "" } : { course: "", source: "", date: "" }); save(); render(); },
+  pdpDel(el) { const p = rec().r3.appraisal.pdp, k = el.dataset.k, i = +el.dataset.i; if (!p[k]) return; const [row] = p[k].splice(i, 1); _undo = () => rec().r3.appraisal.pdp[k].splice(i, 0, row); save(); toast("Row removed.", true); render(); },
   reconsider() { const r = rec(); if (r.r3.done) return; r.r3.appraisal.status = "draft"; r.r3.appraisal.revisions++; save(); go("appraisal"); },
   runBias() { runBias(); },
   finalize() {
     const r = rec(); if (r.r3.done || UI.busy) return;
-    if (r.r3.bias.reflection.trim().length < 15) { r.r3.bias.tried = true; toast("Write a short reflection before finalising."); return render(); }
-    if (!aiReady()) { toast("AI assessment is unavailable. Your facilitator can finalise the appraisal."); return; }
+    const v = appraisalValidation(r);
+    if (!v.ok) { UI.apPart = v.I.length ? "I" : v.II.length ? "II" : "III"; toast(`${plural(v.errors.length, "item needs", "items need")} attention before finalizing.`); return go("appraisal"); }
+    if (r.r3.bias.reflection.trim().length < 15) { r.r3.bias.tried = true; toast("Write a short reflection before finalizing."); return render(); }
+    if (!aiReady()) { toast("AI assessment is unavailable. Your facilitator can finalize the appraisal."); return; }
     assessRound3();
   },
   assessRetry(el) { const k = el.dataset.k; if (k === "round1") assessRound1(); else if (k === "round2") assessRound2(); else assessRound3(); },
@@ -289,7 +296,7 @@ const ACTIONS = {
     if (!r.pulse.slots.coaching) { if (p === "A") applyPulse(r, "constructive", "Pathway A set by the facilitator."); else if (p === "C") applyPulse(r, "punitive", "Pathway C set by the facilitator."); else pulseNote(r, "coaching", "Pathway B set by the facilitator", "Partially effective management: no Pulse change.", 2); }
     save(); toast(`Pathway ${p} set.`); render();
   },
-  facFinal() { const r = rec(); if (r.r3.done) return; r.r3.done = true; pulseNote(r, "appraisal", "Appraisal finalised by the facilitator", "No assessed appraisal: no Pulse change.", 3); save(); toast("Appraisal finalised."); render(); },
+  facFinal() { const r = rec(); if (r.r3.done) return; r.r3.done = true; pulseNote(r, "appraisal", "Appraisal finalized by the facilitator", "No assessed appraisal: no Pulse change.", 3); save(); toast("Appraisal finalized."); render(); },
   pc(el) { rec().pc[el.dataset.i] = el.dataset.v; save(); render(); }
 };
 
@@ -322,7 +329,7 @@ document.addEventListener("change", (ev) => {
   if (el.dataset.bind && (el.tagName === "SELECT" || el.type === "checkbox")) { handleBind(el); render(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) { UI.modal.d[el.dataset.ev] = el.value; if (el.tagName === "SELECT") render(); return; }
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
-  if (el.dataset.kpiMode) { const v = el.value, base = el.dataset.kpiMode; setPath(S, base + ".type", v === "review" ? "review" : "numeric"); if (v !== "review") setPath(S, base + ".dir", v); afterBind(base); save(); render(); return; }
+  if (el.dataset.objMode) { const v = el.value, base = el.dataset.objMode; setPath(S, base + ".mode", v === "review" ? "review" : ""); if (v !== "review") setPath(S, base + ".dir", v); afterBind(base); save(); render(); return; }
   if (el.dataset.actChange === "compPick") { if (el.value) ACTIONS.compAdd({ dataset: { id: el.value } }); return; }
   if (el.dataset.fac) { const r = rec(), id = el.dataset.fac, max = +el.max; if (el.value === "") delete r.fac[id]; else r.fac[id] = Math.max(0, Math.min(max, Math.round(+el.value))); save(); render(); }
 });
