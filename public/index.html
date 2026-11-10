@@ -922,16 +922,18 @@ const STAKEHOLDERS = {
    Names only. Participants use the printed competency dictionary for the Basic /
    Intermediate / Advanced descriptions; the descriptions live on the server
    (api/_lib/scenario_omar.js, COMPETENCY_LEVELS) for the assessment only. */
+/* Shown in the dropdown in this (alphabetical) order. Ids are stable: saved plans refer to them. */
 const COMPETENCY_LIBRARY = [
-  { id: "analytical", name: "Analytical Thinking" },
-  { id: "acumen", name: "Business Acumen" },
-  { id: "communication", name: "Communication" },
-  { id: "stakeholder", name: "Stakeholder Management" },
-  { id: "problem", name: "Problem Solving" },
-  { id: "time", name: "Time Management & Prioritization" },
   { id: "accountability", name: "Accountability & Ownership" },
   { id: "adaptability", name: "Adaptability & Flexibility" },
-  { id: "coaching", name: "Coaching" }
+  { id: "analytical", name: "Analytical Thinking" },
+  { id: "acumen", name: "Business Acumen" },
+  { id: "coaching", name: "Coaching" },
+  { id: "communication", name: "Communication" },
+  { id: "problem", name: "Problem Solving" },
+  { id: "stakeholder", name: "Stakeholder Management" },
+  { id: "strategic", name: "Strategic Thinking" },
+  { id: "time", name: "Time Management & Prioritization" }
 ];
 function competencyLibrary() { return COMPETENCY_LIBRARY; }
 function competencyById(_emp, id) { return COMPETENCY_LIBRARY.find(c => c.id === id); }

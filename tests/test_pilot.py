@@ -348,6 +348,8 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             pg.goto(U + "#goals/competencies"); pg.wait_for_timeout(150)
             check("No proficiency descriptions or View levels shown", pg.locator('[data-act="libOpen"]').count() == 0 and not any(t in pg.inner_text("main") for t in ["Organizes data", "Independently analyzes", "Interprets complex"]))
             check("Competencies are added from a dropdown", pg.locator("#comp-add").count() == 1 and pg.locator('[data-act="compAdd"]').count() == 0)
+            names = pg.eval_on_selector_all("#comp-add option", "os => os.filter(o => o.value).map(o => o.textContent.trim())")
+            check("Competency library: the 10 competencies, alphabetical, including Strategic Thinking", names == ["Accountability & Ownership", "Adaptability & Flexibility", "Analytical Thinking", "Business Acumen", "Coaching", "Communication", "Problem Solving", "Stakeholder Management", "Strategic Thinking", "Time Management & Prioritization"], str(names))
             for cid in ["analytical", "acumen", "communication", "stakeholder"]: pg.select_option("#comp-add", cid); pg.wait_for_timeout(120)
             opts = pg.eval_on_selector_all("#comp-add option", "os => os.map(o => o.value)")
             check("Selected competencies leave the dropdown (no duplicates)", not any(c in opts for c in ["analytical", "acumen", "communication", "stakeholder"]) and len(R(pg)["goals"]["comps"]) == 4)

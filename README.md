@@ -263,7 +263,7 @@ Since Phase 5 there is a single canonical record for every participant: see *Yea
 ## Pilot assumptions (to review after the first test)
 
 1. **Products and Omar's profile** follow the pilot brief (FlowOps, Customer360, InsightIQ; new profile and previous-year evidence). They replace the classic content for this pilot only; the classic version is unchanged.
-2. **Competency library**: the four brief competencies use the approved level descriptors. Five other NextWave competencies (Problem Solving, Time Management & Prioritization, Accountability & Ownership, Adaptability & Flexibility, Coaching) have **draft** level descriptors written for the pilot so that every competency shows three levels. Review them.
+2. **Competency library** (10, alphabetical in the dropdown): the four brief competencies use the approved level descriptors. Six others (Accountability & Ownership, Adaptability & Flexibility, Coaching, Problem Solving, Strategic Thinking, Time Management & Prioritization) have **draft** level descriptors written for the pilot (server only, used by the assessor). Strategic Thinking was added in this update. Review them.
 3. **Year-end datasets, stakeholder comments and observed behaviours** were written for the pilot (the brief asked for fixed, consistent datasets). Dates: Valtora launch June, emails 5–6 July, mid-year conversation 7 July, year-end December 2027.
 4. **Nadine Farouk** is shown with initials (no portrait available).
 5. **Pathway thresholds** (above) and the **"constructive" threshold** (coaching ≥ 9/15) are pilot values.
