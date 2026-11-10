@@ -16,7 +16,8 @@ function freshRecord() {
     r3: {
       dataset: null, error: null,
       appraisal: { status: "not_started", what: {}, how: {}, overall: { what: null, how: null, final: null, just: "", strengths: "", dev: "" }, tried: false, revisions: 0 },
-      conv: { log: [], ended: false },
+      conv: { log: [], ended: false, completed: false, outcome: null },
+      sbii: { result: null, error: null },
       bias: { result: null, error: null, reflection: "", tried: false },
       final: { assessment: null, error: null }, done: false
     },

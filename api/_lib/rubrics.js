@@ -70,21 +70,20 @@ const GROUPS = [
     { id: "r3_overall_justify", max: 2, label: "Evidence-based justification", desc: "The justification cites specific evidence from the whole year." },
     { id: "r3_overall_specific", max: 1, label: "Specific strengths and development priorities", desc: "Strengths and priorities are specific and actionable." }
   ] },
-  { id: "r3_conv", round: 3, label: "Appraisal conversation and bias reflection", task: "round3", criteria: [
-    { id: "r3_conv_explain", max: 2, label: "Explains the rating with evidence", desc: "In the conversation, explains ratings using evidence." },
-    { id: "r3_conv_listen", max: 1, label: "Listens and responds to concerns", desc: "Engages with Omar's reaction and concerns." },
-    { id: "r3_conv_forward", max: 1, label: "Development focus", desc: "Discusses development and next steps." },
+  { id: "r3_conv", round: 3, label: "Appraisal feedback conversation and bias reflection", task: "round3", criteria: [
+    { id: "r3_conv_feedback", max: 4, derived: "sbii", label: "Feedback conversation (situation, behaviour, impact, intent, fairness, development)", desc: "Calculated from the separate 12-point conversation assessment: round(total × 4 ÷ 12)." },
     { id: "r3_conv_bias", max: 1, label: "Honest bias reflection", desc: "The participant's reflection engages honestly with possible biases grounded in their own reasoning." }
   ] }
 ];
 
 const ALL = GROUPS.flatMap(g => g.criteria.map(c => ({ ...c, group: g.id, round: g.round, task: g.task })));
 const byTask = (task) => ALL.filter(c => c.task === task);
+const aiByTask = (task) => byTask(task).filter(c => !c.derived);   /* criteria the AI scores (derived ones are calculated) */
 function summary() {
   return GROUPS.map(g => ({ id: g.id, round: g.round, label: g.label, max: g.criteria.reduce((a, c) => a + c.max, 0), criteria: g.criteria.map(c => ({ id: c.id, label: c.label, max: c.max })) }));
 }
 function rubricText(task) {
-  return GROUPS.filter(g => g.task === task).map(g => `## ${g.label}\n` + g.criteria.map(c => `- ${c.id} (0-${c.max}): ${c.label}. ${c.desc}`).join("\n")).join("\n\n");
+  return GROUPS.filter(g => g.task === task).map(g => `## ${g.label}\n` + g.criteria.filter(c => !c.derived).map(c => `- ${c.id} (0-${c.max}): ${c.label}. ${c.desc}`).join("\n")).join("\n\n");
 }
 
 /* Deterministic rules (pilot values) */
@@ -102,7 +101,16 @@ const RULES = {
     return null;
   },
   alignmentEvent(cls) { return cls === "fair" ? "fair_alignment" : cls === "dismissive" ? "dismissive_alignment" : null; },
+  /* Final feedback conversation (SBII, 6 × 0–2): mapped onto r3_conv_feedback and two Pulse slots */
+  sbiiPoints(total) { return Math.round(Math.max(0, Math.min(12, total)) * 4 / 12); },
+  feedbackEvents(s, cls, completed) {
+    const ev = [], harmful = cls.unsupported_blame || cls.personality_labels || s.fairness === 0;
+    if (harmful) ev.push("blaming_feedback");
+    else if (s.fairness === 2 && s.intent >= 1) ev.push("fair_feedback");
+    if (!harmful && completed && s.development === 2) ev.push("development_agreement");
+    return ev;
+  },
   appraisalEvent(cls) { return cls === "fair" ? "fair_appraisal" : cls === "unfair" ? "unfair_appraisal" : null; }
 };
 
-module.exports = { GROUPS, ALL, byTask, summary, rubricText, RULES };
+module.exports = { GROUPS, ALL, byTask, aiByTask, summary, rubricText, RULES };

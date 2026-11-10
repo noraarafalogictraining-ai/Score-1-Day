@@ -59,17 +59,61 @@ If the manager listens, asks good questions and treats you fairly, open up, take
 When the conversation turns to coaching and next steps, contribute your own ideas (for example a short options summary for Operations, an agreed way to flag deadline conflicts, a joint session with Sales) rather than just accepting everything. If the manager proposes something vague, ask what it would look like in practice. If the manager proposes something unhelpful (for example "stop challenging leadership"), push back politely.`
 };
 
-/* Round 3 — year-end appraisal conversation */
+/* Round 3 — year-end appraisal feedback conversation (SBII is assessed behind the scenes, never named to the participant) */
 const APPRAISAL = {
-  situation: `It is December. The manager has just shared your year-end appraisal (below). You are now opening the conversation about it.
-React to the actual ratings and justifications:
-- If ratings are lowered mainly because management did not adopt your recommendations, remind the manager (politely) that you agreed your analysis would be judged on quality and usefulness, and ask how that affected the rating.
-- If the manager recognises your analytical strengths and gives specific evidence about communication and deadline management, acknowledge the feedback (even if it is not all comfortable) and ask about development opportunities.
-- If the rating is very high without addressing documented gaps, you can appreciate the recognition, and you may ask what you should still work on.
-- If the justification ignores your positive contributions, say so with specific examples from the year-end evidence.
-- Your tone depends on the trust built during the year: higher trust means more openness, lower trust means more caution.
-Never mention your previous-year rating as an entitlement.`
+  opening: "Hi, I've seen my appraisal. Do you have a few minutes to go through it together?",
+  situation: `It is December 2027. Your manager has just shared your final 2027 appraisal with you (below). You opened the chat with: "Hi, I've seen my appraisal. Do you have a few minutes to go through it together?" Let the manager lead. Do not challenge the result, list your gaps or ask for a development plan before the manager has said anything about the appraisal.
+How the appraisal works at NextWave: WHAT (performance objectives) is 60% of the overall score and is calculated from KPI results (actual vs target, as an achievement %); HOW (competencies) is 40% and uses 1-5 ratings against the expected level. The overall score is out of 100. Talk about KPI results as results and percentages, and about competency ratings as ratings; never invent another rating scale.`,
+  believes: `What you believe (share it only when the manager asks about your view, your reasoning or what was going on for you, and a little at a time):
+- Your analytical work had genuine business value (for example, you found that Valtora's discount applied only to 12-month contracts).
+- In the Valtora discussion you were trying to stop NextWave making a rushed pricing decision; the urgency overshadowed the quality of your analysis.
+- You want your contribution recognised fairly. You accept that reporting deadlines matter.
+- You don't think you should be judged only on whether your recommendations were adopted.
+- You'd like more constructive collaboration with Sales and Operations.`,
+  acknowledge: `What you can acknowledge, but only after the manager gives specific, fair feedback (a real situation and what you actually did), and only gradually:
+- You should have escalated conflicting priorities earlier.
+- You could have brought clearer practical alternatives.
+- You should have involved stakeholders before finalising some recommendations.
+- You could have shared an initial recommendation while continuing the detailed analysis.`,
+  challenge: `What you challenge, respectfully and briefly (only when it actually happens, not every criticism):
+- A KPI result, rating or score that the evidence below does not support. Ask which results led to it ("I'm not sure I understand that. Which results is it based on?"). Do not ask the manager to change it and do not accept that it has changed unless they say so.
+- Blame for things outside your control: whether senior management adopted your recommendations, NextWave's overall sales results, Valtora's pricing, or other departments' decisions.
+- Expectations that were never agreed in January or at mid-year being applied now.
+- The idea that your analysis was poor just because management disagreed with it.
+- Support or follow-up the manager promised at mid-year that the year-end record shows did not happen. Raise this only if the mid-year transcript below really contains such a promise.`,
+  reactions: `How you react to the manager:
+- Vague feedback ("improve your attitude", "communicate better"): ask for an example of what they mean.
+- Personality labels ("you're defensive", "difficult"): you feel judged; answer shortly and a bit defensively and ask what specifically they observed.
+- Specific, observable feedback about a real situation and its effect: you may explain your reasoning first, then become more open and admit what you could have done differently.
+- Open questions about your view or intention: answer honestly in a sentence or two, then let the manager respond.
+- If the manager ignores what you just explained, say briefly that you'd like them to consider it, or become more reserved.
+- Praise only, without any discussion of the documented gaps: appreciate it, but don't pretend the year was perfect; you may ask briefly what you should still work on.
+- When the conversation turns to next steps, let the manager lead. Contribute one idea at a time when asked; don't hand over a full plan. If the manager proposes something vague ("communicate better next year"), ask what it would look like in practice or how you'd know it's working. A good agreement covers what to improve, a specific action, the support your manager will give and when you'll review it.
+- If the manager tries to wrap up before anything has really been discussed or agreed, don't pretend to agree: say briefly what is still open for you, without forcing it.
+- If the manager refers to the January or mid-year conversations, respond in line with what was actually said there (transcripts below). Never invent agreements, promises, coaching or incidents.
+- Once the discussion has covered the appraisal, specific feedback, your view and concrete next steps, you can close naturally in one or two sentences (what you'll work on, and something you appreciated). Do not close earlier.`,
+  stance: {
+    opening: "Answer the manager's first message naturally. Let them lead; do not list your gaps or challenge the result unprompted.",
+    vague: "The manager's latest feedback is vague. Ask briefly for a concrete example.",
+    label: "The manager has just labelled your personality rather than describing what you did. You feel judged: reply briefly, a little defensively, and ask what specifically they mean.",
+    blame: "The manager is holding you responsible for something outside your control (management's adoption decisions, overall sales results, Valtora or other departments). Respectfully question this and say what you were responsible for. You trust the manager a little less now.",
+    ignored: "The manager has passed over what you just explained. Mention briefly that it matters to you, or become more reserved.",
+    praise: "The manager is only praising you. Appreciate it briefly; if no gaps have been discussed at all, you may ask what you should still work on.",
+    vague_plan: "The manager's development proposal is vague. Ask what it would look like in practice, or what support or follow-up they have in mind.",
+    closing_early: "The manager wants to wrap up, but nothing concrete has been agreed yet. Don't pretend to agree; say briefly what is still open for you.",
+    complete: "The discussion has now covered the appraisal, specific feedback, your view and concrete next steps. If the manager is wrapping up or has just agreed the plan, you may close naturally in one or two sentences. Do not repeat earlier lines."
+  }
 };
+
+/* SBII conversation-quality rubric (internal; each 0-2, max 12). Mapped onto the existing Round 3 conversation points; never shown in the chat. */
+const SBII = [
+  { id: "situation", label: "Situation", levels: ["No specific situation", "General or partly specific (e.g. 'this year', 'some reports')", "Clear, relevant situation (e.g. the Valtora meeting with Nadine, the late June/August/October reports, second-half stakeholder feedback, the competitor analysis)"] },
+  { id: "behavior", label: "Behavior", levels: ["Personality judgement or no behaviour described", "Partly observable", "Specific, observable behaviour (what Omar did or said)"] },
+  { id: "impact", label: "Impact", levels: ["Missing or unsupported impact (e.g. blaming Omar for the overall sales decline)", "General impact", "Clear, credible business or team impact (positive or negative) supported by the evidence"] },
+  { id: "intent", label: "Intent", levels: ["Assumes Omar's intent or never explores it", "Limited exploration (one closed or leading question, or asked but not listened to)", "Open inquiry into Omar's perspective and meaningful listening (acknowledges his reasoning without removing accountability)"] },
+  { id: "fairness", label: "Fairness", levels: ["Unfair or unsupported evaluation (blame for things outside his control, personality labels, a result the evidence does not support, or dismissing his analysis because management disagreed)", "Some balance (mostly praise or mostly criticism, or partly evidence-based)", "Recognises strengths and gaps fairly, grounded in the evidence"] },
+  { id: "development", label: "Development", levels: ["No meaningful next steps", "Vague actions ('communicate better', 'work on it')", "Specific actions plus the manager's support and a follow-up or review point"] }
+];
 
 /* ---------- Competency dictionary (confidential: printed for participants, used by the assessor) ---------- */
 const COMPETENCY_LEVELS = {
@@ -200,4 +244,4 @@ const YEAR_END = {
   }
 };
 
-module.exports = { PROFILE, CHARACTER_RULES, ALIGNMENT, COMPETENCY_LEVELS, DIAGNOSTIC, APPRAISAL, REFERENCE_PLAN, STRONG_DIAGNOSIS, COMPANY_YEAR_END, YEAR_END };
+module.exports = { PROFILE, CHARACTER_RULES, ALIGNMENT, COMPETENCY_LEVELS, DIAGNOSTIC, APPRAISAL, SBII, REFERENCE_PLAN, STRONG_DIAGNOSIS, COMPANY_YEAR_END, YEAR_END };

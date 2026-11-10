@@ -133,7 +133,11 @@ const PULSE = {
     punitive: { slot: "coaching", round: 2, label: "Punitive or blaming conversation", d: { performance: 0, trust: -9, development: -4 } },
     intervention_followthrough: { slot: "intervention", round: 3, label: "Development intervention with follow-through (outcomes revealed)", d: { performance: 3, trust: 3, development: 8 } },
     unfair_appraisal: { slot: "appraisal", round: 3, label: "Unfair final appraisal", d: { performance: 0, trust: -10, development: -4 } },
-    fair_appraisal: { slot: "appraisal", round: 3, label: "Fair, evidence-based appraisal", d: { performance: 0, trust: 5, development: 4 } }
+    fair_appraisal: { slot: "appraisal", round: 3, label: "Fair, evidence-based appraisal", d: { performance: 0, trust: 5, development: 4 } },
+    /* Final appraisal discussion (from the conversation assessment; separate slots from the written appraisal, so nothing is counted twice) */
+    fair_feedback: { slot: "feedback", round: 3, label: "Fair feedback and genuine listening in the appraisal discussion", d: { performance: 0, trust: 4, development: 0 } },
+    blaming_feedback: { slot: "feedback", round: 3, label: "Blaming or personal feedback in the appraisal discussion", d: { performance: 0, trust: -6, development: -2 } },
+    development_agreement: { slot: "dev_agreement", round: 3, label: "Clear development agreement with manager support", d: { performance: 0, trust: 0, development: 5 } }
   }
 };
 

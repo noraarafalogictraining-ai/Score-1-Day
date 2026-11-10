@@ -11,9 +11,10 @@ const wire = (log) => log.filter(m => m.from === "manager" || m.from === "employ
 function convContext(kind, r = rec()) {
   const ctx = { plan: planPayload(r), pulse: { ...r.pulse.values } };
   if (kind !== "alignment") ctx.prior = priorPayload(r);
-  if (kind === "appraisal") { ctx.appraisal = appraisalPayload(r); ctx.pathway = r.r2.pathway; }
+  if (kind === "appraisal") { ctx.appraisal = appraisalPayload(r); ctx.pathway = r.r2.pathway; ctx.priorLogs = priorLogs(r); ctx.evidence = evidencePayload(r); }
   return ctx;
 }
+const priorLogs = (r = rec()) => ({ alignment: wire(r.align.log), diagnostic: wire(r.r2.diag.log) });
 const convLog = (kind, r = rec()) => kind === "alignment" ? r.align.log : kind === "diagnostic" ? r.r2.diag.log : r.r3.conv.log;
 function applyEvents(r, events, reason) { (events || []).forEach(e => applyPulse(r, e, reason)); }
 const clsReason = (a, fallback) => (a && a.feedback && a.feedback.summary) ? a.feedback.summary.slice(0, 220) : fallback;
@@ -49,7 +50,9 @@ async function assessRound3() {
   const r = rec(); UI.busy = "round3"; r.r3.final.error = null; render();
   try {
     const b = r.r3.bias.result;
-    const res = await api("/api/assess", { task: "round3", payload: { appraisal: appraisalPayload(r), history: wire(r.r3.conv.log), pathway: r.r2.pathway, reflection: r.r3.bias.reflection, bias: b ? [b.summary, ...b.flags.map(f => `${f.bias}: ${f.explanation}`)].join("\n") : "" } });
+    if (!r.r3.sbii.result) await runSbii();
+    const sb = r.r3.sbii.result;
+    const res = await api("/api/assess", { task: "round3", payload: { sbii: sb ? sb.scores : null, appraisal: appraisalPayload(r), history: wire(r.r3.conv.log), pathway: r.r2.pathway, reflection: r.r3.bias.reflection, bias: b ? [b.summary, ...b.flags.map(f => `${f.bias}: ${f.explanation}`)].join("\n") : "" } });
     r.r3.final.assessment = res;
     if (res.events.length) applyEvents(r, res.events, clsReason(res, "Final appraisal assessed."));
     else pulseNote(r, "appraisal", "Final appraisal: mixed", "Appraisal partly evidence-based: no Pulse change.", 3);
@@ -57,6 +60,17 @@ async function assessRound3() {
     UI.busy = null; save(); toast("Appraisal finalised."); go("inbox", "closed"); return;
   } catch (e) { r.r3.final.error = `The appraisal could not be finalised: ${e.message}`; }
   UI.busy = null; save(); render();
+}
+/* Behind-the-scenes assessment of the appraisal discussion (never shown in the chat) */
+async function runSbii() {
+  const r = rec(); r.r3.sbii.error = null;
+  try {
+    const res = await api("/api/assess", { task: "sbii", payload: { appraisal: appraisalPayload(r), history: wire(r.r3.conv.log), pathway: r.r2.pathway, priorLogs: priorLogs(r), completed: !!r.r3.conv.completed } });
+    r.r3.sbii.result = res;
+    if (res.events.length) applyEvents(r, res.events, r.r3.conv.completed ? "Appraisal discussion completed." : "Appraisal discussion closed before an agreement was reached.");
+    else pulseNote(r, "feedback", "Appraisal discussion: no clear pattern", "Neither clearly fair and listening nor blaming: no Pulse change.", 3);
+  } catch (e) { r.r3.sbii.error = `The appraisal discussion could not be assessed: ${e.message}`; }
+  save(); render();
 }
 async function runBias() {
   const r = rec(); UI.busy = "bias"; r.r3.bias.error = null; render();
@@ -70,6 +84,7 @@ function ensureChatOpenings(r = rec()) {
   let changed = false;
   if (r.goals.status === "pending_alignment" && !r.align.log.some(m => m.from === "employee")) { r.align.log.push({ from: "employee", text: AIS.openings.alignment }); changed = true; }
   if (r2Status(r) !== "locked" && !r.r2.diag.log.some(m => m.from === "employee")) { r.r2.diag.log.push({ from: "employee", text: AIS.openings.diagnostic }); changed = true; }
+  if (r.r3.appraisal.status === "submitted" && !r.r3.appraisal.revisions && AIS.openings.appraisal && !r.r3.conv.log.some(m => m.from === "employee")) { r.r3.conv.log.push({ from: "employee", text: AIS.openings.appraisal }); changed = true; }
   return changed;
 }
 function releaseRound(k) {
@@ -109,6 +124,7 @@ async function sendChat(kind, text) {
     const res = await api("/api/converse", { kind, history: wire(log), context: convContext(kind, r) });
     log.push({ from: "employee", text: res.reply });
     if (kind === "alignment") r.align.ready = !!res.ready;
+    if (kind === "appraisal" && res.complete && !r.r3.conv.completed) { r.r3.conv.completed = true; log.push({ from: "sys", text: "Appraisal Discussion Completed" }); }
   } catch (e) {
     if (text) { log.pop(); setPath(S, P("drafts", kind), text); }
     UI.chatErr = { kind, message: text ? `Your message was not sent: ${e.message}` : `Omar's message could not be loaded: ${e.message}`, retry: !text };
@@ -202,9 +218,15 @@ const ACTIONS = {
     setPath(S, path, ""); sendChat(kind, text);
   },
   chatRetry(el) { sendChat(el.dataset.k, null); },
+  endCancel() { UI.endConfirm = false; render(); },
+  sbiiRetry() { runSbii(); },
   appraisalContinue() {
     const r = rec(); if (r.r3.conv.ended || managerCount(r.r3.conv.log) < CHAT_LIMITS.appraisalMin) return;
-    r.r3.conv.ended = true; r.r3.conv.log.push({ from: "sys", text: "Conversation closed" }); UI.chatOpen = false; save(); go("reflection"); if (aiReady()) runBias();
+    if (!r.r3.conv.completed && !UI.endConfirm) { UI.endConfirm = true; return render(); }   /* second click confirms ending early */
+    UI.endConfirm = false;
+    r.r3.conv.ended = true; r.r3.conv.outcome = r.r3.conv.completed ? "completed" : "incomplete";
+    r.r3.conv.log.push({ from: "sys", text: r.r3.conv.completed ? "Conversation closed" : "Conversation closed before an agreement was reached" });
+    UI.chatOpen = false; save(); go("reflection"); if (aiReady()) { runSbii(); runBias(); }
   },
 
   /* --- evidence --- */
@@ -235,7 +257,8 @@ const ACTIONS = {
     a.status = "submitted"; a.tried = false;
     if (a.revisions) { r.r3.conv.log.push({ from: "sys", text: "Revised appraisal recorded" }); r.r3.bias.result = null; save(); go("reflection"); if (aiReady()) runBias(); return; }
     r.r3.conv.log.push({ from: "sys", text: `Appraisal shared with Omar · ${SIM_DATES.yearend}` });
-    save(); toast("Appraisal shared with Omar."); render(); if (aiReady()) sendChat("appraisal", null);
+    ensureChatOpenings(r);   /* Omar's neutral opening: once, in the same thread; the chat is not opened automatically */
+    save(); toast("Appraisal shared with Omar."); render();
   },
   reconsider() { const r = rec(); if (r.r3.done) return; r.r3.appraisal.status = "draft"; r.r3.appraisal.revisions++; save(); go("appraisal"); },
   runBias() { runBias(); },

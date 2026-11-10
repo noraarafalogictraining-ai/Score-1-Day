@@ -49,14 +49,77 @@ function converse(kind, history, ctx) {
     const hit = rules.find(([rx]) => rx.test(lc(last)));
     return { reply: hit ? hit[1] : "It's been a lot to juggle. Where would you like to start?" };
   }
-  /* appraisal */
-  const a = ctx.appraisal, adoptReason = a && lowScore(a) && has(a.overall.just, /(not adopted|weren't adopted|were not adopted|didn't adopt|not implemented)/);
-  if (!history.length) {
-    if (adoptReason) return { reply: "I thought we agreed my analysis would be judged on quality, not adoption. How did that affect my rating?" };
-    if (a && a.overall.score != null && a.overall.score >= 90) return { reply: "Thank you, I appreciate it. What should I still work on next year?" };
-    return { reply: "Thanks, the deadline and communication points are fair. What development could help me with stakeholders?" };
-  }
-  return { reply: "That helps. Can we agree two concrete development steps for next year?" };
+  return appraisalTurn(history, ctx);
+}
+
+/* ---------- year-end appraisal discussion (scripted keyword rules) ---------- */
+const AP = {
+  label: /\b(you are|you're|you were|you've been)\s+(so |too |very |quite |really )?(defensive|difficult|arrogant|stubborn|lazy|negative|rigid|hard to work with)|attitude problem|bad attitude/,
+  vague: /(improve your attitude|communicate better|need to improve|do better|be better|work on yourself|step up)/,
+  blame: /(sales (decline|drop|fell|went down|results)|revenue (drop|decline|fell)|lost (deals|customers)|your fault|because of you|you caused|recommendations? (were|was)n'?t? (adopted|used)|not adopted)/,
+  situation: /(valtora|nadine|meeting|june|august|october|monthly report|reports? (was|were) late|stakeholder feedback|3\.25|consultation|contract-length|12-month|second half)/,
+  behavior: /\byou (spent|focused|defended|explained|submitted|sent|delivered|identified|found|presented|shared|did not|didn't|kept|raised|missed)|when (nadine|she|they|sales) asked/,
+  impact: /(made it harder|which meant|as a result|that meant|affected|delayed|couldn't plan|helped (the business|us|sales|the team)|so (sales|the team|operations))/,
+  intent: /(what were you|what was (going through|your|on your)|how did you see|what made it|what's your view|how do you see|what do you think|help me understand|what was behind)/,
+  ack: /(that's fair|that is fair|valid|i understand|makes sense|good point|i hear you|that concern was)/,
+  ignore: /(doesn't matter|does not matter|irrelevant|not the point|regardless|anyway,|let's move on)/,
+  strength: /(strong|valuable|great|excellent|well done|appreciate|quality of your analysis|accurate|important finding)/,
+  gap: /(late|deadline|escalat|stakeholder feedback|practical options|proposed action|consult|3\.25|follow-up actions)/,
+  devAction: /(escalat|options|one-page|summary|consult|joint session|format|template|share an initial|early)/,
+  devSupport: /\b(i will|i'll|i can|my support|coach|coaching|together|with you)\b/,
+  devFollow: /(review|check-in|checkpoint|monthly|every (two|2) weeks|quarterly|follow up|follow-up)/,
+  devAny: /(next year|going forward|improve|develop)/,
+  wrap: /(that's all|let's wrap|we're done|we are done|sign off|let's close|that is all|nothing else|thanks, bye|good luck next year)/,
+  jan: /(january|we agreed|the plan we)/, mid: /(mid-year|july|summer|coaching|check-ins?)/
+};
+function readAppraisalTalk(history) {
+  const mgr = history.filter(m => m.from === "manager").map(m => lc(m.text)), all = mgr.join("\n");
+  const any = (rx) => rx.test(all);
+  const intentIdx = mgr.findIndex(t => AP.intent.test(t));
+  const dev = mgr.some(t => AP.devAction.test(t) && AP.devSupport.test(t) && AP.devFollow.test(t)) ? "specific" : (any(AP.devAction) || any(AP.devAny)) ? "vague" : "none";
+  const f = { situation: any(AP.situation), behavior: any(AP.behavior), impact: any(AP.impact), strength: any(AP.strength), gap: any(AP.gap),
+    intentAsked: intentIdx >= 0, intentHeard: intentIdx >= 0 && mgr.slice(intentIdx + 1).some(t => AP.ack.test(t)), ignored: any(AP.ignore),
+    label: any(AP.label), blame: any(AP.blame), dev, all, mgr };
+  f.complete = f.situation && f.behavior && f.strength && f.gap && f.intentAsked && dev === "specific" && !f.label && !f.blame;
+  return f;
+}
+function appraisalTurn(history, ctx) {
+  const a = ctx.appraisal, f = readAppraisalTalk(history), last = f.mgr[f.mgr.length - 1] || "", logs = ctx.priorLogs || {};
+  const said = (log, rx) => (log || []).some(m => m.from === "manager" && rx.test(lc(m.text)));
+  const r = (reply) => ({ reply, complete: f.complete });
+  if (AP.label.test(last)) return r("That feels like a judgement about me rather than something I did. What specifically do you mean?");
+  if (AP.blame.test(last)) return r("Sales results depend on much more than my reports, and adoption wasn't my decision. I'm accountable for the analysis and how I shared it. Which part do you mean?");
+  if (lowScore(a) && /(rating|score|result|appraisal)/.test(last) && f.mgr.length <= 2) return r("I'm not sure I understand that result. Could you explain which results led to it?");
+  if (AP.ignore.test(last)) return r("I'd still like you to consider what I said about the pricing risk.");
+  if (f.complete && (AP.wrap.test(last) || AP.devFollow.test(last))) return r("Thanks for going through this with me. I'll work on raising deadline conflicts earlier and bringing practical options, and I appreciate that the analysis was recognised.");
+  if (AP.wrap.test(last)) return r("Before we finish, I'm not sure what we've agreed for next year.");
+  if (AP.jan.test(last)) return r(said(logs.alignment, /(quality|actionab|relevan)/) ? "Yes, we agreed my recommendations would be judged on their quality, not on whether they were adopted." : "I remember we discussed the plan in January, but I don't recall agreeing anything specific about that.");
+  if (AP.mid.test(last)) return r(said(logs.diagnostic, /(coach|check-in|weekly|session|follow)/) ? (ctx.pathway === "A" ? "Yes, the coaching sessions and monthly check-ins helped." : "We talked about support in July, but I don't think much happened after the summer.") : "I don't remember us agreeing any follow-up in July.");
+  if (AP.intent.test(last)) return r("I was worried we'd make a rushed pricing decision. I wanted everyone to see the risks first.");
+  if (AP.devAction.test(last) && AP.devSupport.test(last) && AP.devFollow.test(last)) return r("That works for me. Let's look at it again at the first check-in.");
+  if (AP.vague.test(last) && !AP.situation.test(last) && !/(next year|going forward|from now on)/.test(last)) return r("Could you give me an example of what you mean?");
+  if (AP.devAction.test(last) || (AP.devAny.test(last) && !AP.situation.test(last))) return r("What would that look like in practice, and how would we know it's working?");
+  if (AP.situation.test(last) && AP.behavior.test(last)) return r("I was making sure the analysis held up. But I can see I could have brought practical options as well.");
+  if (AP.strength.test(last) && !AP.gap.test(last)) return r("Thank you, I appreciate that. Is there anything I should still work on?");
+  if (/(how would you|what would you do|differently|next time)/.test(last)) return r("I could bring two or three options instead of only the analysis, and flag deadline clashes earlier.");
+  return r("Okay. Where would you like to start?");
+}
+function sbiiMock(inp) {
+  const f = readAppraisalTalk(inp.history), first = (rx) => firstSentence(inp.history.filter(m => m.from === "manager").map(m => m.text).join("\n"), rx);
+  const harsh = f.label || f.blame;
+  const c = (id, score, rx, reason) => ({ id, score, evidence: score && rx ? [first(rx)].filter(Boolean) : [], reason: `[Scripted test assessment] ${reason}` });
+  return {
+    criteria: [
+      c("situation", f.situation ? 2 : /(this year|sometimes|generally|in general)/.test(f.all) ? 1 : 0, AP.situation, "Situation."),
+      c("behavior", f.label ? 0 : f.behavior ? 2 : f.gap ? 1 : 0, AP.behavior, "Behaviour."),
+      c("impact", f.blame ? 0 : f.impact ? 2 : f.gap ? 1 : 0, AP.impact, "Impact."),
+      c("intent", f.intentAsked && f.intentHeard && !f.ignored ? 2 : f.intentAsked ? 1 : 0, AP.intent, "Intent."),
+      c("fairness", harsh ? 0 : f.strength && f.gap ? 2 : 1, AP.strength, "Fairness."),
+      c("development", f.dev === "specific" ? 2 : f.dev === "vague" ? 1 : 0, AP.devFollow, "Development.")
+    ],
+    classification: { personality_labels: f.label, unsupported_blame: f.blame, praise_only: f.strength && !f.gap, ignored_explanation: f.ignored },
+    feedback: { summary: "[Scripted test assessment]", strengths: "", improve: "" }
+  };
 }
 
 /* ---------- assessments ---------- */
@@ -65,6 +128,7 @@ function crit(id, score, evidence, reason) {
   return { id, score: Math.min(d.max, Math.max(0, score)), evidence: evidence ? [evidence] : [], reason: `[Scripted test assessment] ${reason}`, confidence: "low", missing: "" };
 }
 function assess(task, inp) {
+  if (task === "sbii") return sbiiMock(inp);
   if (task === "plan") {
     const o = inp.plan.objectives, cs = inp.plan.comps;
     const measurable = o.filter(x => /\d/.test(x.kpi)).length / Math.max(1, o.length);
@@ -131,13 +195,12 @@ function assess(task, inp) {
   /* round3 */
   const a = inp.appraisal, j = a.overall.just, allJ = [j, ...a.what.flatMap(w => w.kpis.map(k => k.evidence)), ...a.how.map(h => h.just)].join("\n");
   const adopt = lowScore(a) && /(not adopted|weren't adopted|were not adopted|not implemented)/i.test(allJ), rich = allJ.length > 200;
-  const conv = inp.history.filter(m => m.from === "manager").map(m => m.text).join("\n");
   return {
     criteria: [
       crit("r3_what_grounded", rich ? 3 : 1, firstSentence(allJ, /\d/), "Grounding."), crit("r3_what_limits", /(limitation|not available|no data|missing)/i.test(allJ) ? 2 : 0, null, "Limitations."), crit("r3_what_balance", adopt ? 0 : 2, null, "Balance."), crit("r3_what_overall", 2, null, "Overall WHAT."),
       crit("r3_how_behaviour", rich ? 2 : 1, null, "Behaviour."), crit("r3_how_levels", 1, null, "Levels."), crit("r3_how_balance", adopt ? 0 : 1, null, "Balance."),
       crit("r3_overall_defensible", adopt ? 0 : 2, null, "Defensible."), crit("r3_overall_justify", rich ? 2 : 1, null, "Justification."), crit("r3_overall_specific", a.overall.dev.length > 20 ? 1 : 0, null, "Specific."),
-      crit("r3_conv_explain", conv.length > 40 ? 2 : 0, null, "Explains."), crit("r3_conv_listen", conv.length > 0 ? 1 : 0, null, "Listens."), crit("r3_conv_forward", /(develop|next year|coaching)/i.test(conv) ? 1 : 0, null, "Forward."), crit("r3_conv_bias", inp.reflection.length > 30 ? 1 : 0, null, "Reflection.")
+      crit("r3_conv_bias", inp.reflection.length > 30 ? 1 : 0, null, "Reflection.")
     ],
     classification: { appraisal: adopt ? "unfair" : rich ? "fair" : "mixed" }, feedback: { summary: "[Scripted test assessment]" }
   };

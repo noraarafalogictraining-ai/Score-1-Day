@@ -117,6 +117,32 @@ The Final Appraisal page is a working prototype with three tabs and three live s
 
 **Prototype limitation — the January plan has one free-text KPI per objective.** The prototype reads that text and splits it into separate KPIs where it contains several measurable targets (e.g. "95% on time and 95% passing review" → 2 KPIs), then reads the number as the target. It cannot understand time units, so "one consultation per quarter" is read as a target of 1, and an annual actual of 4 shows as 400% (capped at 120%). A structured January form (KPI, target, unit, direction per line) would remove this guesswork; it was deliberately not changed in this prototype.
 
+## Final appraisal discussion with Omar (SBII, experimental)
+
+**Trigger.** Submitting the final appraisal adds one fixed, neutral message from Omar to the same chat thread ("Hi, I've seen my appraisal. Do you have a few minutes to go through it together?"). The chat bubble shows a red **1**; the chat does not open by itself and the participant stays on the appraisal page. The opening is added once only (safe on refresh and on revised submissions).
+
+**What Omar's AI sees** (`api/_lib/prompts.js` → `omarSystem("appraisal")`): the submitted appraisal (each objective's weight and achievement; each KPI's target, measure type, actual, achievement and evidence; each competency's expected level, standard, observed behaviour, 1–5 rating and justification; WHAT %, HOW %, overall score out of 100, justification, strengths and development priorities), the full January and mid-year chat transcripts, the manager's Evidence Log entries, the agreed plan, the year-end evidence for the pathway reached, and Omar's hidden perspective and reactions (`api/_lib/scenario_omar.js` → `APPRAISAL`). The prompt never names SBII.
+
+**Each reply** (`api/converse.js`): a short structured reading of the manager's messages (vague feedback, personality labels, unsupported blame, ignored explanation, praise only, vague next steps, wrapping up; and, for the whole conversation, whether the appraisal, specific feedback, strengths and gaps, Omar's view and a specific development agreement have been covered). Code — not the AI — then picks Omar's stance and decides completion.
+
+**Completion.** "Appraisal Discussion Completed" appears (small status in the chat and on the appraisal page) only when all of these are true: the appraisal was discussed; feedback named a specific situation and observable behaviour; a strength and a documented gap were both addressed; Omar's view was asked for and responded to; and a **specific** development agreement was reached (what to improve, an action, the manager's support and a review point) — with no personal labels or unsupported blame in the latest message. The participant can still end the discussion earlier (a second click confirms); it is then recorded as **not completed** and Omar is never made to agree.
+
+**SBII assessment (behind the scenes, 12 points).** When the discussion is closed, `/api/assess` task `sbii` scores Situation, Behavior, Impact, Intent, Fairness and Development 0–2 each from the whole conversation (meaning, not keywords; naming the model earns nothing). A score of 2 needs a verbatim quote from the manager's own messages, otherwise it is reduced to 1; no manager messages = 0. Results are shown only in the feedback report after the year is complete, never in the chat.
+
+**No double counting in the Learning Score.** The 100-point total is unchanged. The former year-end conversation criteria (explain 2 + listen 1 + development focus 1 = 4 points) are replaced by one derived criterion, `r3_conv_feedback` (max 4) = round(SBII total × 4 ÷ 12). The written-appraisal assessment no longer scores the conversation.
+
+**Employee Pulse** (deterministic rules in `api/_lib/rubrics.js` → `RULES.feedbackEvents`; values in `src/pilot.js`, provisional):
+
+| Event | Rule | Change | Slot |
+|---|---|---|---|
+| Fair feedback and genuine listening | Fairness 2 and Intent ≥ 1, no blame/labels | Trust +4 | feedback |
+| Blaming or personal feedback | Personality labels, unsupported blame, or Fairness 0 | Trust −6, Development −2 | feedback |
+| Clear development agreement | Development 2 and the discussion was completed (and not blaming) | Development +5 | dev_agreement |
+
+These slots are separate from the written appraisal's slot (fair/unfair appraisal), so the appraisal and the conversation are each counted once; KPI results are never changed by the conversation. Vague praise without improvement actions gives no Development increase.
+
+**Pilot assumptions.** The reference year-end figures in the Phase 4 brief (9 of 12 on time, 11 of 12 passed QA, 5 recommendations, 3 with an action, H2 feedback 3.25, one consultation without actions, no coaching after July) are exactly Pathway C; Pathways A and B keep their own datasets. The 12 → 4 mapping and the Pulse values above are provisional and need sign-off.
+
 ## The three-round experience (facilitator view of the structure)
 
 | Round | What happens | Facilitator |
@@ -173,7 +199,7 @@ Model: `claude-opus-5-5` (change with `SCORE_MODEL`). Omar replies use low effor
 | 3 (25) | WHAT evaluation | 10 |
 | | HOW evaluation | 5 |
 | | Overall rating and justification | 5 |
-| | Appraisal conversation and bias reflection | 5 |
+| | Appraisal feedback conversation (SBII, mapped 12 → 4) and bias reflection | 5 |
 
 Change the `max` values in `api/_lib/rubrics.js`. The Learning Score is separate from the Employee Pulse.
 

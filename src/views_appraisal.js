@@ -115,8 +115,9 @@ function apSummary(r, c, ed) {
 function appraisalStatusNotice(r) {
   if (r.r3.done) return `<div class="notice good">${icon("check", "i-sm")}<span>The appraisal is final and recorded.</span></div>`;
   if (r.r3.conv.ended) return `<div class="notice">${icon("info", "i-sm")}<span class="grow">Appraisal shared with Omar.</span><button class="btn sm primary" data-act="go" data-go="reflection">Bias reflection</button></div>`;
-  const replied = r.r3.conv.log.some(m => m.from === "employee"), answered = managerCount(r.r3.conv.log) >= CHAT_LIMITS.appraisalMin;
-  return `<div class="notice">${icon("chat", "i-sm")}<span class="grow">${replied ? "Omar has replied about the appraisal. Discuss it with him in the chat." : "Appraisal shared with Omar. Waiting for his reply…"}</span>${replied ? `<button class="btn sm" data-act="openChat">Open chat</button>` : ""}${answered ? `<button class="btn sm primary" data-act="appraisalContinue" id="appraisal-continue">Continue to bias reflection</button>` : ""}</div>`;
+  const c = r.r3.conv, answered = managerCount(c.log) >= CHAT_LIMITS.appraisalMin;
+  if (UI.endConfirm && !c.completed) return `<div class="notice warn">${icon("alert", "i-sm")}<span class="grow">You and Omar haven't agreed next steps yet. End the discussion anyway? It will be recorded as not completed.</span><button class="btn sm" data-act="endCancel">Keep talking</button><button class="btn sm primary" data-act="appraisalContinue" id="appraisal-end-confirm">End discussion</button></div>`;
+  return `<div class="notice ${c.completed ? "good" : ""}">${icon(c.completed ? "check" : "chat", "i-sm")}<span class="grow">${c.completed ? "Appraisal Discussion Completed." : answered ? "Appraisal shared with Omar. Continue the discussion in the chat." : "Appraisal shared with Omar."}</span>${c.completed ? "" : `<button class="btn sm" data-act="openChat">Open chat</button>`}${answered ? `<button class="btn sm primary" data-act="appraisalContinue" id="appraisal-continue">${c.completed ? "Continue to bias reflection" : "End discussion"}</button>` : ""}</div>`;
 }
 DRAWERS.evidence = function (d) {
   const r = rec(), list = r.evidence.filter(e => d.id === "all" || e.link === d.id);
@@ -142,6 +143,7 @@ VIEWS.reflection = function () {
     </div></div>
     <div class="card"><div class="card-h"><h3>Your reflection</h3></div><div class="card-b stack">
       ${r.r3.done ? `<div class="small t2" style="white-space:pre-line">${esc(b.reflection)}</div>` : `<textarea class="ta ${b.tried && b.reflection.trim().length < 15 ? "err" : ""}" rows="4" id="${P("r3", "bias", "reflection")}" ${bind(P("r3", "bias", "reflection"))} placeholder="Which biases could have influenced your ratings? What did you check, and what, if anything, would you change?">${esc(b.reflection)}</textarea>`}
+      ${r.r3.sbii.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.sbii.error)}</span>${aiReady() ? `<button class="btn sm" data-act="sbiiRetry">Retry</button>` : ""}</div>` : ""}
       ${r.r3.final.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r3.final.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round3">Retry assessment</button>` : ""}</div>` : ""}
       ${r.r3.done ? `<div class="row between"><span class="small t2">${icon("check", "i-sm")} Appraisal final.</span><button class="btn primary sm" data-act="go" data-go="review">View feedback report</button></div>` : `<div class="row between"><button class="btn" data-act="reconsider" id="reconsider">${icon("edit", "i-sm")} Reconsider the appraisal</button><button class="btn primary" data-act="finalize" id="finalize" ${busy ? "disabled" : ""}>${UI.busy === "round3" ? "Assessing…" : "Finalise appraisal"}</button></div>`}
     </div></div>

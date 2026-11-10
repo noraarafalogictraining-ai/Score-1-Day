@@ -66,4 +66,6 @@ function handler(fn, methods = ["POST"]) {
     }
   };
 }
-module.exports = { LIMITS, BadInput, str, int, arr, cleanHistory, cleanPlan, cleanEvidence, cleanAppraisal, pathwayOf, handler, send };
+/* Prior conversations sent with the year-end appraisal discussion */
+function cleanPriorLogs(p) { p = p || {}; return { alignment: cleanHistory(p.alignment), diagnostic: cleanHistory(p.diagnostic) }; }
+module.exports = { cleanPriorLogs, LIMITS, BadInput, str, int, arr, cleanHistory, cleanPlan, cleanEvidence, cleanAppraisal, pathwayOf, handler, send };

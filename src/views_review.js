@@ -40,8 +40,18 @@ function reviewRound(r, sum, n) {
     ${retryFor(n, r)}
     ${n === 1 && fb ? planFeedback(r, fb) : ""}
     ${n !== 1 && fb && fb.summary ? `<div class="card pad stack-sm"><h4>Summary</h4><p class="small t2">${esc(fb.summary)}</p>${fb.overlooked ? `<p class="small t2"><b>Overlooked:</b> ${esc(fb.overlooked)}</p>` : ""}</div>` : ""}
+    ${n === 3 ? sbiiDebrief(r) : ""}
     ${rr.groups.map(g => `<div class="card"><div class="card-h"><h3>${esc(g.label)}</h3><b class="num">${g.score}/${g.max}</b></div><div class="card-b stack">${g.crit.map(critRow).join("")}</div></div>`).join("")}
   </div>`;
+}
+/* Appraisal discussion debrief: shown only in the report after the year is complete, never in the chat */
+function sbiiDebrief(r) {
+  const s = r.r3.sbii.result; if (!s) return "";
+  return `<div class="card"><div class="card-h"><h3>Your appraisal discussion with Omar</h3><b class="num">${s.total}/${s.max}</b></div><div class="card-b stack">
+    <p class="xs muted">${r.r3.conv.outcome === "incomplete" ? "The discussion was closed before next steps were agreed." : "The discussion reached an agreement."} This 12-point check is converted to ${s.points} of the 4 conversation points in the year-end score.</p>
+    ${s.criteria.map(c => `<div class="crit-row"><div class="row between nowrap"><b class="small">${esc(c.label)}</b><b class="num small">${c.score}/2</b></div><p class="small t2">${esc(c.reason)}</p>${c.evidence.length ? `<div class="quotes">${c.evidence.map(q => `<q>${esc(q)}</q>`).join("")}</div>` : ""}</div>`).join("")}
+    ${s.feedback.strengths ? `<p class="small t2"><b>What worked:</b> ${esc(s.feedback.strengths)}</p>` : ""}${s.feedback.improve ? `<p class="small t2"><b>To improve:</b> ${esc(s.feedback.improve)}</p>` : ""}
+  </div></div>`;
 }
 function critRow(c) {
   const a = c.a;
