@@ -20,6 +20,15 @@ const EVIDENCE_MEASURES = [
   { id: "intelligence", label: "Competitive intelligence findings", rx: /(competitor|competitive|market) (analys|intelligence|insight|brief|update|study|finding)/, refs: ["EV-CI-01", "Register 5"], units: [], uncounted: true },
   { id: "business", label: "Department business results", rx: /(win rate|revenue|sales (growth|target|volume|result)|pipeline|opportunit|objection|market share|retention|new customers|conversion|profit|margin)/, refs: ["EV-BIZ-01", "EV-BIZ-02", "EV-BIZ-03"], units: [], business: "This is a department result; the records won't isolate Omar's individual contribution." }
 ];
+const EVIDENCE_VERSION = "2027.2";   /* the year-end record version this build expects (older saves reload it) */
+/* Measure families, used to spot one KPI that combines two separate measures under a single target */
+const MEASURE_FAMILY = { rep_escalate: "escalation", rep_late: "timeliness", rep_ontime: "timeliness", rep_quality: "quality", rec_adopt: "adoption", rec_action: "recommendations", feedback: "feedback", development: "development", consult: "consultations", intelligence: "intelligence", business: "business" };
+const FAMILY_LABEL = { escalation: "escalation", timeliness: "timeliness", quality: "quality review", adoption: "adoption", recommendations: "recommendations", feedback: "stakeholder feedback", development: "development activity", consultations: "consultations", intelligence: "competitive intelligence", business: "business results" };
+function measureFamilies(t) {
+  const fams = new Set(EVIDENCE_MEASURES.filter(m => MEASURE_FAMILY[m.id] && (m.id === "feedback" ? /(feedback|satisfaction|survey)/.test(t) : m.rx.test(t))).map(m => MEASURE_FAMILY[m.id]));
+  if (fams.has("escalation")) fams.delete("timeliness");     /* escalation KPIs are about deadlines by nature */
+  return [...fams];
+}
 const REF_LABEL = {
   "EV-REP-01": "Monthly reports scheduled", "EV-REP-02": "Reports submitted on time", "EV-REP-03": "Reporting deadlines missed", "EV-REP-04": "Quality review results", "EV-REP-05": "Escalation of deadline conflicts",
   "EV-REC-01": "Recommendations submitted", "EV-REC-02": "Recommendations with a proposed action", "EV-REC-03": "Management decisions on recommendations",
@@ -36,9 +45,11 @@ function matchKpi(k) {
   const t = String(k.name || "").toLowerCase();
   const m = EVIDENCE_MEASURES.find(x => x.rx.test(t)) || null;
   const unit = kpiUnitKind(k), period = kpiPeriod(t);
-  const out = { measure: m ? m.id : null, label: m ? m.label : "No matching record", refs: m ? m.refs : [], unit, period, dir: m && m.dir ? m.dir : k.dir, business: m ? (m.business || "") : "", status: "supported", reason: "", notes: [] };
-  const unavailable = (why) => Object.assign(out, { status: "unavailable", reason: why });
-  const clarify = (why) => Object.assign(out, { status: "clarify", reason: why });
+  const fams = measureFamilies(t);
+  const out = { measure: m ? m.id : null, label: m ? m.label : "No matching record", refs: m ? m.refs : [], unit, period, dir: m && m.dir ? m.dir : k.dir, business: m ? (m.business || "") : "", status: "supported", reason: "", notes: [], families: fams, compound: fams.length > 1, numericAllowed: true };
+  const unavailable = (why) => Object.assign(out, { status: "unavailable", reason: why, numericAllowed: false });
+  const clarify = (why, numeric = false) => Object.assign(out, { status: "clarify", reason: why, numericAllowed: numeric });
+  if (out.compound) return clarify(`This KPI combines ${fams.length} separate measures (${fams.map(f => FAMILY_LABEL[f]).join(", ")}) under one target. Consider splitting it into ${fams.length} KPIs, each with its own target.`);
   if (!m) return unavailable(k.target != null ? "The measure is clear, but the available records may not support this result." : "The available records may not support this measure.");
   if (m.id === "business") return unavailable(m.business);
   if (m.uncounted && k.target != null) return unavailable("Records won't count analyses or findings; consider a measure that will be recorded.");
@@ -55,7 +66,7 @@ function matchKpi(k) {
     return clarify("Check the unit of the target (count or percentage).");
   }
   if (m.id === "feedback" && unit === "scale" && !/\/5$/.test(k.unit)) return clarify("Stakeholder feedback is recorded on a 1–5 scale: state the target on that scale.");
-  if (m.max && unit === "count" && k.target > m.max) return clarify(`Only ${m.max} monthly reports are scheduled in the year: check the target.`);
+  if (m.max && unit === "count" && k.target > m.max) return clarify(`Only ${m.max} monthly reports are scheduled in the year: check the target.`, true);
   if (m.business) out.notes.push(m.business);
   if (m.standard && unit === "count") out.notes.push("Your KPI sets a standard each recommendation must meet: decide which records qualify.");
   if (m.id === "consult" && /(action|follow)/.test(t)) out.notes.push("Your KPI sets a standard (documented actions): decide which consultations qualify.");
@@ -74,5 +85,7 @@ function objectiveCoverage(o) {
   const ks = parseKpis(o.kpi).map(k => ({ k, c: kpiCoverageJanuary(k) }));
   const rank = { unavailable: 2, clarify: 1, supported: 0 };
   const worst = ks.reduce((w, x) => rank[x.c.status] > rank[w] ? x.c.status : w, "supported");
-  return { status: worst, label: COVERAGE_LABEL[worst], kpis: ks };
+  /* Two measurable targets in one KPI text: suggest splitting (the wording is never rewritten) */
+  const split = ks.length > 1 ? `This KPI contains ${ks.length} separate measures. Consider writing them as ${ks.length} KPIs so each has its own target and is clear to assess. It will be kept exactly as you wrote it.` : "";
+  return { status: worst, label: COVERAGE_LABEL[worst], kpis: ks, split };
 }

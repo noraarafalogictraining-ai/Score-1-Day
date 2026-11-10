@@ -10,6 +10,7 @@ const APPRAISAL_CONFIG = {
   howWeight: 40,           /* % of the overall score from HOW */
   kpiCap: null,            /* null = no cap: overachievement stays visible (approved) */
   manualMax: 200,          /* highest manager-assessed % accepted for a KPI under review */
+  basisMin: 20,            /* minimum length of the written measurement basis for a reviewed KPI */
   lowerIsBetter: "inverse",/* "inverse" = target ÷ actual × 100 when both > 0 (otherwise review); "review" = always manager review */
   howScale: 5              /* HOW achievement = average rating ÷ 5 × 100 (1 = 20% … 5 = 100%) */
 };
@@ -64,10 +65,14 @@ function kpiAchievement(k, entry) {
   const type = e.type || k.type, dir = e.dir || k.dir;
   const done = (raw, note) => { const capped = C.kpiCap != null && raw > C.kpiCap; const v = capped ? C.kpiCap : raw; return { raw: v, pct: round1(v), status: "ok", note: capped ? `Capped at ${C.kpiCap}% (calculated ${round1(raw)}%)` : note }; };
   if (type === "review") {
-    const v = parseActual(e.manual);
-    if (v == null) return { raw: null, pct: null, status: "blank", note: "Enter your assessed achievement %" };
-    if (Number.isNaN(v) || v < 0 || v > C.manualMax) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
-    return done(v, "Manager assessment (review)");
+    /* Manager review: included in the score only when RESOLVED = evidence reviewed + documented measurement basis + assessed % */
+    const v = parseActual(e.manual), miss = [];
+    if (e.manual != null && String(e.manual).trim() && (Number.isNaN(v) || v < 0 || v > C.manualMax)) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
+    if (!e.reviewed) miss.push("confirm the evidence review");
+    if (String(e.basis || "").trim().length < C.basisMin) miss.push("document the measurement basis");
+    if (v == null) miss.push("enter the assessed achievement %");
+    if (miss.length) return { raw: null, pct: null, status: "unresolved", note: `Unresolved: ${miss.join(", ")}` };
+    return done(v, "Manager review: resolved with a documented basis");
   }
   if (k.target == null || k.target === 0) return { raw: null, pct: null, status: "review", note: "No usable target: switch to manager review" };
   const a = parseActualU(e.actual);
@@ -90,7 +95,8 @@ function appraisalCalc(r = rec()) {
     const rows = kpis.map((k, i) => {
       const match = matchKpi(k), base = match.status === "supported" ? k : { ...k, type: "review", reason: match.reason || k.reason };
       if (match.dir !== base.dir) base.dir = match.dir;
-      return { k: base, i, e: entries[i] || {}, share: 100 / kpis.length, match, res: kpiAchievement(base, entries[i]) };
+      const raw = entries[i] || {}, e = match.numericAllowed ? raw : { ...raw, type: "review" };   /* unsupported KPIs can't be switched to a formula */
+      return { k: base, i, e, share: 100 / kpis.length, match, res: kpiAchievement(base, e) };
     });
     const done = rows.every(x => x.res.status === "ok");
     const achRaw = done ? rows.reduce((s, x) => s + x.res.raw, 0) / rows.length : null;
@@ -106,6 +112,7 @@ function appraisalCalc(r = rec()) {
   const howRaw = comps.length && rated.length === comps.length ? rated.reduce((s, x) => s + x.rating, 0) / rated.length / C.howScale * 100 : null;
   const overallRaw = whatRaw != null && howRaw != null ? whatRaw * C.whatWeight / 100 + howRaw * C.howWeight / 100 : null;
   const r1 = (x) => x == null ? null : round1(x);
-  return { objectives, totalWeight, weightOK, whatPct: r1(whatRaw), whatPartial, objDone: doneObjs.length, comps, howPct: r1(howRaw), rated: rated.length, overall: r1(overallRaw),
+  const unresolved = objectives.reduce((n, x) => n + x.rows.filter(y => y.res.status === "unresolved").length, 0);
+  return { objectives, unresolved, totalWeight, weightOK, whatPct: r1(whatRaw), whatPartial, objDone: doneObjs.length, comps, howPct: r1(howRaw), rated: rated.length, overall: r1(overallRaw),
     whatContrib: whatRaw == null ? null : round1(whatRaw * C.whatWeight / 100), howContrib: howRaw == null ? null : round1(howRaw * C.howWeight / 100) };
 }

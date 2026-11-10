@@ -125,12 +125,15 @@ The Final Appraisal page is a working prototype with three tabs and three live s
 
 **Summary records.** EV-REP-01…05 (12 scheduled; 9 of 12 on time = 75%; 3 missed = 25%; 11 of 12 passed QA = 91.7%; 0 of 3 conflicts escalated), EV-REC-01…03 (5 submitted; 3 of 5 with an action = 60%; 1 adopted, 1 under review, 3 not adopted = 20%, marked *business outcome*), EV-FB-01/02 (Q1 3.6 · Q2 3.4 · Q3 3.2 · Q4 3.3; H1 3.5, H2 3.25, year 3.375, quarters weighted equally; no respondent counts), EV-ENG-01/02 (1 structured consultation in H2, called by Youssef; 0 with documented actions), EV-CI-01 (12-month-contract condition; email; used by Sales in December), EV-DEV-01 (no formal coaching recorded after July), EV-BIZ-01…03 (department results).
 
-**New scenario content needing approval** (everything else is an established fact):
-1. Report deadline = first working day of each month; on-time reports submitted on the deadline day. Late dates follow from the established delays: June due Tue 1 Jun → Thu 3 Jun (2 days); August due Mon 2 Aug → Thu 5 Aug (3); October due Fri 1 Oct → Tue 5 Oct (2). The December report is due Wed 1 Dec, the day of the year-end update.
-2. The three missed deadlines are the three "deadline conflicts" with no advance escalation. (The old Pathway C text said "0 of 3 conflicts *after July*", which conflicts with June being one of them.)
-3. Recommendation dates, topics and findings for REC-01, 02, 04, 05, and which record has which status. REC-03 (Valtora pricing, June) is the adopted one, matching the September value-based decision. Decision owners are recorded as "Not documented".
-4. Engagement records: purpose of ENG-02 taken from Youssef's mid-year email; ENG-03 (September meeting with Nadine) comes from the former Pathway C behaviour note.
-5. Pulse: the "intervention" event for a strong mid-year plan is kept but relabelled, because the fixed record now shows no coaching after July for everyone. Please decide whether to keep it.
+**Scenario details (approved direction; record v2027.2):**
+1. **Business calendar** (one definition in `evidence_omar.js`): working days Monday–Friday; company holiday Fri 1 Jan 2027. Each monthly report covers one month and is due on the **first working day of the following month**. The 12 reports due in 2027 cover December 2026 – November 2027, and on-time reports are submitted on the deadline day. All dates are computed from this calendar, and the server re-counts the working days at start-up.
+   - **June report:** due Thu 1 Jul, submitted Mon 5 Jul (2 working days late). This is the "latest scheduled report" in Mariam's 6 July email and the late report on the mid-year dashboard.
+   - **August report:** due Wed 1 Sep, submitted Mon 6 Sep (3 working days late).
+   - **October report:** due Mon 1 Nov, submitted Wed 3 Nov (2 working days late). It also needed a major correction.
+2. **Late submissions and escalation:** 3 late submissions in the year, 2 of them after the July mid-year review (August, October). None was escalated in advance (0 of 3 in the year; 0 of 2 after mid-year). The record and Omar's AI context use the same wording.
+3. **Recommendations:** REC-03 (28 Jun, Valtora pricing response from the June competitor analysis) is the adopted one, matching the September value-based decision. It is explicitly separate from the July 12-month-contract finding (CI-02), which was shared by email and used by Sales only in December. REC-04 was changed to an unrelated topic (InsightIQ renewal usage evidence) to avoid confusion. Decision owners: "Not documented".
+4. **Engagement:** ENG-01 is the late-June Valtora meeting that Nadine's 5 July email refers to. ENG-02 is the July consultation Youssef called after his 5 July request for practical options, with no documented follow-up actions. ENG-03 is the September meeting with Nadine, which ended without agreed next steps.
+5. **Pulse:** there is no automatic December Development increase. Mid-year coaching still affects the Pulse in July (the existing *constructive* event). In December, Development rises only if the record contains documented follow-through (a development record marked `followThrough`); the 2027 record has none. A specific development agreement in the December discussion (+5 Development) still counts.
 
 **KPI → evidence matching** (`src/evidence_map.js`, deterministic, no AI): each KPI from the January text is matched by the first rule that fits (escalation → late reports → quality → on-time → report count → adoption → recommendations with action → recommendation count → feedback → development → consultations → competitive intelligence → department results). The result records the measure, relevant evidence IDs, unit (count / % / 1–5 scale), period (year / quarter / month / half) and direction. The file holds definitions and record IDs only, never values.
 
@@ -140,7 +143,11 @@ The Final Appraisal page is a working prototype with three tabs and three live s
 | Needs clarification | No target, a milestone, two figures, a zero target, % for a 1–5 feedback score, or more than 12 monthly reports |
 | Evidence unavailable | Department results (win rate, revenue, pipeline…), measures that are not recorded, or counts of analyses/insights |
 
-In **January** the check is advisory (it never blocks submission) and its wording never mentions results or events. In **December** each KPI shows its coverage, links to the relevant records (opening the right section) and notes on standards and periods (e.g. "Your target is per quarter", "Consultation records cover July – December only"). Actual results are **never pre-filled**. A KPI that isn't Supported starts in manager review: the manager enters an assessed % and must justify it.
+In **January** the check is advisory (it never blocks submission) and its wording never mentions results or events. In **December** each KPI shows its coverage, links to the relevant records (opening the right section) and notes on standards and periods (e.g. "Your target is per quarter", "Consultation records cover July – December only"). Actual results are **never pre-filled**.
+
+**Unresolved KPIs.** A KPI that isn't Supported (or that the manager moves to manager review) is flagged **"Unresolved: not included in the score"**. It counts only after three things: the manager ticks *"I have reviewed the relevant evidence records"*, writes a **measurement basis** (at least 20 characters: what was counted, against what, and why it's a fair reading of the January KPI), and enters the assessed %. Until then WHAT and the overall score stay "—" and submission is blocked with a clear message. KPIs marked *Evidence unavailable*, and clarifications other than "more than 12 reports", cannot be switched to a formula. The basis is passed to Omar's AI and the assessors.
+
+**Compound KPIs.** If a January KPI contains two targets ("95% on time and 95% passing review"), January shows a *Suggestion* to write them as separate KPIs; at year-end they are assessed as separate KPIs with equal shares. If one KPI combines two measures under a single target ("95% of reports on time and without major corrections"), it is marked *Needs clarification* with the same suggestion. The participant's wording is never changed.
 
 **Scoring** (`src/appraisal_calc.js`): KPI = actual ÷ target × 100. Lower is better = target ÷ actual × 100, only when both are above 0 (otherwise manager review). **No cap.** The actual must use the target's unit: a % target needs a % sign, a 1–5 target must stay at or below 5, and a count target rejects %. Objective = equal-share average of its KPIs (no subweights exist in the January plan). WHAT = Σ objective × weight; it is not calculated if the weights don't total 100% (no silent rescaling). HOW = average rating × 20. Overall = WHAT × 60% + HOW × 40%; it can exceed 100. Values stay unrounded until display. Example with the same evidence (9 of 12 on time): a target of 10 reports → 90%; a target of 90% (actual 75%) → 83.3%; a target of 12 reports → 75%.
 
@@ -243,7 +250,7 @@ Baseline: Performance 80, Trust 60, Development 55 (fictional). Each event belon
 | Mid-year business disruption | Round 2 released | −5 | 0 | 0 |
 | Constructive diagnosis and coaching | not blaming, constructive, coaching ≥ 9/15 | 0 | +5 | +4 |
 | Punitive or blaming conversation | blaming | 0 | −9 | −4 |
-| Constructive mid-year development plan (year-end effect) | pathway A, when the year-end record is released | +3 | +3 | +8 |
+| Documented development follow-through | only if the year-end record documents follow-through (none in 2027) | +2 | +2 | +6 |
 | Unfair final appraisal | appraisal assessed "unfair" | 0 | −10 | −4 |
 | Fair, evidence-based appraisal | assessed "fair" | 0 | +5 | +4 |
 

@@ -164,7 +164,7 @@ function evidencePayload(r = rec()) { return r.evidence.map(e => ({ period: e.pe
 function appraisalPayload(r = rec()) {
   const a = r.r3.appraisal, c = appraisalCalc(r);
   return {
-    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? (y.e.manual ? `manager-assessed ${y.e.manual}%` : "") : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "", matched: `${y.match.label} (${COVERAGE_LABEL[y.match.status]})` })) })),
+    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? (y.e.manual ? `manager-assessed ${y.e.manual}%${y.e.basis ? `; basis: ${String(y.e.basis).slice(0, 400)}` : ""}${y.res.status === "unresolved" ? " (unresolved)" : ""}` : "") : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "", matched: `${y.match.label} (${COVERAGE_LABEL[y.match.status]})` })) })),
     how: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "", observed: (a.how[c.id] || {}).observed || "", rating: (a.how[c.id] || {}).rating || null, just: (a.how[c.id] || {}).just || "" })),
     overall: { whatPct: c.whatPct, howPct: c.howPct, score: c.overall, just: a.overall.just, strengths: a.overall.strengths, dev: a.overall.dev }
   };
@@ -185,6 +185,7 @@ function appraisalValidation(r = rec()) {
     const tag = `Objective ${oi + 1}${x.rows.length > 1 ? `, KPI ${y.i + 1}` : ""}`;
     if (y.res.status === "blank") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
     if (y.res.status === "invalid") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
+    if (y.res.status === "unresolved") errors.push(`${tag}: unresolved KPI, not yet in the score (${y.res.note.replace(/^Unresolved: /, "")}).`);
     if (y.res.status === "review") errors.push(`${tag}: ${y.res.note.charAt(0).toLowerCase() + y.res.note.slice(1)}.`);
     if (!String(y.e.evidence || "").trim()) errors.push(`${tag}: add the supporting evidence.`);
   }));

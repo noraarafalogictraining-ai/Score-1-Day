@@ -24,8 +24,8 @@ function yearEndBody(d, r = rec(), openSec = null) {
     <div class="ev-head"><div><div class="eyebrow">NextWave · Human Resources</div><b>${esc(d.title)}</b></div><span class="xs muted">As of ${esc(d.asOf)} · Record v${esc(d.version)}</span></div>
     ${sec("results", "1. Performance Results", "Reporting and recommendations", `
       ${regTable(SUM_HEAD, sumRows(d, ["Reporting", "Recommendations"]))}
-      <h4>Register 1 · Monthly reporting</h4>
-      ${regTable(["Month", "Report ID", "Deadline", "Submitted", "Timeliness", "Quality review", "Revision", "Advance escalation", "Source"], R.reporting.map(x => [esc(x.month), `<span class="ev-id">${esc(x.id)}</span>`, esc(x.due), esc(x.submitted), x.timeliness === "On time" ? esc(x.timeliness) : `<b class="neg">${esc(x.timeliness)}</b>`, x.quality.startsWith("Passed") ? esc(x.quality) : `<b class="neg">${esc(x.quality)}</b>`, esc(x.revision), esc(x.escalation), `<span class="xs t2">${esc(x.source)}</span>`]))}
+      <h4>Register 1 · Monthly reporting</h4><p class="xs muted">${d.calendar ? `Business calendar: ${esc(d.calendar.workingDays)} working days; holiday Fri 1 Jan 2027. ${esc(d.calendar.deadlineRule)}.` : ""}</p>
+      ${regTable(["Report for", "Report ID", "Deadline", "Submitted", "Timeliness", "Quality review", "Revision", "Advance escalation", "Source"], R.reporting.map(x => [esc(x.month), `<span class="ev-id">${esc(x.id)}</span>`, esc(x.due), esc(x.submitted), x.timeliness === "On time" ? esc(x.timeliness) : `<b class="neg">${esc(x.timeliness)}</b>`, x.quality.startsWith("Passed") ? esc(x.quality) : `<b class="neg">${esc(x.quality)}</b>`, esc(x.revision), esc(x.escalation), `<span class="xs t2">${esc(x.source)}</span>`]))}
       <h4>Register 2 · Commercial recommendations</h4>
       ${regTable(["ID", "Date", "Topic", "Finding", "Proposed action", "Decision status", "Decision owner", "Evidence"], R.recommendations.map(x => [`<span class="ev-id">${esc(x.id)}</span>`, esc(x.date), esc(x.topic), esc(x.finding), esc(x.action), esc(x.status), esc(x.owner), `<span class="xs t2">${esc(x.ref)}</span>`]))}
       <p class="xs muted">Decision status records management's decision on each recommendation.</p>`)}
@@ -71,7 +71,7 @@ VIEWS.appraisal = function () {
   const ed = apEditable(r), c = appraisalCalc(r), C = APPRAISAL_CONFIG, tab = ["how", "summary"].includes(UI.apTab) ? UI.apTab : "what";
   const pct = (v) => v == null ? "—" : `${v}%`;
   const cards = `<div class="ap-summary">
-    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} points (weight ${C.whatWeight}%)` : !c.weightOK && c.objectives.length ? `Weights total ${c.totalWeight}%, not 100%` : `${c.objDone} of ${c.objectives.length} objectives assessed`}</span></div>
+    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} points (weight ${C.whatWeight}%)` : !c.weightOK && c.objectives.length ? `Weights total ${c.totalWeight}%, not 100%` : `${c.objDone} of ${c.objectives.length} objectives assessed${c.unresolved ? ` · ${plural(c.unresolved, "KPI", "KPIs")} unresolved` : ""}`}</span></div>
     <div class="ap-sc how"><span class="xs">HOW Achievement</span><b class="num">${pct(c.howPct)}</b><span class="xs">${c.howPct != null ? `Contributes ${c.howContrib} points (weight ${C.howWeight}%)` : `${c.rated} of ${c.comps.length} competencies rated`}</span></div>
     <div class="ap-sc overall"><span class="xs">Overall Performance Score</span><b class="num">${c.overall != null ? c.overall + "%" : "—"}</b><span class="xs">WHAT ${C.whatWeight}% · HOW ${C.howWeight}%</span></div>
   </div>`;
@@ -102,19 +102,23 @@ function apWhat(r, c, ed) {
 function kpiRow(y, base, ed) {
   const k = y.k, e = y.e, p = `${base}.${y.i}`, type = e.type || k.type, dir = e.dir || k.dir, res = y.res;
   const mode = type === "review" ? "review" : dir;
-  const sel = ed ? `<select class="sel sm" data-kpi-mode="${p}" aria-label="How this KPI is measured">${[["higher", "Higher is better"], ["lower", "Lower is better"], ["review", "Manager review"]].map(([v, l]) => `<option value="${v}" ${mode === v ? "selected" : ""} ${v !== "review" && k.target == null ? "disabled" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${mode === "review" ? "Manager review" : mode === "lower" ? "Lower is better" : "Higher is better"}</span>`;
+  const sel = ed ? `<select class="sel sm" data-kpi-mode="${p}" aria-label="How this KPI is measured">${[["higher", "Higher is better"], ["lower", "Lower is better"], ["review", "Manager review"]].map(([v, l]) => `<option value="${v}" ${mode === v ? "selected" : ""} ${v !== "review" && (k.target == null || !y.match.numericAllowed) ? "disabled" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${mode === "review" ? "Manager review" : mode === "lower" ? "Lower is better" : "Higher is better"}</span>`;
   const inputErr = res.status === "invalid" ? "err" : "";
   return `<div class="kpi-item ${type === "review" ? "flagged" : ""}">
     <div class="kpi-item-h"><span class="kpi-num">KPI ${y.i + 1}</span><span class="grow small">${esc(k.name)}</span>${y.share < 100 ? `<span class="xs muted">${Math.round(y.share * 10) / 10}% of objective</span>` : ""}</div>
     <div class="kpi-match"><span class="cov cov-${y.match.status}">${COVERAGE_LABEL[y.match.status]}</span><span class="xs t2">Relevant evidence: ${y.match.refs.length ? y.match.refs.map(ref => `<button class="ev-ref" data-act="evRef" data-ref="${ref}">${esc(ref)} · ${esc(REF_LABEL[ref] || "")}</button>`).join(" ") : "none identified"}</span></div>
     ${y.match.notes.length ? `<div class="xs t2 kpi-notes">${y.match.notes.map(n => `<div>${icon("info", "i-xs")} ${esc(n)}</div>`).join("")}</div>` : ""}
-    ${type === "review" ? `<div class="kpi-flag">${icon("alert", "i-xs")} Requires review: ${esc(k.reason || "measured by manager judgment")} Enter your assessed % and justify it with evidence.</div>` : ""}
+    ${type === "review" ? `<div class="kpi-flag ${res.status === "ok" ? "resolved" : ""}">${icon(res.status === "ok" ? "check" : "alert", "i-xs")} <span><b>${res.status === "ok" ? "Resolved by manager review" : "Unresolved: not included in the score"}</b> · ${esc(k.reason || "Measured by manager judgment.")}${y.match.numericAllowed ? "" : " A formula can't be applied to this KPI."}</span></div>` : ""}
     <div class="kpi-grid">
       <div class="kg"><span class="kg-l">Target</span><b class="kg-target">${esc(fmtTarget(k))}</b><span class="xs muted">From January · locked</span></div>
       <div class="kg"><span class="kg-l">${type === "review" ? "Assessed achievement %" : "Actual result"}</span>${ed ? (type === "review" ? `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.manual" ${bind(p + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.manualMax}">` : `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.actual" ${bind(p + ".actual")} value="${esc(e.actual || "")}" placeholder="${k.unit === "%" ? "Percentage, e.g. 80%" : k.unit ? `Score, e.g. 3.5${k.unit}` : "Number, e.g. 7"}">`) : `<b>${esc(type === "review" ? (e.manual ? e.manual + "%" : "—") : (e.actual || "—"))}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>
       <div class="kg"><span class="kg-l">Achievement</span><b class="kg-ach ${res.pct == null ? "na" : res.pct >= 100 ? "good" : "low"}">${res.pct == null ? "—" : res.pct + "%"}</b><span class="xs muted">${res.status === "ok" ? esc(res.note) : ""}</span></div>
       <div class="kg"><span class="kg-l">Measure</span>${sel}</div>
     </div>
+    ${type === "review" ? `<div class="review-box">
+      <label class="check"><input type="checkbox" id="${p}.reviewed" ${bind(p + ".reviewed")} ${e.reviewed ? "checked" : ""} ${ed ? "" : "disabled"}> I have reviewed the relevant evidence records for this KPI <span class="req">*</span></label>
+      <div class="field"><label class="lbl" for="${p}.basis">Measurement basis <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.basis" ${bind(p + ".basis")} placeholder="How did you determine the %? Which records did you count, against what, and why is this a fair reading of the January KPI?">${esc(e.basis || "")}</textarea>` : `<div class="small t2">${esc(e.basis || "—")}</div>`}</div>
+    </div>` : ""}
     <div class="field"><label class="lbl" for="${p}.evidence">Supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.evidence" ${bind(p + ".evidence")} placeholder="Which year-end evidence or Evidence Log entries support this result?">${esc(e.evidence || "")}</textarea>` : `<div class="small t2">${esc(e.evidence || "—")}</div>`}</div>
   </div>`;
 }

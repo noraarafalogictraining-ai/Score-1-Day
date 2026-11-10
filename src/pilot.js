@@ -131,7 +131,8 @@ const PULSE = {
     midyear_disruption: { slot: "disruption", round: 2, label: "Mid-year business disruption (Valtora)", d: { performance: -5, trust: 0, development: 0 } },
     constructive: { slot: "coaching", round: 2, label: "Constructive diagnosis and coaching", d: { performance: 0, trust: 5, development: 4 } },
     punitive: { slot: "coaching", round: 2, label: "Punitive or blaming conversation", d: { performance: 0, trust: -9, development: -4 } },
-    intervention_followthrough: { slot: "intervention", round: 3, label: "Constructive mid-year development plan (year-end effect)", d: { performance: 3, trust: 3, development: 8 } },
+    /* December: only DOCUMENTED follow-through (a development record marked followThrough) can raise Development. The 2027 record has none. */
+    documented_followthrough: { slot: "intervention", round: 3, label: "Documented development follow-through (year-end record)", d: { performance: 2, trust: 2, development: 6 } },
     unfair_appraisal: { slot: "appraisal", round: 3, label: "Unfair final appraisal", d: { performance: 0, trust: -10, development: -4 } },
     fair_appraisal: { slot: "appraisal", round: 3, label: "Fair, evidence-based appraisal", d: { performance: 0, trust: 5, development: 4 } },
     /* Final appraisal discussion (from the conversation assessment; separate slots from the written appraisal, so nothing is counted twice) */

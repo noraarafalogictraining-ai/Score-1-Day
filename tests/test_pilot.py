@@ -98,6 +98,16 @@ def run():
         st, _ = post(PORT, "/api/converse", {"kind": "diagnostic", "history": [{"from": "manager", "text": "x" * 5000}]}); check("Over-long message rejected", st == 400)
         st, j1 = post(PORT, "/api/yearend", {"pathway": "A"}); st2, j2 = post(PORT, "/api/yearend", {})
         check("Year-end record is the same for every participant (pathway ignored)", st == 200 and st2 == 200 and j1["dataset"] == j2["dataset"])
+        reg = {x["month"]: x for x in j1["dataset"]["registers"]["reporting"]}
+        check("Calendar: June report due Thu 1 Jul → Mon 5 Jul (2 working days); August due Wed 1 Sep → Mon 6 Sep (3); October due Mon 1 Nov → Wed 3 Nov (2)",
+              [(reg[m]["due"], reg[m]["submitted"], reg[m]["lateDays"]) for m in ["June 2027", "August 2027", "October 2027"]] == [("Thu 1 Jul 2027", "Mon 5 Jul 2027", 2), ("Wed 1 Sep 2027", "Mon 6 Sep 2027", 3), ("Mon 1 Nov 2027", "Wed 3 Nov 2027", 2)] and j1["dataset"]["calendar"]["workingDays"] == "Monday–Friday")
+        summ = {x["id"]: x for x in j1["dataset"]["summary"]}
+        out = subprocess.run(["node", "-e", "process.stdout.write(require('./api/_lib/prompts').yearEndText())"], cwd=ROOT, capture_output=True, text=True).stdout
+        check("Late submissions: 3 in the year, 2 after the July mid-year review — same wording in the record and Omar's AI context", "3 of 12 (25%) in the year; 2 after the July mid-year review" in summ["EV-REP-03"]["actual"] and "0 of 3 in the year (0 of 2 after mid-year)" in summ["EV-REP-05"]["actual"] and summ["EV-REP-03"]["actual"] in out and summ["EV-REP-05"]["actual"] in out)
+        recs = {x["id"]: x for x in j1["dataset"]["registers"]["recommendations"]}
+        check("REC-03 (adopted, September decision) is separate from the July 12-month-contract finding (CI-02)", recs["REC-03"]["status"].startswith("Adopted") and "12-month" not in recs["REC-03"]["finding"] and "contract" not in recs["REC-04"]["finding"] and "Separate from recommendation REC-03" in summ["EV-CI-01"]["narrative"])
+        eng = {x["id"]: x for x in j1["dataset"]["registers"]["engagement"]}
+        check("Engagement matches the 5 July emails (Nadine's meeting before 5 Jul; Youssef's consultation after his 5 Jul request)", "5 Jul" in eng["ENG-01"]["behaviour"] and "after Youssef's email of Mon 5 Jul" in eng["ENG-02"]["when"] and eng["ENG-03"]["when"] == "September 2027")
         st, j = post(NOAI, "/api/converse", {"kind": "diagnostic", "history": [{"from": "manager", "text": "Hello"}]})
         check("No AI configured: conversations report unavailable (503)", st == 503 and j["error"] == "ai_unavailable")
         st, j = post(NOAI, "/api/assess", {"task": "plan", "payload": {"plan": {"objectives": [], "comps": []}}})
@@ -261,7 +271,13 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
                 blank: A(t, { actual: '' }), invalid: A(t, { actual: 'n/a' }).status, negative: A(t, { actual: '-5' }).status,
                 lower: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '4' }).pct, lowerZero: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '0' }).pct, lowerZeroStatus: A({ target: 5, dir: 'lower', type: 'numeric' }, { actual: '0' }).status,
                 qual: P('Improve the quality of reports')[0], milestone: P('Launch the new pricing dashboard by Q3')[0], ambiguous: P('Grow revenue from 10 to 12 million')[0], zero: P('Zero major errors')[0].type,
-                lowerParsed: P('Fewer than 3 late reports per year')[0], review: A(P('Improve the quality of reports')[0], { manual: '90' }).pct, reviewBad: A(P('Improve the quality of reports')[0], { manual: '300' }).status,
+                lowerParsed: P('Fewer than 3 late reports per year')[0], review: A(P('Improve the quality of reports')[0], { manual: '90', basis: 'Counted QA results for the 12 reports against last year', reviewed: true }).pct,
+                reviewNoBasis: A(P('Improve the quality of reports')[0], { manual: '90', reviewed: true }).status, reviewNotReviewed: A(P('Improve the quality of reports')[0], { manual: '90', basis: 'Counted QA results for the 12 reports against last year' }).status,
+                unsupportedForced: (() => { const c = fake([{ id: 'u', kpi: 'Increase the win rate to 35%', weight: 100 }], { u: { kpis: { 0: { type: 'numeric', dir: 'higher', actual: '28%' } } } }, [3]); return { status: c.objectives[0].rows[0].res.status, what: c.whatPct, unresolved: c.unresolved }; })(),
+                compound: matchKpi(P('Deliver 95% of reports on time and without major corrections')[0]),
+                splitMsg: objectiveCoverage({ kpi: 'At least 95% of monthly reports on time and 95% passing quality review' }).split,
+                notCompound: ['Average stakeholder feedback of at least 4/5 for clarity, relevance and actionability', 'At least one structured stakeholder consultation per quarter with documented actions', 'At least 60% of recommendations adopted by management', 'Escalate 100% of deadline conflicts before reports are late'].map(t => matchKpi(P(t)[0]).compound),
+                reviewBad: A(P('Improve the quality of reports')[0], { manual: '300' }).status,
                 weighted: fake([{ id: 'a', kpi: '10 reports on time', weight: 50 }, { id: 'b', kpi: '10 recommendations and 4 stakeholder consultations', weight: 30 }, { id: 'c', kpi: 'at least 5 recommendations with a proposed action', weight: 20 }],
                   { a: { kpis: { 0: { actual: '8' } } }, b: { kpis: { 0: { actual: '10' }, 1: { actual: '2' } } }, c: { kpis: { 0: { actual: '6' } } } }, [3, 4, 5]),
                 partial: fake([{ id: 'a', kpi: '10 reports on time', weight: 60 }, { id: 'b', kpi: '6 recommendations', weight: 40 }], { a: { kpis: { 0: { actual: '10' } } } }, [3, null]),
@@ -275,7 +291,11 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             check("Calc: blank actual is not zero; invalid and negative values rejected", calc["blank"]["pct"] is None and calc["blank"]["status"] == "blank" and calc["invalid"] == "invalid" and calc["negative"] == "invalid")
             check("Calc: lower-is-better = target ÷ actual (5 vs 4 → 125%); actual 0 → review, never divides by zero", calc["lower"] == 125 and calc["lowerZero"] is None and calc["lowerZeroStatus"] == "review" and calc["lowerParsed"]["dir"] == "lower")
             check("Calc: qualitative, milestone, ambiguous and zero-target KPIs flagged for review", all(x["type"] == "review" for x in [calc["qual"], calc["milestone"], calc["ambiguous"]]) and calc["zero"] == "review" and "Milestone" in calc["milestone"]["reason"])
-            check("Calc: reviewed KPI uses the manager's % within 0–200", calc["review"] == 90 and calc["reviewBad"] == "invalid")
+            check("Calc: reviewed KPI counts only when resolved (evidence reviewed + measurement basis + %)", calc["review"] == 90 and calc["reviewNoBasis"] == "unresolved" and calc["reviewNotReviewed"] == "unresolved" and calc["reviewBad"] == "invalid")
+            check("Calc: an unsupported KPI can't be scored by a formula; it stays unresolved and WHAT is not calculated", calc["unsupportedForced"] == {"status": "unresolved", "what": None, "unresolved": 1}, str(calc["unsupportedForced"]))
+            check("Calc: one KPI combining two measures under one target → Needs clarification, suggest splitting", calc["compound"]["compound"] and calc["compound"]["status"] == "clarify" and "Consider splitting" in calc["compound"]["reason"])
+            check("Calc: two targets in one KPI text → split suggestion, wording kept as written", "Consider writing them as 2 KPIs" in calc["splitMsg"] and "exactly as you wrote it" in calc["splitMsg"])
+            check("Calc: single-measure KPIs are not mistaken for compound ones", calc["notCompound"] == [False, False, False, False], str(calc["notCompound"]))
             check("Calc: objective weights not totalling 100% → WHAT not calculated (no silent rescaling)", calc["badWeights"]["whatPct"] is None and calc["badWeights"]["totalWeight"] == 90)
             w = calc["weighted"]
             check("Calc: weights 50/30/20, 1–2 KPIs each → WHAT 40+22.5+24 = 86.5; HOW avg 4 → 80; overall 83.9", (w["whatPct"], w["howPct"], w["overall"]) == (86.5, 80, 83.9), str((w["whatPct"], w["howPct"], w["overall"])))
@@ -322,6 +342,7 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             check("Weights must total 100% (90% shown in validation)", "must total 100%" in pg.inner_text(".validation") and pg.locator("#submit-goals").is_disabled())
             pg.locator('[data-act="editObj"]').nth(3).click(); pg.wait_for_timeout(100); fill_bind(pg, ".objectives.3.weight", 20); act(pg, "doneObj")
             check("Objective validation complete at 100%", "All objectives are complete" in pg.inner_text(".validation"))
+            check("January: objective with two targets in one KPI gets a split suggestion; wording unchanged", "Consider writing them as 2 KPIs" in pg.inner_text(f"#obj-{R(pg)['goals']['objectives'][0]['id']}") and R(pg)["goals"]["objectives"][0]["kpi"] == STRONG[0][1] and "Could be split: 1" in pg.inner_text("#kpi-coverage"))
             check("January KPI evidence check shown per KPI (advisory, does not block)", pg.locator(".goal .cov").count() >= 5 and pg.locator("#kpi-coverage").count() == 1 and "Supported" in pg.inner_text("#kpi-coverage") and pg.evaluate("objectiveValidation().errors.length") == 0)
             shot(pg, "v01_objectives")
             pg.goto(U + "#goals/competencies"); pg.wait_for_timeout(150)
@@ -480,7 +501,7 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             pg.goto(U + "#home"); pg.wait_for_timeout(300)
             check("Year-End period shows company year-end figures from the same data", "Year-End · December 2027" in pg.inner_text("main") and "28%" in pg.inner_text(".kpi-row") and "24%" in pg.inner_text(".kpi-row") and not pg.locator('[data-act="period"][data-v="year"]').is_disabled())
             shot(pg, "w03_home_yearend")
-            check("Follow-through revealed → Pulse +3/+3/+8", r["pulse"]["values"] == {"performance": 80, "trust": 74, "development": 70}, str(r["pulse"]["values"]))
+            check("December release: no automatic Development boost from mid-year coaching alone (record shows no follow-through)", r["pulse"]["values"] == {"performance": 77, "trust": 71, "development": 62} and r["pulse"]["slots"].get("intervention") != "documented_followthrough" and any("No documented development follow-through" in h["label"] for h in r["pulse"]["history"]), str(r["pulse"]["values"]))
             shot(pg, "p07_yearend")
             pg.goto(U + "#appraisal"); pg.wait_for_timeout(250)
             objs = r["goals"]["objectives"]
@@ -519,7 +540,12 @@ console.log(JSON.stringify({a:A.includes('actual 9 of 12')&&A.includes('rating 3
             check("Rating-scale target (4/5): 3.25/5 → 81.3%; quarterly-period note shown", pg.inner_text(f"{O(2)} .ap-obj-h .ap-ach") == "81.3%" and "recorded by quarter" in pg.inner_text(O(2)))
             open_obj(objs[3]["id"]); check("Per-quarter KPI warns about matching the period", "per quarter" in pg.inner_text(O(3)) and "July – December only" in pg.inner_text(O(3)))
             pg.locator(f'[data-kpi-mode$="what.{objs[3]["id"]}.kpis.0"]').select_option("review"); pg.wait_for_timeout(200)
-            check("KPI can be switched to manager review (requires review, manual %)", "Requires review" in pg.inner_text("main") and pg.locator(f'[data-bind$="what.{objs[3]["id"]}.kpis.0.manual"]').count() == 1)
+            rb = f"what.{objs[3]['id']}.kpis.0"
+            check("KPI switched to manager review is flagged Unresolved and kept out of the score", "Unresolved: not included in the score" in pg.inner_text(O(3)) and pg.evaluate("appraisalCalc().unresolved") == 1 and "unresolved" in pg.inner_text(".ap-sc.what"))
+            fill_bind(pg, rb + ".manual", "50"); pg.wait_for_timeout(450)
+            check("A % alone does not resolve it (basis and evidence review required)", pg.evaluate("appraisalCalc().unresolved") == 1)
+            pg.locator(f'[data-bind$="{rb}.reviewed"]').check(); fill_bind(pg, rb + ".basis", "One structured consultation in H2 against a target of one per quarter (two quarters recorded) = 50%."); pg.wait_for_timeout(450)
+            check("Evidence review + measurement basis + % → Resolved and included", "Resolved by manager review" in pg.inner_text(O(3)) and pg.evaluate("appraisalCalc().unresolved") == 0 and R(pg)["r3"]["appraisal"]["what"][objs[3]["id"]]["kpis"]["0"]["reviewed"] is True)
             pg.locator(f'[data-kpi-mode$="what.{objs[3]["id"]}.kpis.0"]').select_option("higher"); pg.wait_for_timeout(200)
             kpi_fill(objs[3]["id"], 0, "actual", "0.5"); kpi_fill(objs[3]["id"], 0, "evidence", "EV-ENG-01: one consultation in H2 (two quarters), no documented actions."); pg.wait_for_timeout(450)
             c = pg.evaluate("appraisalCalc()")

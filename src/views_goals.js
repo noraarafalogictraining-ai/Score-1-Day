@@ -49,14 +49,14 @@ function objTab(r, ed) {
 function coverageBlock(o) {
   if (!String(o.kpi || "").trim()) return "";
   const c = objectiveCoverage(o);
-  return `<div class="cov-list">${c.kpis.map(({ k, c: x }) => `<div class="cov-row"><span class="cov cov-${x.status}">${x.label}</span><span class="xs t2">${c.kpis.length > 1 ? `<b>${esc(k.name)}</b> · ` : ""}${esc(x.message)}</span></div>`).join("")}</div>`;
+  return `<div class="cov-list">${c.split ? `<div class="cov-row"><span class="cov cov-suggest">Suggestion</span><span class="xs t2">${esc(c.split)}</span></div>` : ""}${c.kpis.map(({ k, c: x }) => `<div class="cov-row"><span class="cov cov-${x.status}">${x.label}</span><span class="xs t2">${c.kpis.length > 1 ? `<b>${esc(k.name)}</b> · ` : ""}${esc(x.message)}</span></div>`).join("")}</div>`;
 }
 function coverageSummary(r) {
   const all = r.goals.objectives.filter(o => String(o.kpi || "").trim()).flatMap(o => objectiveCoverage(o).kpis.map(x => x.c.status));
   if (!all.length) return "";
-  const n = (s) => all.filter(x => x === s).length;
+  const n = (s) => all.filter(x => x === s).length, splits = r.goals.objectives.filter(o => objectiveCoverage(o).split).length;
   return `<section class="card" id="kpi-coverage"><div class="card-h"><h3>KPI evidence check</h3><span class="xs muted">Advisory · you decide</span></div><div class="card-b stack-sm">
-    <div class="row" style="gap:8px">${["supported", "clarify", "unavailable"].map(s => `<span class="cov cov-${s}">${COVERAGE_LABEL[s]}: ${n(s)}</span>`).join("")}</div>
+    <div class="row" style="gap:8px">${["supported", "clarify", "unavailable"].map(s => `<span class="cov cov-${s}">${COVERAGE_LABEL[s]}: ${n(s)}</span>`).join("")}${splits ? `<span class="cov cov-suggest">Could be split: ${splits}</span>` : ""}</div>
     <p class="xs muted">Checks whether each KPI has a measurable target and whether NextWave's records will be able to measure it. You can revise your KPIs before submitting.</p>
   </div></section>`;
 }

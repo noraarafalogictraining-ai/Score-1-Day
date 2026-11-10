@@ -636,6 +636,10 @@ button.org-node:hover { border-color: var(--blue-line); }
 .ev-sec-b { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--line); padding-top: 10px; }
 table.tbl.reg { min-width: 640px; font-size: .8rem; } .tbl.reg td, .tbl.reg th { padding: 7px 9px; }
 .ev-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem; color: var(--text2); white-space: nowrap; }
+.cov-suggest { background: var(--blue-soft); color: var(--blue); }
+.kpi-flag.resolved { background: #EEF1F6; color: var(--text2); }
+.review-box { border: 1px dashed var(--line2); border-radius: var(--r-sm); padding: 8px 10px; display: flex; flex-direction: column; gap: 8px; background: #FCFCFD; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: .84rem; font-weight: 600; } .check input { margin-top: 3px; width: 16px; height: 16px; flex: none; }
 </style>
 <div id="app"></div>
 <script>
@@ -992,7 +996,8 @@ const PULSE = {
     midyear_disruption: { slot: "disruption", round: 2, label: "Mid-year business disruption (Valtora)", d: { performance: -5, trust: 0, development: 0 } },
     constructive: { slot: "coaching", round: 2, label: "Constructive diagnosis and coaching", d: { performance: 0, trust: 5, development: 4 } },
     punitive: { slot: "coaching", round: 2, label: "Punitive or blaming conversation", d: { performance: 0, trust: -9, development: -4 } },
-    intervention_followthrough: { slot: "intervention", round: 3, label: "Constructive mid-year development plan (year-end effect)", d: { performance: 3, trust: 3, development: 8 } },
+    /* December: only DOCUMENTED follow-through (a development record marked followThrough) can raise Development. The 2027 record has none. */
+    documented_followthrough: { slot: "intervention", round: 3, label: "Documented development follow-through (year-end record)", d: { performance: 2, trust: 2, development: 6 } },
     unfair_appraisal: { slot: "appraisal", round: 3, label: "Unfair final appraisal", d: { performance: 0, trust: -10, development: -4 } },
     fair_appraisal: { slot: "appraisal", round: 3, label: "Fair, evidence-based appraisal", d: { performance: 0, trust: 5, development: 4 } },
     /* Final appraisal discussion (from the conversation assessment; separate slots from the written appraisal, so nothing is counted twice) */
@@ -1265,7 +1270,7 @@ function evidencePayload(r = rec()) { return r.evidence.map(e => ({ period: e.pe
 function appraisalPayload(r = rec()) {
   const a = r.r3.appraisal, c = appraisalCalc(r);
   return {
-    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? (y.e.manual ? `manager-assessed ${y.e.manual}%` : "") : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "", matched: `${y.match.label} (${COVERAGE_LABEL[y.match.status]})` })) })),
+    what: c.objectives.map(x => ({ objective: x.o.objective, weight: x.weight, achievement: x.ach, kpis: x.rows.map(y => ({ name: y.k.name, target: fmtTarget(y.k), type: (y.e.type || y.k.type) === "review" ? "manager review" : (y.e.dir || y.k.dir) === "lower" ? "lower is better" : "higher is better", actual: (y.e.type || y.k.type) === "review" ? (y.e.manual ? `manager-assessed ${y.e.manual}%${y.e.basis ? `; basis: ${String(y.e.basis).slice(0, 400)}` : ""}${y.res.status === "unresolved" ? " (unresolved)" : ""}` : "") : (y.e.actual || ""), achievement: y.res.pct, evidence: y.e.evidence || "", matched: `${y.match.label} (${COVERAGE_LABEL[y.match.status]})` })) })),
     how: r.goals.comps.map(c => ({ name: compName(c.id), level: levelLabel(c.level), standard: c.standard || "", observed: (a.how[c.id] || {}).observed || "", rating: (a.how[c.id] || {}).rating || null, just: (a.how[c.id] || {}).just || "" })),
     overall: { whatPct: c.whatPct, howPct: c.howPct, score: c.overall, just: a.overall.just, strengths: a.overall.strengths, dev: a.overall.dev }
   };
@@ -1286,6 +1291,7 @@ function appraisalValidation(r = rec()) {
     const tag = `Objective ${oi + 1}${x.rows.length > 1 ? `, KPI ${y.i + 1}` : ""}`;
     if (y.res.status === "blank") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
     if (y.res.status === "invalid") errors.push(`${tag}: ${y.res.note.toLowerCase()}.`);
+    if (y.res.status === "unresolved") errors.push(`${tag}: unresolved KPI, not yet in the score (${y.res.note.replace(/^Unresolved: /, "")}).`);
     if (y.res.status === "review") errors.push(`${tag}: ${y.res.note.charAt(0).toLowerCase() + y.res.note.slice(1)}.`);
     if (!String(y.e.evidence || "").trim()) errors.push(`${tag}: add the supporting evidence.`);
   }));
@@ -1329,6 +1335,7 @@ const APPRAISAL_CONFIG = {
   howWeight: 40,           /* % of the overall score from HOW */
   kpiCap: null,            /* null = no cap: overachievement stays visible (approved) */
   manualMax: 200,          /* highest manager-assessed % accepted for a KPI under review */
+  basisMin: 20,            /* minimum length of the written measurement basis for a reviewed KPI */
   lowerIsBetter: "inverse",/* "inverse" = target ÷ actual × 100 when both > 0 (otherwise review); "review" = always manager review */
   howScale: 5              /* HOW achievement = average rating ÷ 5 × 100 (1 = 20% … 5 = 100%) */
 };
@@ -1383,10 +1390,14 @@ function kpiAchievement(k, entry) {
   const type = e.type || k.type, dir = e.dir || k.dir;
   const done = (raw, note) => { const capped = C.kpiCap != null && raw > C.kpiCap; const v = capped ? C.kpiCap : raw; return { raw: v, pct: round1(v), status: "ok", note: capped ? `Capped at ${C.kpiCap}% (calculated ${round1(raw)}%)` : note }; };
   if (type === "review") {
-    const v = parseActual(e.manual);
-    if (v == null) return { raw: null, pct: null, status: "blank", note: "Enter your assessed achievement %" };
-    if (Number.isNaN(v) || v < 0 || v > C.manualMax) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
-    return done(v, "Manager assessment (review)");
+    /* Manager review: included in the score only when RESOLVED = evidence reviewed + documented measurement basis + assessed % */
+    const v = parseActual(e.manual), miss = [];
+    if (e.manual != null && String(e.manual).trim() && (Number.isNaN(v) || v < 0 || v > C.manualMax)) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
+    if (!e.reviewed) miss.push("confirm the evidence review");
+    if (String(e.basis || "").trim().length < C.basisMin) miss.push("document the measurement basis");
+    if (v == null) miss.push("enter the assessed achievement %");
+    if (miss.length) return { raw: null, pct: null, status: "unresolved", note: `Unresolved: ${miss.join(", ")}` };
+    return done(v, "Manager review: resolved with a documented basis");
   }
   if (k.target == null || k.target === 0) return { raw: null, pct: null, status: "review", note: "No usable target: switch to manager review" };
   const a = parseActualU(e.actual);
@@ -1409,7 +1420,8 @@ function appraisalCalc(r = rec()) {
     const rows = kpis.map((k, i) => {
       const match = matchKpi(k), base = match.status === "supported" ? k : { ...k, type: "review", reason: match.reason || k.reason };
       if (match.dir !== base.dir) base.dir = match.dir;
-      return { k: base, i, e: entries[i] || {}, share: 100 / kpis.length, match, res: kpiAchievement(base, entries[i]) };
+      const raw = entries[i] || {}, e = match.numericAllowed ? raw : { ...raw, type: "review" };   /* unsupported KPIs can't be switched to a formula */
+      return { k: base, i, e, share: 100 / kpis.length, match, res: kpiAchievement(base, e) };
     });
     const done = rows.every(x => x.res.status === "ok");
     const achRaw = done ? rows.reduce((s, x) => s + x.res.raw, 0) / rows.length : null;
@@ -1425,7 +1437,8 @@ function appraisalCalc(r = rec()) {
   const howRaw = comps.length && rated.length === comps.length ? rated.reduce((s, x) => s + x.rating, 0) / rated.length / C.howScale * 100 : null;
   const overallRaw = whatRaw != null && howRaw != null ? whatRaw * C.whatWeight / 100 + howRaw * C.howWeight / 100 : null;
   const r1 = (x) => x == null ? null : round1(x);
-  return { objectives, totalWeight, weightOK, whatPct: r1(whatRaw), whatPartial, objDone: doneObjs.length, comps, howPct: r1(howRaw), rated: rated.length, overall: r1(overallRaw),
+  const unresolved = objectives.reduce((n, x) => n + x.rows.filter(y => y.res.status === "unresolved").length, 0);
+  return { objectives, unresolved, totalWeight, weightOK, whatPct: r1(whatRaw), whatPartial, objDone: doneObjs.length, comps, howPct: r1(howRaw), rated: rated.length, overall: r1(overallRaw),
     whatContrib: whatRaw == null ? null : round1(whatRaw * C.whatWeight / 100), howContrib: howRaw == null ? null : round1(howRaw * C.howWeight / 100) };
 }
 
@@ -1451,6 +1464,15 @@ const EVIDENCE_MEASURES = [
   { id: "intelligence", label: "Competitive intelligence findings", rx: /(competitor|competitive|market) (analys|intelligence|insight|brief|update|study|finding)/, refs: ["EV-CI-01", "Register 5"], units: [], uncounted: true },
   { id: "business", label: "Department business results", rx: /(win rate|revenue|sales (growth|target|volume|result)|pipeline|opportunit|objection|market share|retention|new customers|conversion|profit|margin)/, refs: ["EV-BIZ-01", "EV-BIZ-02", "EV-BIZ-03"], units: [], business: "This is a department result; the records won't isolate Omar's individual contribution." }
 ];
+const EVIDENCE_VERSION = "2027.2";   /* the year-end record version this build expects (older saves reload it) */
+/* Measure families, used to spot one KPI that combines two separate measures under a single target */
+const MEASURE_FAMILY = { rep_escalate: "escalation", rep_late: "timeliness", rep_ontime: "timeliness", rep_quality: "quality", rec_adopt: "adoption", rec_action: "recommendations", feedback: "feedback", development: "development", consult: "consultations", intelligence: "intelligence", business: "business" };
+const FAMILY_LABEL = { escalation: "escalation", timeliness: "timeliness", quality: "quality review", adoption: "adoption", recommendations: "recommendations", feedback: "stakeholder feedback", development: "development activity", consultations: "consultations", intelligence: "competitive intelligence", business: "business results" };
+function measureFamilies(t) {
+  const fams = new Set(EVIDENCE_MEASURES.filter(m => MEASURE_FAMILY[m.id] && (m.id === "feedback" ? /(feedback|satisfaction|survey)/.test(t) : m.rx.test(t))).map(m => MEASURE_FAMILY[m.id]));
+  if (fams.has("escalation")) fams.delete("timeliness");     /* escalation KPIs are about deadlines by nature */
+  return [...fams];
+}
 const REF_LABEL = {
   "EV-REP-01": "Monthly reports scheduled", "EV-REP-02": "Reports submitted on time", "EV-REP-03": "Reporting deadlines missed", "EV-REP-04": "Quality review results", "EV-REP-05": "Escalation of deadline conflicts",
   "EV-REC-01": "Recommendations submitted", "EV-REC-02": "Recommendations with a proposed action", "EV-REC-03": "Management decisions on recommendations",
@@ -1467,9 +1489,11 @@ function matchKpi(k) {
   const t = String(k.name || "").toLowerCase();
   const m = EVIDENCE_MEASURES.find(x => x.rx.test(t)) || null;
   const unit = kpiUnitKind(k), period = kpiPeriod(t);
-  const out = { measure: m ? m.id : null, label: m ? m.label : "No matching record", refs: m ? m.refs : [], unit, period, dir: m && m.dir ? m.dir : k.dir, business: m ? (m.business || "") : "", status: "supported", reason: "", notes: [] };
-  const unavailable = (why) => Object.assign(out, { status: "unavailable", reason: why });
-  const clarify = (why) => Object.assign(out, { status: "clarify", reason: why });
+  const fams = measureFamilies(t);
+  const out = { measure: m ? m.id : null, label: m ? m.label : "No matching record", refs: m ? m.refs : [], unit, period, dir: m && m.dir ? m.dir : k.dir, business: m ? (m.business || "") : "", status: "supported", reason: "", notes: [], families: fams, compound: fams.length > 1, numericAllowed: true };
+  const unavailable = (why) => Object.assign(out, { status: "unavailable", reason: why, numericAllowed: false });
+  const clarify = (why, numeric = false) => Object.assign(out, { status: "clarify", reason: why, numericAllowed: numeric });
+  if (out.compound) return clarify(`This KPI combines ${fams.length} separate measures (${fams.map(f => FAMILY_LABEL[f]).join(", ")}) under one target. Consider splitting it into ${fams.length} KPIs, each with its own target.`);
   if (!m) return unavailable(k.target != null ? "The measure is clear, but the available records may not support this result." : "The available records may not support this measure.");
   if (m.id === "business") return unavailable(m.business);
   if (m.uncounted && k.target != null) return unavailable("Records won't count analyses or findings; consider a measure that will be recorded.");
@@ -1486,7 +1510,7 @@ function matchKpi(k) {
     return clarify("Check the unit of the target (count or percentage).");
   }
   if (m.id === "feedback" && unit === "scale" && !/\/5$/.test(k.unit)) return clarify("Stakeholder feedback is recorded on a 1–5 scale: state the target on that scale.");
-  if (m.max && unit === "count" && k.target > m.max) return clarify(`Only ${m.max} monthly reports are scheduled in the year: check the target.`);
+  if (m.max && unit === "count" && k.target > m.max) return clarify(`Only ${m.max} monthly reports are scheduled in the year: check the target.`, true);
   if (m.business) out.notes.push(m.business);
   if (m.standard && unit === "count") out.notes.push("Your KPI sets a standard each recommendation must meet: decide which records qualify.");
   if (m.id === "consult" && /(action|follow)/.test(t)) out.notes.push("Your KPI sets a standard (documented actions): decide which consultations qualify.");
@@ -1505,7 +1529,9 @@ function objectiveCoverage(o) {
   const ks = parseKpis(o.kpi).map(k => ({ k, c: kpiCoverageJanuary(k) }));
   const rank = { unavailable: 2, clarify: 1, supported: 0 };
   const worst = ks.reduce((w, x) => rank[x.c.status] > rank[w] ? x.c.status : w, "supported");
-  return { status: worst, label: COVERAGE_LABEL[worst], kpis: ks };
+  /* Two measurable targets in one KPI text: suggest splitting (the wording is never rewritten) */
+  const split = ks.length > 1 ? `This KPI contains ${ks.length} separate measures. Consider writing them as ${ks.length} KPIs so each has its own target and is clear to assess. It will be kept exactly as you wrote it.` : "";
+  return { status: worst, label: COVERAGE_LABEL[worst], kpis: ks, split };
 }
 
 /* =========================================================
@@ -2047,14 +2073,14 @@ function objTab(r, ed) {
 function coverageBlock(o) {
   if (!String(o.kpi || "").trim()) return "";
   const c = objectiveCoverage(o);
-  return `<div class="cov-list">${c.kpis.map(({ k, c: x }) => `<div class="cov-row"><span class="cov cov-${x.status}">${x.label}</span><span class="xs t2">${c.kpis.length > 1 ? `<b>${esc(k.name)}</b> · ` : ""}${esc(x.message)}</span></div>`).join("")}</div>`;
+  return `<div class="cov-list">${c.split ? `<div class="cov-row"><span class="cov cov-suggest">Suggestion</span><span class="xs t2">${esc(c.split)}</span></div>` : ""}${c.kpis.map(({ k, c: x }) => `<div class="cov-row"><span class="cov cov-${x.status}">${x.label}</span><span class="xs t2">${c.kpis.length > 1 ? `<b>${esc(k.name)}</b> · ` : ""}${esc(x.message)}</span></div>`).join("")}</div>`;
 }
 function coverageSummary(r) {
   const all = r.goals.objectives.filter(o => String(o.kpi || "").trim()).flatMap(o => objectiveCoverage(o).kpis.map(x => x.c.status));
   if (!all.length) return "";
-  const n = (s) => all.filter(x => x === s).length;
+  const n = (s) => all.filter(x => x === s).length, splits = r.goals.objectives.filter(o => objectiveCoverage(o).split).length;
   return `<section class="card" id="kpi-coverage"><div class="card-h"><h3>KPI evidence check</h3><span class="xs muted">Advisory · you decide</span></div><div class="card-b stack-sm">
-    <div class="row" style="gap:8px">${["supported", "clarify", "unavailable"].map(s => `<span class="cov cov-${s}">${COVERAGE_LABEL[s]}: ${n(s)}</span>`).join("")}</div>
+    <div class="row" style="gap:8px">${["supported", "clarify", "unavailable"].map(s => `<span class="cov cov-${s}">${COVERAGE_LABEL[s]}: ${n(s)}</span>`).join("")}${splits ? `<span class="cov cov-suggest">Could be split: ${splits}</span>` : ""}</div>
     <p class="xs muted">Checks whether each KPI has a measurable target and whether NextWave's records will be able to measure it. You can revise your KPIs before submitting.</p>
   </div></section>`;
 }
@@ -2360,8 +2386,8 @@ function yearEndBody(d, r = rec(), openSec = null) {
     <div class="ev-head"><div><div class="eyebrow">NextWave · Human Resources</div><b>${esc(d.title)}</b></div><span class="xs muted">As of ${esc(d.asOf)} · Record v${esc(d.version)}</span></div>
     ${sec("results", "1. Performance Results", "Reporting and recommendations", `
       ${regTable(SUM_HEAD, sumRows(d, ["Reporting", "Recommendations"]))}
-      <h4>Register 1 · Monthly reporting</h4>
-      ${regTable(["Month", "Report ID", "Deadline", "Submitted", "Timeliness", "Quality review", "Revision", "Advance escalation", "Source"], R.reporting.map(x => [esc(x.month), `<span class="ev-id">${esc(x.id)}</span>`, esc(x.due), esc(x.submitted), x.timeliness === "On time" ? esc(x.timeliness) : `<b class="neg">${esc(x.timeliness)}</b>`, x.quality.startsWith("Passed") ? esc(x.quality) : `<b class="neg">${esc(x.quality)}</b>`, esc(x.revision), esc(x.escalation), `<span class="xs t2">${esc(x.source)}</span>`]))}
+      <h4>Register 1 · Monthly reporting</h4><p class="xs muted">${d.calendar ? `Business calendar: ${esc(d.calendar.workingDays)} working days; holiday Fri 1 Jan 2027. ${esc(d.calendar.deadlineRule)}.` : ""}</p>
+      ${regTable(["Report for", "Report ID", "Deadline", "Submitted", "Timeliness", "Quality review", "Revision", "Advance escalation", "Source"], R.reporting.map(x => [esc(x.month), `<span class="ev-id">${esc(x.id)}</span>`, esc(x.due), esc(x.submitted), x.timeliness === "On time" ? esc(x.timeliness) : `<b class="neg">${esc(x.timeliness)}</b>`, x.quality.startsWith("Passed") ? esc(x.quality) : `<b class="neg">${esc(x.quality)}</b>`, esc(x.revision), esc(x.escalation), `<span class="xs t2">${esc(x.source)}</span>`]))}
       <h4>Register 2 · Commercial recommendations</h4>
       ${regTable(["ID", "Date", "Topic", "Finding", "Proposed action", "Decision status", "Decision owner", "Evidence"], R.recommendations.map(x => [`<span class="ev-id">${esc(x.id)}</span>`, esc(x.date), esc(x.topic), esc(x.finding), esc(x.action), esc(x.status), esc(x.owner), `<span class="xs t2">${esc(x.ref)}</span>`]))}
       <p class="xs muted">Decision status records management's decision on each recommendation.</p>`)}
@@ -2407,7 +2433,7 @@ VIEWS.appraisal = function () {
   const ed = apEditable(r), c = appraisalCalc(r), C = APPRAISAL_CONFIG, tab = ["how", "summary"].includes(UI.apTab) ? UI.apTab : "what";
   const pct = (v) => v == null ? "—" : `${v}%`;
   const cards = `<div class="ap-summary">
-    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} points (weight ${C.whatWeight}%)` : !c.weightOK && c.objectives.length ? `Weights total ${c.totalWeight}%, not 100%` : `${c.objDone} of ${c.objectives.length} objectives assessed`}</span></div>
+    <div class="ap-sc what"><span class="xs">WHAT Achievement</span><b class="num">${c.whatPct != null ? c.whatPct + "%" : "—"}</b><span class="xs">${c.whatPct != null ? `Contributes ${c.whatContrib} points (weight ${C.whatWeight}%)` : !c.weightOK && c.objectives.length ? `Weights total ${c.totalWeight}%, not 100%` : `${c.objDone} of ${c.objectives.length} objectives assessed${c.unresolved ? ` · ${plural(c.unresolved, "KPI", "KPIs")} unresolved` : ""}`}</span></div>
     <div class="ap-sc how"><span class="xs">HOW Achievement</span><b class="num">${pct(c.howPct)}</b><span class="xs">${c.howPct != null ? `Contributes ${c.howContrib} points (weight ${C.howWeight}%)` : `${c.rated} of ${c.comps.length} competencies rated`}</span></div>
     <div class="ap-sc overall"><span class="xs">Overall Performance Score</span><b class="num">${c.overall != null ? c.overall + "%" : "—"}</b><span class="xs">WHAT ${C.whatWeight}% · HOW ${C.howWeight}%</span></div>
   </div>`;
@@ -2438,19 +2464,23 @@ function apWhat(r, c, ed) {
 function kpiRow(y, base, ed) {
   const k = y.k, e = y.e, p = `${base}.${y.i}`, type = e.type || k.type, dir = e.dir || k.dir, res = y.res;
   const mode = type === "review" ? "review" : dir;
-  const sel = ed ? `<select class="sel sm" data-kpi-mode="${p}" aria-label="How this KPI is measured">${[["higher", "Higher is better"], ["lower", "Lower is better"], ["review", "Manager review"]].map(([v, l]) => `<option value="${v}" ${mode === v ? "selected" : ""} ${v !== "review" && k.target == null ? "disabled" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${mode === "review" ? "Manager review" : mode === "lower" ? "Lower is better" : "Higher is better"}</span>`;
+  const sel = ed ? `<select class="sel sm" data-kpi-mode="${p}" aria-label="How this KPI is measured">${[["higher", "Higher is better"], ["lower", "Lower is better"], ["review", "Manager review"]].map(([v, l]) => `<option value="${v}" ${mode === v ? "selected" : ""} ${v !== "review" && (k.target == null || !y.match.numericAllowed) ? "disabled" : ""}>${l}</option>`).join("")}</select>` : `<span class="tag">${mode === "review" ? "Manager review" : mode === "lower" ? "Lower is better" : "Higher is better"}</span>`;
   const inputErr = res.status === "invalid" ? "err" : "";
   return `<div class="kpi-item ${type === "review" ? "flagged" : ""}">
     <div class="kpi-item-h"><span class="kpi-num">KPI ${y.i + 1}</span><span class="grow small">${esc(k.name)}</span>${y.share < 100 ? `<span class="xs muted">${Math.round(y.share * 10) / 10}% of objective</span>` : ""}</div>
     <div class="kpi-match"><span class="cov cov-${y.match.status}">${COVERAGE_LABEL[y.match.status]}</span><span class="xs t2">Relevant evidence: ${y.match.refs.length ? y.match.refs.map(ref => `<button class="ev-ref" data-act="evRef" data-ref="${ref}">${esc(ref)} · ${esc(REF_LABEL[ref] || "")}</button>`).join(" ") : "none identified"}</span></div>
     ${y.match.notes.length ? `<div class="xs t2 kpi-notes">${y.match.notes.map(n => `<div>${icon("info", "i-xs")} ${esc(n)}</div>`).join("")}</div>` : ""}
-    ${type === "review" ? `<div class="kpi-flag">${icon("alert", "i-xs")} Requires review: ${esc(k.reason || "measured by manager judgment")} Enter your assessed % and justify it with evidence.</div>` : ""}
+    ${type === "review" ? `<div class="kpi-flag ${res.status === "ok" ? "resolved" : ""}">${icon(res.status === "ok" ? "check" : "alert", "i-xs")} <span><b>${res.status === "ok" ? "Resolved by manager review" : "Unresolved: not included in the score"}</b> · ${esc(k.reason || "Measured by manager judgment.")}${y.match.numericAllowed ? "" : " A formula can't be applied to this KPI."}</span></div>` : ""}
     <div class="kpi-grid">
       <div class="kg"><span class="kg-l">Target</span><b class="kg-target">${esc(fmtTarget(k))}</b><span class="xs muted">From January · locked</span></div>
       <div class="kg"><span class="kg-l">${type === "review" ? "Assessed achievement %" : "Actual result"}</span>${ed ? (type === "review" ? `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.manual" ${bind(p + ".manual")} value="${esc(e.manual || "")}" placeholder="0–${APPRAISAL_CONFIG.manualMax}">` : `<input class="inp ${inputErr}" inputmode="decimal" id="${p}.actual" ${bind(p + ".actual")} value="${esc(e.actual || "")}" placeholder="${k.unit === "%" ? "Percentage, e.g. 80%" : k.unit ? `Score, e.g. 3.5${k.unit}` : "Number, e.g. 7"}">`) : `<b>${esc(type === "review" ? (e.manual ? e.manual + "%" : "—") : (e.actual || "—"))}</b>`}${res.status === "invalid" ? `<span class="err-text">${esc(res.note)}</span>` : ""}</div>
       <div class="kg"><span class="kg-l">Achievement</span><b class="kg-ach ${res.pct == null ? "na" : res.pct >= 100 ? "good" : "low"}">${res.pct == null ? "—" : res.pct + "%"}</b><span class="xs muted">${res.status === "ok" ? esc(res.note) : ""}</span></div>
       <div class="kg"><span class="kg-l">Measure</span>${sel}</div>
     </div>
+    ${type === "review" ? `<div class="review-box">
+      <label class="check"><input type="checkbox" id="${p}.reviewed" ${bind(p + ".reviewed")} ${e.reviewed ? "checked" : ""} ${ed ? "" : "disabled"}> I have reviewed the relevant evidence records for this KPI <span class="req">*</span></label>
+      <div class="field"><label class="lbl" for="${p}.basis">Measurement basis <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.basis" ${bind(p + ".basis")} placeholder="How did you determine the %? Which records did you count, against what, and why is this a fair reading of the January KPI?">${esc(e.basis || "")}</textarea>` : `<div class="small t2">${esc(e.basis || "—")}</div>`}</div>
+    </div>` : ""}
     <div class="field"><label class="lbl" for="${p}.evidence">Supporting evidence <span class="req">*</span></label>${ed ? `<textarea class="ta" rows="2" id="${p}.evidence" ${bind(p + ".evidence")} placeholder="Which year-end evidence or Evidence Log entries support this result?">${esc(e.evidence || "")}</textarea>` : `<div class="small t2">${esc(e.evidence || "—")}</div>`}</div>
   </div>`;
 }
@@ -2694,20 +2724,22 @@ function releaseRound(k) {
 }
 async function loadYearEnd() {
   const r = rec();
-  if (r.r3.dataset && r.r3.dataset.registers) return;   /* older saves held a per-pathway dataset: reload the canonical record */
+  if (r.r3.dataset && r.r3.dataset.version === EVIDENCE_VERSION) return;   /* older saves hold an earlier record: reload the current one */
   if (UI.busy === "yearend") return;
   UI.busy = "yearend"; r.r3.error = null;
   try {
     const res = await api("/api/yearend", {});
     r.r3.dataset = res.dataset; r.r3.tag = res.tag; UI.period = null;   /* show the newest period when results arrive */
-    if (r.r2.pathway === "A") applyPulse(r, "intervention_followthrough", "Constructive mid-year development plan (assessed in July).");
-    else pulseNote(r, "intervention", "No development intervention with follow-through", r.r2.pathway === "B" ? "Limited coaching and follow-up after mid-year: no Pulse change." : "No constructive development support after mid-year: no Pulse change.", 3);
+    /* A December Development increase needs DOCUMENTED follow-through in the record, never mid-year coaching quality alone */
+    const ft = (res.dataset.registers.development || []).filter(x => x.followThrough);
+    if (ft.length) applyPulse(r, "documented_followthrough", `Documented development follow-through: ${ft.map(x => x.record).join("; ")}.`);
+    else pulseNote(r, "intervention", "No documented development follow-through", "The year-end record shows no coaching or development activity after July: no Pulse change.", 3);
   } catch (e) { r.r3.error = `The year-end update could not be loaded: ${e.message}`; }
   UI.busy = null; save(); render();
 }
 function afterRoute() {
   const r = rec();
-  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !(r.r3.dataset && r.r3.dataset.registers) && !r.r3.error) loadYearEnd();
+  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !(r.r3.dataset && r.r3.dataset.version === EVIDENCE_VERSION) && !r.r3.error) loadYearEnd();
 }
 
 /* ---------- conversation ---------- */
@@ -2902,17 +2934,18 @@ document.addEventListener("keydown", (ev) => {
   if (ev.key === "Enter" && ev.target.id && ev.target.id.startsWith("code-")) ACTIONS.releaseCode({ dataset: { k: ev.target.id.slice(5) } });
   if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey) && ev.target.dataset && /\.drafts\./.test(ev.target.dataset.bind || "")) { const k = ev.target.dataset.bind.split(".").pop(); ev.preventDefault(); ACTIONS.chatSend({ dataset: { k } }); }
 });
-function handleBind(el) { const path = el.dataset.bind; let v = el.value; if (el.dataset.type === "num") v = v === "" ? "" : Number(v); setPath(S, path, v); afterBind(path); save(); }
+function handleBind(el) { const path = el.dataset.bind; let v = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.type === "num") v = v === "" ? "" : Number(v); setPath(S, path, v); afterBind(path); save(); }
 let _liveT = null;
 function liveUpdate() { clearTimeout(_liveT); _liveT = setTimeout(render, 350); }
 document.addEventListener("input", (ev) => {
   const el = ev.target;
+  if (el.dataset.bind && el.type === "checkbox") return;   /* handled on change */
   if (el.dataset.bind) { handleBind(el); if (el.tagName !== "SELECT" && !/\.drafts\./.test(el.dataset.bind)) liveUpdate(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) UI.modal.d[el.dataset.ev] = el.value;
 });
 document.addEventListener("change", (ev) => {
   const el = ev.target;
-  if (el.dataset.bind && el.tagName === "SELECT") { handleBind(el); render(); return; }
+  if (el.dataset.bind && (el.tagName === "SELECT" || el.type === "checkbox")) { handleBind(el); render(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) { UI.modal.d[el.dataset.ev] = el.value; if (el.tagName === "SELECT") render(); return; }
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
   if (el.dataset.kpiMode) { const v = el.value, base = el.dataset.kpiMode; setPath(S, base + ".type", v === "review" ? "review" : "numeric"); if (v !== "review") setPath(S, base + ".dir", v); afterBind(base); save(); render(); return; }

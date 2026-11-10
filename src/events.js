@@ -98,20 +98,22 @@ function releaseRound(k) {
 }
 async function loadYearEnd() {
   const r = rec();
-  if (r.r3.dataset && r.r3.dataset.registers) return;   /* older saves held a per-pathway dataset: reload the canonical record */
+  if (r.r3.dataset && r.r3.dataset.version === EVIDENCE_VERSION) return;   /* older saves hold an earlier record: reload the current one */
   if (UI.busy === "yearend") return;
   UI.busy = "yearend"; r.r3.error = null;
   try {
     const res = await api("/api/yearend", {});
     r.r3.dataset = res.dataset; r.r3.tag = res.tag; UI.period = null;   /* show the newest period when results arrive */
-    if (r.r2.pathway === "A") applyPulse(r, "intervention_followthrough", "Constructive mid-year development plan (assessed in July).");
-    else pulseNote(r, "intervention", "No development intervention with follow-through", r.r2.pathway === "B" ? "Limited coaching and follow-up after mid-year: no Pulse change." : "No constructive development support after mid-year: no Pulse change.", 3);
+    /* A December Development increase needs DOCUMENTED follow-through in the record, never mid-year coaching quality alone */
+    const ft = (res.dataset.registers.development || []).filter(x => x.followThrough);
+    if (ft.length) applyPulse(r, "documented_followthrough", `Documented development follow-through: ${ft.map(x => x.record).join("; ")}.`);
+    else pulseNote(r, "intervention", "No documented development follow-through", "The year-end record shows no coaching or development activity after July: no Pulse change.", 3);
   } catch (e) { r.r3.error = `The year-end update could not be loaded: ${e.message}`; }
   UI.busy = null; save(); render();
 }
 function afterRoute() {
   const r = rec();
-  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !(r.r3.dataset && r.r3.dataset.registers) && !r.r3.error) loadYearEnd();
+  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !(r.r3.dataset && r.r3.dataset.version === EVIDENCE_VERSION) && !r.r3.error) loadYearEnd();
 }
 
 /* ---------- conversation ---------- */
@@ -306,17 +308,18 @@ document.addEventListener("keydown", (ev) => {
   if (ev.key === "Enter" && ev.target.id && ev.target.id.startsWith("code-")) ACTIONS.releaseCode({ dataset: { k: ev.target.id.slice(5) } });
   if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey) && ev.target.dataset && /\.drafts\./.test(ev.target.dataset.bind || "")) { const k = ev.target.dataset.bind.split(".").pop(); ev.preventDefault(); ACTIONS.chatSend({ dataset: { k } }); }
 });
-function handleBind(el) { const path = el.dataset.bind; let v = el.value; if (el.dataset.type === "num") v = v === "" ? "" : Number(v); setPath(S, path, v); afterBind(path); save(); }
+function handleBind(el) { const path = el.dataset.bind; let v = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.type === "num") v = v === "" ? "" : Number(v); setPath(S, path, v); afterBind(path); save(); }
 let _liveT = null;
 function liveUpdate() { clearTimeout(_liveT); _liveT = setTimeout(render, 350); }
 document.addEventListener("input", (ev) => {
   const el = ev.target;
+  if (el.dataset.bind && el.type === "checkbox") return;   /* handled on change */
   if (el.dataset.bind) { handleBind(el); if (el.tagName !== "SELECT" && !/\.drafts\./.test(el.dataset.bind)) liveUpdate(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) UI.modal.d[el.dataset.ev] = el.value;
 });
 document.addEventListener("change", (ev) => {
   const el = ev.target;
-  if (el.dataset.bind && el.tagName === "SELECT") { handleBind(el); render(); return; }
+  if (el.dataset.bind && (el.tagName === "SELECT" || el.type === "checkbox")) { handleBind(el); render(); return; }
   if (el.dataset.ev && UI.modal && UI.modal.d) { UI.modal.d[el.dataset.ev] = el.value; if (el.tagName === "SELECT") render(); return; }
   if (el.dataset.actChange === "evFilter") { UI.evFilter = el.value; render(); return; }
   if (el.dataset.kpiMode) { const v = el.value, base = el.dataset.kpiMode; setPath(S, base + ".type", v === "review" ? "review" : "numeric"); if (v !== "review") setPath(S, base + ".dir", v); afterBind(base); save(); render(); return; }
