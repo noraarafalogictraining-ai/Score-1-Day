@@ -107,20 +107,18 @@ function fmtDefinitionTarget(def) {
   return `${def.dir === "lower" ? "≤ " : ""}${def.target}${def.unit}`;
 }
 const MILESTONE_OPTIONS = [["done", "Completed by the due date (100%)"], ["late", "Completed after the due date"], ["partial", "Partly completed"], ["not", "Not completed (0%)"]];
-const METHOD_LABEL = { higher: "Actual ÷ target × 100", lower: "Lower is better: target ÷ actual × 100", milestone: "Completion rule", review: "Manager assessment with documented basis" };
+const METHOD_LABEL = { higher: "Actual ÷ target × 100", lower: "Lower is better: target ÷ actual × 100", milestone: "Completion rule", review: "Manager assessment (no formula applies)" };
 
 /* ---------- Year-end result for one objective ---------- */
+/* Where no formula applies, the manager enters the % achieved and explains the judgment in the (required) comments. */
 function manualResult(e, C) {
-  const v = parseActual(e.manual), miss = [];
-  if (e.manual != null && String(e.manual).trim() && (Number.isNaN(v) || v < 0 || v > C.manualMax)) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
-  if (!e.reviewed) miss.push("confirm the evidence review");
-  if (String(e.basis || "").trim().length < C.basisMin) miss.push("document the measurement basis");
-  if (v == null) miss.push("enter the % achieved");
-  if (miss.length) return { raw: null, pct: null, status: "unresolved", note: `Needs clarification: ${miss.join(", ")}` };
-  return { raw: v, pct: round1(v), status: "ok", note: "Manager assessment with a documented basis" };
+  const v = parseActual(e.manual);
+  if (v == null) return { raw: null, pct: null, status: "blank", note: "Enter the % achieved and explain your judgment in the comments" };
+  if (Number.isNaN(v) || v < 0 || v > C.manualMax) return { raw: null, pct: null, status: "invalid", note: `Enter a percentage between 0 and ${C.manualMax}` };
+  return { raw: v, pct: round1(v), status: "ok", note: "Manager assessment (see comments)" };
 }
 function objectiveMethod(def, e) {
-  if (def.type === "numeric") return e.mode === "review" ? "review" : (e.dir || def.dir) === "lower" ? "lower" : "higher";
+  if (def.type === "numeric") return def.dir === "lower" ? "lower" : "higher";   /* from the agreed measurement; no manual choice */
   return def.type;                                   /* milestone | review */
 }
 function objectiveResult(o, entry) {
@@ -138,7 +136,7 @@ function objectiveResult(o, entry) {
   if (Number.isNaN(a.n) || a.n < 0) return { raw: null, pct: null, status: "invalid", note: "Enter a number, e.g. 9 or 75%" };
   const up = unitProblem(k, a); if (up) return { raw: null, pct: null, status: "invalid", note: up };
   if (method === "lower") {
-    if (a.n === 0) return { raw: null, pct: null, status: "unresolved", note: "The actual is 0, so a ratio can't be calculated: use a manager assessment with a documented basis" };
+    if (a.n === 0) { const m = manualResult(e, APPRAISAL_CONFIG); return m.status === "ok" ? m : { ...m, zeroLower: true, note: "The actual is 0, so a ratio can't be calculated: enter the % achieved and explain it in the comments" }; }
     return ok(def.target / a.n * 100, METHOD_LABEL.lower);
   }
   return ok(a.n / def.target * 100, METHOD_LABEL.higher);

@@ -30,7 +30,6 @@ function hardZero(taskName, inp, c) {
   if (taskName === "round2" && c.group === "r2_data" && inp.interpretation.trim().length < 15) return "No interpretation of the business data was submitted.";
   if (taskName === "round2" && c.group === "r2_log" && !inp.evidence.length) return "No Evidence Log entries were submitted.";
   if (taskName === "round2" && (c.group === "r2_diag" || c.group === "r2_coach") && !inp.history.some(m => m.from === "manager")) return "No conversation took place.";
-  if (taskName === "round3" && c.id === "r3_conv_bias" && inp.reflection.trim().length < 15) return "No bias reflection was written.";
   return null;
 }
 

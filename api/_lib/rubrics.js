@@ -70,9 +70,8 @@ const GROUPS = [
     { id: "r3_overall_justify", max: 2, label: "Evidence-based justification", desc: "The justification cites specific evidence from the whole year." },
     { id: "r3_overall_specific", max: 1, label: "Specific development plan", desc: "The development plan (Part III) addresses the identified gaps with specific, realistic actions and support; manager comments are specific." }
   ] },
-  { id: "r3_conv", round: 3, label: "Appraisal feedback conversation and bias reflection", task: "round3", criteria: [
-    { id: "r3_conv_feedback", max: 4, derived: "sbii", label: "Feedback conversation (situation, behaviour, impact, intent, fairness, development)", desc: "Calculated from the separate 12-point conversation assessment: round(total × 4 ÷ 12)." },
-    { id: "r3_conv_bias", max: 1, label: "Honest bias reflection", desc: "The participant's reflection engages honestly with possible biases grounded in their own reasoning." }
+  { id: "r3_conv", round: 3, label: "Final performance conversation", task: "round3", criteria: [
+    { id: "r3_conv_feedback", max: 5, derived: "sbii", label: "Feedback conversation (situation, behaviour, impact, intent, fairness, development)", desc: "Calculated from the separate 12-point conversation assessment: round(total × 5 ÷ 12)." },
   ] }
 ];
 
@@ -102,7 +101,7 @@ const RULES = {
   },
   alignmentEvent(cls) { return cls === "fair" ? "fair_alignment" : cls === "dismissive" ? "dismissive_alignment" : null; },
   /* Final feedback conversation (SBII, 6 × 0–2): mapped onto r3_conv_feedback and two Pulse slots */
-  sbiiPoints(total) { return Math.round(Math.max(0, Math.min(12, total)) * 4 / 12); },
+  sbiiPoints(total) { return Math.round(Math.max(0, Math.min(12, total)) * 5 / 12); },   /* 12-point conversation check → 5 points */
   feedbackEvents(s, cls, completed) {
     const ev = [], harmful = cls.unsupported_blame || cls.personality_labels || s.fairness === 0;
     if (harmful) ev.push("blaming_feedback");

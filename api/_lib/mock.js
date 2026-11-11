@@ -199,8 +199,7 @@ function assess(task, inp) {
     criteria: [
       crit("r3_what_grounded", rich ? 3 : 1, firstSentence(allJ, /\d/), "Grounding."), crit("r3_what_limits", /(limitation|not available|no data|missing)/i.test(allJ) ? 2 : 0, null, "Limitations."), crit("r3_what_balance", adopt ? 0 : 2, null, "Balance."), crit("r3_what_overall", 2, null, "Overall WHAT."),
       crit("r3_how_behaviour", rich ? 2 : 1, null, "Behaviour."), crit("r3_how_levels", 1, null, "Levels."), crit("r3_how_balance", adopt ? 0 : 1, null, "Balance."),
-      crit("r3_overall_defensible", adopt ? 0 : 2, null, "Defensible."), crit("r3_overall_justify", rich ? 2 : 1, null, "Justification."), crit("r3_overall_specific", (a.pdp.ld || []).some(x => x.action.length > 20) ? 1 : 0, null, "Specific."),
-      crit("r3_conv_bias", inp.reflection.length > 30 ? 1 : 0, null, "Reflection.")
+      crit("r3_overall_defensible", adopt ? 0 : 2, null, "Defensible."), crit("r3_overall_justify", rich ? 2 : 1, null, "Justification."), crit("r3_overall_specific", (a.pdp.ld || []).some(x => x.action.length > 20) ? 1 : 0, null, "Specific.")
     ],
     classification: { appraisal: adopt ? "unfair" : rich ? "fair" : "mixed" }, feedback: { summary: "[Scripted test assessment]" }
   };

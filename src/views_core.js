@@ -103,14 +103,19 @@ function chatInboxItem() {
 }
 function mailView(m) {
   const s = senderOf(m), r = rec();
-  const body = m.body.map(p => p === "__LIST__" ? `<ul>${m.list.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p).replace(/\n/g, "<br>")}</p>`).join("");
+  const body = m.body.map(p => p === "__LIST__" ? `<ul>${m.list.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p>${esc(p).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>")}</p>`).join("");
   const to = (m.to || ["me"]).map(recipient), cc = (m.cc || []).map(recipient);
-  const attach = m.attach ? `<div class="attach">${icon("clip", "i-sm")}<span class="grow"><b class="small">Year-End Performance Update — Omar Hassan.pdf</b><span class="xs muted">${r.r3.dataset ? "Performance evidence · December 2027" : r.r3.error ? esc(r.r3.error) : "Preparing…"}</span></span>${r.r3.dataset ? `<button class="btn sm" data-act="go" data-go="yearend">${icon("eye", "i-sm")} Open</button>` : r.r3.error ? `<button class="btn sm" data-act="loadYearEnd">Retry</button>` : ""}</div>` : "";
+  const attach = m.attach ? `<div class="attach">${icon("clip", "i-sm")}<span class="grow"><b class="small">Year-End Performance Summary — Omar Hassan.pdf</b><span class="xs muted">${r.r3.dataset ? "Performance evidence · December 2027" : r.r3.error ? esc(r.r3.error) : "Preparing…"}</span></span>${r.r3.dataset ? `<button class="btn sm" data-act="go" data-go="yearend">${icon("eye", "i-sm")} Open</button>` : r.r3.error ? `<button class="btn sm" data-act="loadYearEnd">Retry</button>` : ""}</div>` : "";
   return `<article class="mail">
     <h2>${esc(m.subject)}</h2>
     <div class="mail-meta">${senderAvatar(m)}<div class="grow"><div class="row between"><span><b class="small">${esc(s.name)}</b> <span class="xs muted">${esc(s.title)}</span></span><span class="xs muted">${m.date}</span></div><div class="xs t2 mail-rcpt"><span class="muted">To:</span> ${to.map(esc).join("; ")}</div>${cc.length ? `<div class="xs t2 mail-rcpt"><span class="muted">Cc:</span> ${cc.map(esc).join("; ")}</div>` : ""}</div></div>
     ${m.secondhand ? `<div class="notice warn">${icon("info", "i-sm")}<span><b>Secondhand account.</b> Mariam is reporting what she observed and what Omar told her. It has not been verified.</span></div>` : ""}
     <div class="mail-body">${body}</div>
+    ${m.closing ? `<section class="cycle-close" id="cycle-close">
+      <div class="cc-title">${APP.cycleYear} PERFORMANCE CYCLE COMPLETED</div>
+      <p class="cc-quote">Great performance is not managed once a year. It is built through everyday leadership.</p>
+      <ol class="score-journey" aria-label="The SCORE journey">${["SET", "CHECK", "OPTIMIZE", "REVIEW", "EVOLVE"].map((w, i) => `${i ? `<li class="sj-arrow" aria-hidden="true">→</li>` : ""}<li class="sj-step"><b>${w[0]}</b>${w.slice(1)}</li>`).join("")}</ol>
+    </section>` : ""}
     ${attach}
     ${m.action ? `<div><button class="btn primary" data-act="go" data-go="${m.action.go}">${esc(m.action.l)} ${icon("arrow", "i-sm")}</button></div>` : ""}
   </article>`;

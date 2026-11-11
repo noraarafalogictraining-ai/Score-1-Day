@@ -37,6 +37,7 @@ function chatPanel() {
     <div class="chat-foot">
       ${err ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(err.message)}</span>${err.retry ? `<button class="btn sm" data-act="chatRetry" data-k="${err.kind}">Retry</button>` : ""}</div>` : ""}
       ${r.goals.status === "pending_alignment" && r.align.ready ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Omar is ready to go ahead with the plan.</span><button class="btn primary sm" data-act="alignConfirm" id="align-confirm">Confirm alignment</button></div>` : ""}
+      ${ctx === "appraisal" && managerCount(r.r3.conv.log) >= CHAT_LIMITS.appraisalMin ? (UI.endConfirm && !r.r3.conv.completed ? `<div class="notice warn xs">${icon("alert", "i-xs")}<span class="grow">No next steps agreed yet. Complete anyway?</span><button class="btn sm" data-act="endCancel">Keep talking</button><button class="btn sm primary" data-act="appraisalContinue">Complete</button></div>` : `<div class="row" style="justify-content:flex-end"><button class="btn sm ${r.r3.conv.completed ? "primary" : ""}" data-act="appraisalContinue" id="chat-complete">${icon("check", "i-sm")} Complete Performance Conversation</button></div>`) : ""}
       ${foot}
     </div>
   </section>`;

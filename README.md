@@ -93,6 +93,40 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 
   A period unlocks only after its release, and the dashboard switches to the newest period when results arrive. All figures come from one source (`bizData` in `src/views_monitor.js`, using `DASHBOARD` and the server's year-end company figures). Figures the scenario doesn't define (for example revenue growth actuals) show "—" with "Not published".
 
+## Year-end refinement and simulation closure
+
+**Year-End Performance Summary** (replaces the long record in the participant view; `yearEndBody` in `src/views_appraisal.js`, mapping in `objectiveEvidence` in `src/evidence_map.js`). It has four compact sections, and only A is open by default.
+- **A. Results against agreed objectives:** only the participant's own January objectives, each with its weight, target, actual result, achievement and one key evidence line. Results come from one fixed outcome expressed in the unit of the agreed measurement:
+  - submitted reports: 12 (100%);
+  - on-time reports: 9 (75%);
+  - late reports: 3 (lower is better);
+  - quality review passed: 11 (91.7%);
+  - recommendations: 5, with a proposed action: 3 (60%);
+  - feedback: 3.4/5 for the year, 3.25 for H2.
+
+  Where no record matches, the measurement is a department result, the period can't be matched, or a milestone has no completion record, it shows "Not verifiable" and no number. Consultations are only partly verifiable, because there are no records for January–June.
+- **B. Competency evidence:** one card per January competency, with the expected level, one strength and one development observation. No ratings.
+- **C. Stakeholder feedback:** the quarterly trend, three comments, positive contributions and documented gaps.
+- **D. Development & manager follow-up:** a timeline built from the participant's own records (plan, mid-year conversation, Evidence Log actions), the HR note ("no HR record ≠ no action") and Omar's self-assessment.
+
+Section B observations are new scenario summaries drawn from the established record.
+
+**Appraisal simplifications:**
+- The evidence-review checkbox, the measurement-basis field and the calculation-method selector are removed.
+- The method follows the agreed measurement.
+- Where no formula applies (qualitative objectives, a late or partial milestone, a lower-is-better actual of 0), the manager enters the % and explains it in the required comments.
+
+**Removed:** the bias check, overlooked/overemphasised evidence, the reflection, reconsider, and the review & finalize page (old links open the form). The reflection's 1 point moved into the conversation score: 12-point check × 5 ÷ 12 = 5 points. The year-end stage stays at 25 and the total at 100.
+
+**Sequence:**
+1. Review the summary.
+2. Complete Parts I–II and select **Submit appraisal**. Omar's opening message arrives.
+3. Hold the conversation. Part III stays editable and is recommended, not required.
+4. Select **Complete Performance Conversation**, on the form or in the chat window. If no next steps were agreed, a second click confirms.
+5. The cycle is complete. HR's **"Performance Cycle 2027 — Thank You"** email arrives once, with a notification, and ends with the **2027 PERFORMANCE CYCLE COMPLETED** block and SET → CHECK → OPTIMIZE → REVIEW → EVOLVE.
+
+The final learning-score assessment runs in the background and never delays the email. The SCORE feedback report still exists at `#review` but is no longer linked.
+
 ## Objectives of the Year and Performance Appraisal Form (follows the NextWave HR forms)
 
 The January form and the December appraisal follow the two reference documents (*Objective Setting form* and *Performance Appraisal form*). Participant screens, Omar's AI context and the assessors no longer use the term "KPI".
@@ -300,7 +334,7 @@ Since Phase 5 there is a single canonical record for every participant: see *Yea
 
 ## Testing results
 
-`tests/test_pilot.py`: 272 checks pass in scripted test mode and no-AI mode (including the Objectives of the Year form, SMART checks, the Performance Appraisal Form calculations, rating bands, development plan, migration and the full January–December flow). They cover:
+`tests/test_pilot.py`: 289 checks pass in scripted test mode and no-AI mode (including the Objectives of the Year form, SMART checks, the Performance Appraisal Form calculations, rating bands, development plan, migration and the full January–December flow). They cover:
 - the API (methods, invalid JSON, oversized or tampered input, the same year-end record for everyone, no-AI 503s);
 - that confidential files are not downloadable and the page source contains no hidden facts, model answers or datasets;
 - the scoring total (100 = 35/40/25) and the blaming → pathway C → punitive rule;

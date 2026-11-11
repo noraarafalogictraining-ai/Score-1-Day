@@ -161,7 +161,7 @@ def run():
             "That concern was valid. The June report was also late, which meant leadership couldn't plan.",
             "Let's agree: you'll escalate deadline conflicts early and bring options on one page; I'll coach you on summaries and we'll review it at our monthly check-in."]
         h, res = talk(STRONG_TALK); j = sbii(h, completed=res["complete"])
-        check("S1 strong SBII feedback → completed, 12/12, fair-feedback and development Pulse events", res["complete"] and j["total"] == 12 and j["points"] == 4 and j["events"] == ["fair_feedback", "development_agreement"], f"{j['scores']} {j['events']}")
+        check("S1 strong SBII feedback → completed, 12/12, fair-feedback and development Pulse events", res["complete"] and j["total"] == 12 and j["points"] == 5 and j["events"] == ["fair_feedback", "development_agreement"], f"{j['scores']} {j['events']}")
         check("S1/S10 specific agreement → Omar closes naturally (no SBII wording)", "work on" in res["reply"] and not re.search(r"situation|behaviou?r|impact|intent|SBII", res["reply"], re.I))
         h, res = talk(["You need to improve your attitude."]); j = sbii(h)
         check("S2 vague feedback → Omar asks for an example; Situation 0", "example" in res["reply"] and j["scores"]["situation"] == 0 and not res["complete"])
@@ -273,12 +273,12 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
                 lower: R(O('Late reports', 'No more than 2 late reports'), { actual: '3' }).pct, lowerZero: R(O('Late reports', 'No more than 2 late reports'), { actual: '0' }).status,
                 time: [D(O('Respond to requests', 'Within 2 working days')).dir, R(O('Respond to requests', 'Within 2 working days'), { actual: '3' }).pct],
                 relative: D(O('Reduce late reports', 'Reduce late reports by 50%')).type,
-                milestone: [D(ms).type, R(ms, { milestone: 'done' }).pct, R(ms, { milestone: 'not' }).pct, R(ms, { milestone: 'late' }).status, R(ms, { milestone: 'late', manual: '70', basis: 'Launched three weeks late; used by Sales from November.', reviewed: true }).pct],
+                milestone: [D(ms).type, R(ms, { milestone: 'done' }).pct, R(ms, { milestone: 'not' }).pct, R(ms, { milestone: 'late' }).status, R(ms, { milestone: 'late', manual: '70' }).pct],
                 qualitative: D(O('Improve communication', 'Better feedback')).type, compound: D(O('Quality', '95% on time and 95% passing quality review')).compound,
                 dateNotTarget: D(O('Six recommendations by 30 June 2027', 'Recommendation register')).target, ofTotal: D(O('Reports', 'At least 11 of the 12 scheduled reports by their deadline')).target,
                 blank: R(O('Reports', '12 reports on time'), { actual: '' }), invalid: R(O('Reports', '12 reports on time'), { actual: 'n/a' }).status, negative: R(O('Reports', '12 reports on time'), { actual: '-3' }).status,
                 unitPct: R(O('Reports', '90% of reports on time'), { actual: '9' }).note, unitCount: R(O('Reports', '12 reports on time'), { actual: '75%' }).status,
-                review: [R(O('Improve communication', 'Better feedback'), { manual: '80' }).status, R(O('Improve communication', 'Better feedback'), { manual: '80', basis: 'Q4 feedback 3.3 against last year 3.6; briefings still technical.', reviewed: true }).pct],
+                review: [R(O('Improve communication', 'Better feedback'), {}).status, R(O('Improve communication', 'Better feedback'), { manual: '80' }).pct],
                 example: fake([{ id: 'a', objective: 'Reports', measure: '12 reports on time', due: '2027-12-31', weight: 30 }, { id: 'b', objective: 'Recs', measure: 'At least six recommendations', due: '2027-12-31', weight: 70 }], { a: { actual: '9' }, b: { actual: '6' } }, [3, 4, 2]),
                 badWeights: fake([{ id: 'a', objective: 'Reports', measure: '12 reports on time', due: '2027-12-31', weight: 60 }, { id: 'b', objective: 'Recs', measure: '6 recommendations', due: '2027-12-31', weight: 30 }], { a: { actual: '9' }, b: { actual: '5' } }, [3]),
                 partial: fake([{ id: 'a', objective: 'Reports', measure: '12 reports on time', due: '2027-12-31', weight: 100 }], {}, [3, null]),
@@ -297,13 +297,13 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             }""")
             check("Calc: count target 12, actual 9 → 75% (form example); % target 90%, actual 95% → 105.6%; 10 → 12 = 120% (no cap)", (calc["count"], calc["pctOver"], calc["over"]) == (75, 105.6, 120), str((calc["count"], calc["pctOver"], calc["over"])))
             check("Calc: same evidence (9 of 12 on time) against different targets → 90% / 83.3% / 75%", calc["sameEvidence"] == [90, 83.3, 75], str(calc["sameEvidence"]))
-            check("Calc: lower is better = target ÷ actual (≤2 late, 3 actual → 66.7%); actual 0 → needs clarification, never divides by zero", calc["lower"] == 66.7 and calc["lowerZero"] == "unresolved")
+            check("Calc: lower is better = target ÷ actual (≤2 late, 3 actual → 66.7%); actual 0 → manager enters the %, never divides by zero", calc["lower"] == 66.7 and calc["lowerZero"] == "blank")
             check("Calc: time-based measure (within 2 working days, actual 3) → lower is better, 66.7%", calc["time"] == ["lower", 66.7])
             check("Calc: reduction stated as 'by 50%' without a level → needs clarification", calc["relative"] == "review")
-            check("Calc: milestone rule — completed by due date 100%, not completed 0%, late needs a documented assessment", calc["milestone"] == ["milestone", 100, 0, "unresolved", 70], str(calc["milestone"]))
+            check("Calc: milestone rule — completed by due date 100%, not completed 0%, late needs the manager's %", calc["milestone"] == ["milestone", 100, 0, "blank", 70], str(calc["milestone"]))
             check("Calc: qualitative and compound measurements need clarification; dates are not targets; '11 of 12' → 11", calc["qualitative"] == "review" and calc["compound"] is True and calc["dateNotTarget"] == 6 and calc["ofTotal"] == 11)
             check("Calc: blank is not zero; invalid and negative rejected; units must match the target", calc["blank"]["pct"] is None and calc["blank"]["status"] == "blank" and calc["invalid"] == "invalid" and calc["negative"] == "invalid" and "% sign" in calc["unitPct"] and calc["unitCount"] == "invalid")
-            check("Calc: manager assessment counts only with evidence review + documented basis", calc["review"] == ["unresolved", 80])
+            check("Calc: where no formula applies the manager enters the % (explained in comments); no basis field or evidence checkbox", calc["review"] == ["blank", 80])
             ex = calc["example"]
             check("Calc: weighted score = % achieved × weight (75% × 30% = 22.5); objectives score = Σ weighted (22.5 + 70 = 92.5)", ex["objectives"][0]["weighted"] == 22.5 and ex["objectivesScore"] == 92.5, str(ex["objectivesScore"]))
             check("Calc: competencies 3, 4, 2 → average 3 → 100% (3 = 100%, ÷ 3 not ÷ 4)", ex["avgRating"] == 3 and ex["competenciesScore"] == 100)
@@ -526,7 +526,32 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             check("Year-end update arrives by email with the evidence attached", r["r3"]["dataset"] and "Year-End Performance Update and Appraisal" in pg.inner_text("main") and pg.locator(".attach").count() == 1)
             shot(pg, "u05_yearend_email")
             pg.locator('.attach [data-go="yearend"]').click(); pg.wait_for_timeout(300)
-            check("Year-end evidence opens from the email as a four-section HR record", all(x in pg.inner_text("main") for x in ["Performance Results", "Stakeholder Feedback", "Business Contributions", "Development & Follow-Up"]) and pg.locator(".ev-sec").count() == 4)
+            main = pg.inner_text("main")
+            check("Year-end evidence is a concise four-section summary; only section A is open", "Year-End Performance Summary — Omar Hassan" in main and pg.locator(".ev-sec").count() == 4 and pg.locator(".ev-sec[open]").count() == 1 and pg.locator("#ev-results[open]").count() == 1)
+            check("Summary is substantially shorter: no register IDs, registers or long tables", not re.search(r"MIR-2027|REC-0\d|ENG-0\d|Register \d", pg.inner_text("main")) and pg.locator(".tbl.reg").count() == 0 and len(pg.evaluate("document.querySelector('.ev-record').innerText")) < 4500)
+            res_txt = pg.inner_text("#ev-results")
+            check("Section A lists exactly the participant's agreed objectives (4) with weights", pg.locator(".ev-obj").count() == len(R(pg)["goals"]["objectives"]) == 4 and all(f"Weight {w}%" in res_txt for w in (30, 30, 20)))
+            ev_rows = pg.evaluate("rec().goals.objectives.map(o => objectiveEvidence(o, rec().r3.dataset))")
+            check("Section A results use the agreed units: 11 on-time reports → 9 (81.8%); 6 recs with an action → 3 (50%); 4/5 feedback → 3.4/5 (85%)", [(x["actualInput"], x["achievement"]) for x in ev_rows[:3]] == [("9", 81.8), ("3", 50), ("3.4/5", 85)], str([(x["actualInput"], x["achievement"]) for x in ev_rows]))
+            check("Section A never invents a number it can't verify (consultations: Jan–Jun not recorded)", ev_rows[3]["achievement"] is None and "Not verifiable" in ev_rows[3]["note"])
+            for sec_id in ["comp", "feedback", "dev"]: pg.click(f"#ev-{sec_id} > summary"); pg.wait_for_timeout(80)
+            comp_txt = pg.inner_text("#ev-comp")
+            check("Section B: one card per January competency with expected level and observations, no ratings", pg.locator(".ev-comp").count() == len(R(pg)["goals"]["comps"]) and "Expected: Advanced" in comp_txt and not re.search(r"Exceptional|Meets Expectations|Needs Improvement|Unsatisfactory|rating of", comp_txt))
+            check("Section C: feedback trend, stakeholder observations, contributions and gaps", all(x.lower() in pg.inner_text("#ev-feedback").lower() for x in ["3.6", "3.3", "Nadine Farouk", "Positive contributions", "Documented gaps"]))
+            dev_txt = pg.inner_text("#ev-dev")
+            check("Section D: timeline from the participant's records; missing HR record ≠ no action", "Agreed with Omar" in dev_txt and "Held" in dev_txt and "escalation routine" in dev_txt and "does not show whether informal support took place" in dev_txt and "I kept delivering the analysis" in dev_txt)
+            check("Open Final Appraisal button on the summary", pg.locator("#open-appraisal").count() == 1)
+            shot(pg, "p06_yearend_summary")
+            plans = pg.evaluate("""() => { const d = rec().r3.dataset; const E = (objective, measure) => { const x = objectiveEvidence({ id: 'p', objective, measure, due: '2027-12-31', weight: 100 }, d); return [x.actualInput, x.achievement, x.status]; };
+              return {
+                counts: [E('Deliver monthly market intelligence reports', 'Submit 12 monthly reports'), E('Deliver reports on time', '12 reports submitted on time'), E('Limit late reports', 'No more than 2 late reports'), E('Provide recommendations', 'Submit six commercial recommendations')],
+                percentages: [E('Deliver reports on time', 'At least 90% of reports submitted on time'), E('Report quality', '95% of reports passing quality review'), E('Actionable recommendations', '80% of recommendations include a proposed action'), E('Stakeholder feedback', 'Average feedback of at least 4/5 in the second half')],
+                unmatched: [E('Grow industry presence', 'Attend 4 industry conferences'), E('Improve conversion', 'Increase the win rate to 35%'), E('Launch a competitor dashboard for Sales', 'Dashboard launched and used by Sales')]
+              }; }""")
+            check("Plan 1 (counts): 12 submitted → 12 (100%); 12 on time → 9 (75%); ≤2 late → 3 (66.7%); 6 recs → 5 (83.3%)", [p[:2] for p in plans["counts"]] == [["12", 100], ["9", 75], ["3", 66.7], ["5", 83.3]], str(plans["counts"]))
+            check("Plan 2 (percentages): 90% on time → 75% (83.3%); 95% QA → 91.7% (96.5%); 80% with action → 60% (75%); H2 feedback 4/5 → 3.25/5 (81.3%)", [p[:2] for p in plans["percentages"]] == [["75%", 83.3], ["91.7%", 96.5], ["60%", 75], ["3.25/5", 81.3]], str(plans["percentages"]))
+            check("Plan 3 (no matching evidence): conferences, department win rate and an unrecorded milestone → no number, marked insufficient", all(p[0] is None and p[1] is None and p[2] == "insufficient" for p in plans["unmatched"]), str(plans["unmatched"]))
+
             pg.goto(U + "#home"); pg.wait_for_timeout(300)
             check("Year-End period shows company year-end figures from the same data", "Year-End · December 2027" in pg.inner_text("main") and "28%" in pg.inner_text(".kpi-row") and "24%" in pg.inner_text(".kpi-row") and not pg.locator('[data-act="period"][data-v="year"]').is_disabled())
             shot(pg, "w03_home_yearend")
@@ -570,7 +595,7 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             check("Actual achievement is never pre-filled", all(not v for v in pg.evaluate("[...document.querySelectorAll('[data-bind$=\".actual\"]')].map(e => e.value)")))
             check("Weights are not editable at year-end", pg.locator('[data-bind$=".weight"]').count() == 0)
             pg.locator(f"#apobj-{objs[0]['id']} + tr .ev-ref").first.click(); pg.wait_for_timeout(250)
-            check("Evidence link opens the year-end record at the reporting register", pg.locator(".drawer #ev-results[open]").count() == 1 and "MIR-2027-07" in pg.inner_text(".drawer")); pg.click('.drawer [data-act="closeDrawer"]'); pg.wait_for_timeout(150)
+            check("Evidence link opens the year-end summary at section A", pg.locator(".drawer #ev-results[open]").count() == 1 and "Year-End Performance Summary" in pg.inner_text(".drawer")); pg.click('.drawer [data-act="closeDrawer"]'); pg.wait_for_timeout(150)
             fill_bind(pg, W(objs[0]["id"], "actual"), "nine"); pg.wait_for_timeout(450)
             check("Invalid actual shows a clear error and no percentage", "Enter a number" in pg.inner_text("main") and pg.inner_text(f"#apobj-{objs[0]['id']} .c-pct") == "—")
             fill_bind(pg, W(objs[0]["id"], "actual"), "9"); pg.wait_for_timeout(450)
@@ -582,17 +607,16 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             fill_bind(pg, W(objs[1]["id"], "actual"), "3"); fill_bind(pg, W(objs[1]["id"], "comments"), "EV-REC-02: five recommendations, but only three met the agreed standard (proposed action)."); pg.wait_for_timeout(450)
             open_obj(objs[2]["id"]); fill_bind(pg, W(objs[2]["id"], "actual"), "3.25/5"); fill_bind(pg, W(objs[2]["id"], "comments"), "EV-FB-02: H2 average 3.25 (Q3 3.2, Q4 3.3)."); pg.wait_for_timeout(450)
             check("Rating-scale target (4/5): 3.25/5 → 81.3%", pg.inner_text(f"#apobj-{objs[2]['id']} .c-pct") == "81.3%")
-            open_obj(objs[3]["id"]); pg.locator(f'[data-obj-mode$="what.{objs[3]["id"]}"]').select_option("review"); pg.wait_for_timeout(250)
-            check("Manager assessment needs clarification until basis and evidence review are recorded", pg.evaluate("appraisalCalc().unresolved") == 1)
-            fill_bind(pg, W(objs[3]["id"], "manual"), "25"); pg.locator(f'[data-bind$="{W(objs[3]["id"], "reviewed")}"]').check()
-            fill_bind(pg, W(objs[3]["id"], "basis"), "One structured consultation in H2 against a target of four; no documented follow-up actions, so it does not fully meet the agreed standard: 25%.")
-            fill_bind(pg, W(objs[3]["id"], "comments"), "EV-ENG-01/02: one consultation (July, called by Youssef), no documented actions."); pg.wait_for_timeout(450)
+            open_obj(objs[3]["id"])
+            check("No evidence-review checkbox, measurement-basis field or calculation selector on the form", pg.locator('[data-bind$=".reviewed"], [data-bind$=".basis"], [data-obj-mode]').count() == 0 and "I have reviewed" not in pg.inner_text("main") and "Measurement basis" not in pg.inner_text("main"))
+            fill_bind(pg, W(objs[3]["id"], "actual"), "1"); fill_bind(pg, W(objs[3]["id"], "comments"), "One structured consultation documented (July, called by Youssef), with no documented follow-up actions; no records for January–June."); pg.wait_for_timeout(450)
+            check("Actual 1 vs target 4 → 25% calculated automatically", pg.inner_text(f"#apobj-{objs[3]['id']} .c-pct") == "25%")
             c = pg.evaluate("appraisalCalc()")
             exp_obj = round(9 / 11 * 100 * 0.3 + 3 / 6 * 100 * 0.3 + 3.25 / 4 * 100 * 0.2 + 25 * 0.2, 1)
             exp_overall = round((9 / 11 * 100 * 0.3 + 3 / 6 * 100 * 0.3 + 3.25 / 4 * 100 * 0.2 + 25 * 0.2) * 0.6 + 100 * 0.4, 1)
             check(f"Objectives score = Σ weighted scores = {exp_obj}% (computed independently)", c["objectivesScore"] == exp_obj and pg.inner_text("#obj-score") == f"{exp_obj}%", str(c["objectivesScore"]))
             check(f"Overall = objectives × 60/100 + competencies × 40/100 = {exp_overall}% → rating 'Good', ticked in the profile table", c["overall"] == exp_overall and pg.inner_text("#overall-score") == f"{exp_overall}%" and c["band"]["label"] == "Good" and "Good" in pg.inner_text("#band-table tr.on"), str(c["overall"]))
-            check("Part II complete; share button enabled once Parts I–II are complete", pg.locator('.ap-part[data-v="II"].done').count() == 1 and not pg.locator("#submit-appraisal").is_disabled())
+            check("Part II complete; Submit appraisal enabled once Parts I–II are complete", pg.locator('.ap-part[data-v="II"].done').count() == 1 and not pg.locator("#submit-appraisal").is_disabled())
             shot(pg, "p07b_appraisal_part2")
             # Part III (draftable at any time)
             part("III")
@@ -604,8 +628,8 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             check("Payload to Omar/assessor: objectives (target, actual, % achieved, weighted), 1–4 ratings, scores and rating band", p_["what"][0]["target"] == "11" and p_["what"][0]["actual"] == "9" and p_["what"][0]["achievement"] == 81.8 and p_["what"][0]["weighted"] == 24.5 and p_["how"][0]["rating"] in (1, 2, 3, 4) and p_["overall"]["score"] == exp_overall and p_["overall"]["rating"] == "Good")
             act(pg, "submitAppraisal"); pg.wait_for_timeout(300)
             conv = R(pg)["r3"]["conv"]["log"]; emp = [m for m in conv if m["from"] == "employee"]
-            check("Sharing Parts I–II → Omar's neutral opening, badge 1, chat not opened, user stays on the form", len(emp) == 1 and emp[0]["text"] == APPRAISAL_OPENING and pg.url.endswith("#appraisal") and pg.locator(".chat-win").count() == 0 and badge(pg) == "1")
-            check("Parts I–II read-only after sharing; Part III still editable", pg.locator('[data-bind$=".actual"]').count() == 0 and (part("III") or True) and pg.locator('[data-bind$="pdp.short"]').count() == 1)
+            check("Submitting the appraisal → Omar's neutral opening, badge 1, chat not opened, user stays on the form", len(emp) == 1 and emp[0]["text"] == APPRAISAL_OPENING and pg.url.endswith("#appraisal") and pg.locator(".chat-win").count() == 0 and badge(pg) == "1")
+            check("Parts I–II read-only after submission; Part III still editable", pg.locator('[data-bind$=".actual"]').count() == 0 and (part("III") or True) and pg.locator('[data-bind$="pdp.short"]').count() == 1)
             pg.reload(); pg.wait_for_timeout(600)
             check("No duplicate opening after reload", [m["from"] for m in R(pg)["r3"]["conv"]["log"]].count("employee") == 1 and badge(pg) == "1")
             ctx_ = pg.evaluate("convContext('appraisal')")
@@ -622,14 +646,10 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             check("No scores, SBII terms or training feedback inside the chat", not re.search(r"SBII|Situation|Behaviou?r\b.*Impact|/12|score:|rubric", chat.replace(f"Your overall score came out at {exp_overall}%, which is Good", "")))
             check("One thread holds December 2026, January, June and December 2027", all(x in chat for x in ["December 2026", "January 2027", "June 2027", "December 2027"]))
             shot(pg, "p08_appraisal_chat", False)
-            act(pg, "closeChat"); pg.click("#appraisal-continue"); pg.wait_for_function("() => UI.busy === null && S.recs.omar.r3.sbii.result", timeout=15000); pg.wait_for_timeout(300)
-            r = R(pg); sb = r["r3"]["sbii"]["result"]
-            check("After the discussion the participant returns to Part III of the same form", pg.url.endswith("#appraisal") and pg.locator('.ap-part[data-v="III"].on').count() == 1)
-            check("Discussion assessed behind the scenes: strong SBII (≥10/12), mapped to 4-point scale", sb["total"] >= 10 and sb["points"] == round(sb["total"] * 4 / 12) and r["r3"]["conv"]["outcome"] == "completed", str(sb["scores"]))
-            check("Pulse: fair feedback +Trust and development agreement +Development (own slots; not from the score)", r["pulse"]["slots"].get("feedback") == "fair_feedback" and r["pulse"]["slots"].get("dev_agreement") == "development_agreement")
-            pg.goto(U + "#reflection"); pg.wait_for_timeout(300)
-            pg.click("#finalize"); pg.wait_for_timeout(250)
-            check("Finalizing is blocked until Part III is complete (specific messages)", not R(pg)["r3"]["done"] and pg.url.endswith("#appraisal") and "Career planning: add the short-term plan." in pg.inner_text("main"))
+            check("Complete Performance Conversation is available in the chat", pg.locator("#chat-complete").count() == 1)
+            act(pg, "closeChat")
+            check("No closing email before the conversation is completed", "closed" not in pg.evaluate("mailList().map(m => m.id)") and not R(pg)["r3"]["done"])
+            part("III")
             fill_bind(pg, "pdp.short", "Lead the market intelligence input to the 2028 pricing review.")
             fill_bind(pg, "pdp.long", "Grow into a senior commercial insights role that advises leadership directly.")
             fill_bind(pg, "pdp.ld.0.area", "Presenting practical options to stakeholders")
@@ -638,29 +658,28 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             act(pg, "pdpAdd", k="training"); fill_bind(pg, "pdp.training.0.course", "Executive presentation skills"); fill_bind(pg, "pdp.training.0.source", "NextWave Academy"); fill_bind(pg, "pdp.training.0.date", "2028-02-15")
             fill_bind(pg, "pdp.manager", "Strong, accurate analysis; reporting timeliness and actionable, stakeholder-ready recommendations are the priorities for 2028.")
             pg.wait_for_timeout(450)
-            check("Part III complete; multiple development actions and training rows saved", pg.locator('.ap-part[data-v="III"].done').count() == 1 and len(R(pg)["r3"]["appraisal"]["pdp"]["ld"]) == 2 and R(pg)["r3"]["appraisal"]["pdp"]["training"][0]["date"] == "2028-02-15")
-            check("Employee and manager comments kept separate", R(pg)["r3"]["appraisal"]["pdp"]["employee"] == "" and "Strong, accurate analysis" in R(pg)["r3"]["appraisal"]["pdp"]["manager"])
+            check("Part III saved (multiple development actions and training rows); employee and manager comments kept separate", pg.locator('.ap-part[data-v="III"].done').count() == 1 and len(R(pg)["r3"]["appraisal"]["pdp"]["ld"]) == 2 and R(pg)["r3"]["appraisal"]["pdp"]["training"][0]["date"] == "2028-02-15" and R(pg)["r3"]["appraisal"]["pdp"]["employee"] == "")
             shot(pg, "p07c_appraisal_part3")
-            pg.click("#go-review"); pg.wait_for_timeout(300)
-            summ = pg.inner_text("#appraisal-summary")
-            check("Review summary shows employee details, Parts I–III, scores, rating, manager comments and completion status", all(x in summ for x in ["Omar Hassan", "Part I", "Part II", "Part III", f"{exp_overall}%", "Good", "Strong, accurate analysis", "Executive presentation skills", "Ready to finalize"]) and pg.locator("#appraisal-summary .ck.no").count() == 0)
-            check("Bias reflection shown on the review page", "Bias check" in pg.inner_text("main") and R(pg)["r3"]["bias"]["result"] is not None)
-            check("Bias feedback grounded (none flagged for evidence-based reasoning)", R(pg)["r3"]["bias"]["result"]["flags"] == [])
-            shot(pg, "p09a_appraisal_review")
-            pg.click("#reconsider"); pg.wait_for_timeout(200)
-            check("Participant can reconsider the appraisal", R(pg)["r3"]["appraisal"]["status"] == "draft")
-            part("III"); fill_bind(pg, "pdp.manager", "As last year, he exceeded: strong, accurate analysis; timeliness and actionable recommendations remain the priorities.")
-            act(pg, "submitAppraisal"); pg.wait_for_function("() => UI.busy === null", timeout=15000); pg.wait_for_timeout(300)
-            flags = R(pg)["r3"]["bias"]["result"]["flags"]
-            check("Anchoring flagged only when the reasoning shows it, with a real quote", len(flags) == 1 and flags[0]["bias"] == "anchoring" and flags[0]["evidence"] in R(pg)["r3"]["appraisal"]["pdp"]["manager"])
-            pg.click("#finalize"); pg.wait_for_timeout(200)
-            check("Reflection required before finalizing", not R(pg)["r3"]["done"])
-            fill_bind(pg, "bias.reflection", "I referred to last year's rating; the current evidence supports the result on its own, so I removed that reference.")
-            pg.click("#finalize"); pg.wait_for_function("() => UI.busy === null", timeout=15000); pg.wait_for_timeout(500)
+            check("No bias check, reflection, reconsider or finalize step anywhere", not re.search(r"Bias check|Your reflection|Reconsider|Finalize appraisal|overlooked|overemphasi", pg.inner_text("main")) and pg.locator("#reconsider, #finalize, #go-review").count() == 0)
+            pg.click("#appraisal-continue"); pg.wait_for_timeout(400)
             r = R(pg)
-            check("Appraisal finalized and assessed", r["r3"]["done"] and r["r3"]["final"]["assessment"])
+            check("Completing the conversation (appraisal already submitted) completes the cycle", r["r3"]["done"] and r["r3"]["conv"]["ended"] and r["r3"]["conv"]["outcome"] == "completed")
+            check("HR closing email delivered once, with a new-email notification", pg.evaluate("mailList().filter(m => m.id === 'closed').length") == 1 and (pg.locator(".mail-pop").count() == 1 or state(pg)["notified"].get("closed")))
+            pg.wait_for_function("() => S.recs.omar.r3.final.assessment && S.recs.omar.r3.sbii.result", timeout=15000); pg.wait_for_timeout(300)
+            r = R(pg); sb = r["r3"]["sbii"]["result"]
+            check("Discussion assessed behind the scenes: strong SBII (≥10/12), mapped to 5 points", sb["total"] >= 10 and sb["points"] == round(sb["total"] * 5 / 12), str(sb["scores"]))
+            check("Pulse: fair feedback +Trust and development agreement +Development (own slots; not from the score)", r["pulse"]["slots"].get("feedback") == "fair_feedback" and r["pulse"]["slots"].get("dev_agreement") == "development_agreement")
             fc = {c["id"]: c for c in r["r3"]["final"]["assessment"]["criteria"]}
-            check("Year-end conversation points come from the SBII check (no double count; Round 3 still 25)", fc["r3_conv_feedback"]["score"] == r["r3"]["sbii"]["result"]["points"] and "/12" in fc["r3_conv_feedback"]["reason"] and pg.evaluate("AIS.scoring.reduce((a, g) => a + g.max, 0)") == 100)
+            check("Year-end conversation points come from the SBII check (no bias-reflection criterion; Round 3 still 25; total 100)", fc["r3_conv_feedback"]["score"] == sb["points"] and "r3_conv_bias" not in fc and pg.evaluate("AIS.scoring.reduce((a, g) => a + g.max, 0)") == 100 and pg.evaluate("AIS.scoring.filter(g => g.round === 3).reduce((a, g) => a + g.max, 0)") == 25)
+            pg.goto(U + "#inbox/closed"); pg.wait_for_timeout(300)
+            mail = pg.inner_text(".mail")
+            check("Closing email: subject, HR sender and the exact message", "Performance Cycle 2027 — Thank You" in mail and "NextWave Human Resources" in mail and "performance management does not end with the annual appraisal." in mail and "Thank you for completing Omar Hassan's 2027 performance appraisal" in mail and pg.locator(".mail .mail-body b").count() >= 1)
+            check("Closing block: 2027 PERFORMANCE CYCLE COMPLETED, quote and SET → CHECK → OPTIMIZE → REVIEW → EVOLVE", "2027 PERFORMANCE CYCLE COMPLETED" in pg.inner_text("#cycle-close") and "Great performance is not managed once a year." in pg.inner_text("#cycle-close") and [t.strip() for t in pg.locator(".sj-step").all_inner_texts()] == ["SET", "CHECK", "OPTIMIZE", "REVIEW", "EVOLVE"])
+            shot(pg, "p10_closing_email")
+            pg.reload(); pg.wait_for_timeout(600)
+            check("Closing email appears only once after refresh; appraisal and conversation records preserved", pg.evaluate("mailList().filter(m => m.id === 'closed').length") == 1 and R(pg)["r3"]["conv"]["log"][-1]["from"] == "sys" and R(pg)["r3"]["appraisal"]["what"][objs[0]["id"]]["actual"] == "9")
+            pg.goto(U + "#reflection"); pg.wait_for_timeout(300)
+            check("The old review/reflection link opens the appraisal form", pg.url.endswith("#appraisal") and "Bias check" not in pg.inner_text("main"))
             hist = r["pulse"]["history"]; base = {"performance": 80, "trust": 60, "development": 55}
             summed = {k: base[k] + sum(h["delta"][k] for h in hist) for k in base}
             check("Pulse history consistent with the final values", summed == r["pulse"]["values"], f"{summed} vs {r['pulse']['values']}")

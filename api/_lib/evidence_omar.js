@@ -9,7 +9,7 @@
    - [E] established scenario fact (Phase 4 brief / former Pathway C dataset / mid-year emails)
    - [A] NEW scenario detail added for the registers — needs approval (see README)
    ========================================================= */
-const VERSION = "2027.2";
+const VERSION = "2027.3";
 
 /* ---------- Business calendar (one definition, used for every date below) ---------- */
 /* [A] NextWave working days: Monday–Friday. Company holiday in the 2027 performance year: Friday 1 January 2027.
@@ -142,10 +142,42 @@ const SUMMARY = [
   if (avg(q.slice(2)) !== 3.25) fail("feedback");
 })();
 
+/* ---------- Measures for the year-end summary: one consistent outcome, expressed in each unit a participant's measurement may use.
+   Keys match the measure ids in src/evidence_map.js. Values are derived from the registers above (never invented per participant). */
+const yearAvg = avg(q), h1 = avg(q.slice(0, 2)), h2 = avg(q.slice(2));
+const MEASURES = {
+  rep_count: { count: 12, pct: 100, label: "Monthly reports submitted", evidence: "All 12 scheduled monthly reports were submitted." },
+  rep_ontime: { count: onTime, pct: pct1(onTime, 12), label: "Reports submitted on time", evidence: `${pct1(onTime, 12)}% of scheduled reports were submitted on time (${onTime} of 12); ${pct1(12 - onTime, 12)}% were late (June, August, October).` },
+  rep_late: { count: 12 - onTime, pct: pct1(12 - onTime, 12), lower: true, label: "Late reports", evidence: `${12 - onTime} of 12 reports were late (June 2, August 3 and October 2 working days).` },
+  rep_quality: { count: passed, pct: pct1(passed, 12), label: "Reports passing quality review", evidence: `${passed} of 12 reports (${pct1(passed, 12)}%) passed quality review without major corrections; the October report needed a major correction.` },
+  rep_escalate: { count: 0, pct: 0, of: 3, label: "Deadline conflicts escalated in advance", evidence: "No advance escalation is documented for any of the three late reports." },
+  rec_count: { count: RECOMMENDATIONS.length, label: "Recommendations submitted", evidence: `${RECOMMENDATIONS.length} evidence-based recommendations were submitted; ${withAction} included a proposed action.` },
+  rec_action: { count: withAction, pct: pct1(withAction, RECOMMENDATIONS.length), label: "Recommendations with a proposed action", evidence: `${withAction} of ${RECOMMENDATIONS.length} recommendations (${pct1(withAction, RECOMMENDATIONS.length)}%) included a proposed action; 2 had no clearly defined next step.` },
+  rec_adopt: { count: adopted, pct: pct1(adopted, RECOMMENDATIONS.length), business: true, label: "Recommendations adopted", evidence: `${adopted} of ${RECOMMENDATIONS.length} recommendations was adopted, 1 is under review and 3 were not adopted. Adoption is a management decision.` },
+  feedback: { scale: yearAvg, h1, h2, label: "Stakeholder feedback (1–5)", evidence: `Average ${Math.round(yearAvg * 10) / 10}/5 for the year (H1 ${h1}, H2 ${h2}); scores declined from 3.6 in Q1 to 3.3 in Q4.` },
+  consult: { count: 1, periodOnly: "h2", label: "Structured stakeholder consultations", evidence: "One structured consultation is documented (July, called by Youssef Ali), with no documented follow-up actions. There are no consultation records for January–June." },
+  development: { count: 0, label: "Formal development activities", evidence: "No formal coaching or development activity is recorded by HR after July." },
+  intelligence: { qualitative: true, label: "Competitive intelligence", evidence: "Identified that Valtora's discount applied only to 12-month contracts (July); shared by email and used by Sales only in December." },
+  business: { business: true, label: "Department results", evidence: "Department results: win rate 28% (December), price objections 24%, qualified opportunities −6% vs baseline. These are not individual results." }
+};
+/* ---------- Competency evidence cards (factual observations from the record; never a rating) ---------- */
+const COMPETENCY_EVIDENCE = {
+  analytical: { strength: "Reconciled conflicting Valtora pricing sources and identified the 12-month-contract condition behind the discount (July).", development: "The October report needed a major correction after a rushed final check." },
+  acumen: { strength: "Recommended a value-based response rather than matching Valtora's price; this was the recommendation adopted in September.", development: "Two of five recommendations had no clearly defined next step." },
+  communication: { strength: "Analysis was accurate: 11 of 12 reports passed quality review without major corrections.", development: "Leadership briefings remained detailed and technical; findings were increasingly shared by email rather than discussed." },
+  stakeholder: { strength: "Took part in the July consultation called by Youssef Ali on Valtora pricing questions.", development: "Fewer interactions with Operations after July; the September meeting with Nadine Farouk ended without agreed next steps." },
+  problem: { strength: "Found the condition behind Valtora's pricing advantage (12-month contracts), a root-cause insight for Sales.", development: "Nadine Farouk: “We still struggle to get practical options out of the analysis.”" },
+  time: { strength: "All 12 scheduled reports were submitted; 9 of 12 on time.", development: "Three reports were late, with no advance escalation of the deadline conflicts." },
+  accountability: { strength: "Delivered every scheduled report and the requested Valtora competitor analysis.", development: "No record of raising deadline risks before they affected delivery." },
+  adaptability: { strength: "Delivered the requested competitor analysis soon after Valtora's launch, alongside regular reporting.", development: "Briefings kept the same detailed format after stakeholders asked for practical options." },
+  strategic: { strength: "Flagged the margin risk of matching Valtora's price across the board.", development: "Business implications and next steps were often missing from recommendations." },
+  coaching: { strength: "Not observable in the 2027 record: Omar has no coaching responsibilities.", development: "" }
+};
+
 const DATASET = {
   version: VERSION, calendar: CALENDAR, title: "Year-End Performance Record 2027 — Omar Hassan", asOf: "Wed 1 Dec 2027",
   summary: SUMMARY, registers: { reporting: REPORTING, recommendations: RECOMMENDATIONS, feedback: FEEDBACK, comments: COMMENTS, engagement: ENGAGEMENT, intelligence: INTELLIGENCE, development: DEVELOPMENT, behaviours: BEHAVIOURS },
-  business: BUSINESS,
+  business: BUSINESS, measures: MEASURES, competencies: COMPETENCY_EVIDENCE,
   company: { label: "Department results — context, not individual performance", metrics: BUSINESS.metrics }   /* used by the dashboard */
 };
 

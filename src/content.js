@@ -49,8 +49,13 @@ function hrMessages() {
     yearend: { subject: "Year-End Performance Update and Appraisal", date: SIM_DATES.yearend,
       body: ["Dear Commercial Director,", "Please find attached the year-end performance update for Omar Hassan.", "Review the evidence, compare the results with the objectives and competencies agreed in January, and complete the year-end appraisal.", "NextWave HR"],
       action: { l: "Open Final Appraisal", go: "appraisal" } },
-    closed: { subject: "Performance Appraisal Completed", date: SIM_DATES.closed,
-      body: ["Dear Commercial Director,", `Thank you. The ${APP.cycleYear} appraisal for Omar Hassan has been completed and recorded.`, "NextWave HR"],
-      action: { l: "View feedback report", go: "review" } }
+    /* Closing email: delivered once, only after the appraisal is submitted AND the performance conversation is completed */
+    closed: { subject: `Performance Cycle ${APP.cycleYear} — Thank You`, date: SIM_DATES.closed, closing: true,
+      body: ["Dear Commercial Director,",
+        `Thank you for completing Omar Hassan's ${APP.cycleYear} performance appraisal and taking the time to discuss his achievements, challenges, and development opportunities.`,
+        "Your commitment to setting clear expectations, monitoring progress, providing feedback, and making evidence-based decisions helps build a culture where employees understand what is expected and have the support they need to perform and grow.",
+        `As we close the ${APP.cycleYear} performance cycle, remember that **performance management does not end with the annual appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.`,
+        "Thank you for your leadership and commitment to building a high-performance culture at NextWave.",
+        "Best regards,\n**NextWave Human Resources**"] }
   };
 }
