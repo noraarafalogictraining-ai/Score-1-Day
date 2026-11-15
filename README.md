@@ -93,6 +93,19 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 
   A period unlocks only after its release, and the dashboard switches to the newest period when results arrive. All figures come from one source (`bizData` in `src/views_monitor.js`, using `DASHBOARD` and the server's year-end company figures). Figures the scenario doesn't define (for example revenue growth actuals) show "—" with "Not published".
 
+## Change request (November): website section, separate Chat, journey ends at mid-year
+
+- **NextWave Company Website:** a collapsible section at the bottom of every page (`websiteSection` in `src/ui.js`). The address is set in `src/content.js` → `NEXTWAVE_WEBSITE.url`. It is empty until the approved address is provided, and the section then says the website "will be available here soon". With an address, the site is embedded in a frame with an **Open in a new tab** button, in case the site blocks embedding.
+- **Chat and Inbox are separate.** The sidebar shows **Home · Inbox · Chat · Performance Management**.
+  - The **Inbox** holds email only, and its count is email only.
+  - **Chat** is its own page with the whole Omar thread, history and AI behaviour, and its own unread count. The floating chat bubble still announces new messages on other pages.
+- **The Final Appraisal round is removed:**
+  - Gone: the year-end code 7319, the year-end evidence, the appraisal form and its scoring, the final conversation with Omar, the year-end HR email, the Year-End dashboard period and the sidebar item.
+  - Old links (`#appraisal`, `#yearend`, `#reflection`, `#review`) open Home.
+  - The journey now ends when the participant **submits the mid-year review**. HR's "Performance Cycle 2027 — Thank You" email then arrives once, with wording adapted to the shorter journey and the same closing block.
+- **The Learning Score is removed for participants.** The January and mid-year AI assessments still run in the background only because they drive the Employee Pulse and Omar's tone; no score is shown.
+- The server still contains the unused year-end code (API endpoints and the evidence file); nothing in the participant interface reaches it.
+
 ## Year-end refinement and simulation closure
 
 **Year-End Performance Summary** (replaces the long record in the participant view; `yearEndBody` in `src/views_appraisal.js`, mapping in `objectiveEvidence` in `src/evidence_map.js`). It has four compact sections, and only A is open by default.
@@ -334,7 +347,7 @@ Since Phase 5 there is a single canonical record for every participant: see *Yea
 
 ## Testing results
 
-`tests/test_pilot.py`: 289 checks pass in scripted test mode and no-AI mode (including the Objectives of the Year form, SMART checks, the Performance Appraisal Form calculations, rating bands, development plan, migration and the full January–December flow). They cover:
+`tests/test_pilot.py`: 234 checks pass in scripted test mode and no-AI mode (including the Objectives of the Year form, SMART checks, the Performance Appraisal Form calculations, rating bands, development plan, migration and the full January–December flow). They cover:
 - the API (methods, invalid JSON, oversized or tampered input, the same year-end record for everyone, no-AI 503s);
 - that confidential files are not downloadable and the page source contains no hidden facts, model answers or datasets;
 - the scoring total (100 = 35/40/25) and the blaming → pathway C → punitive rule;

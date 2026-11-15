@@ -6,7 +6,7 @@ import os, subprocess, sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, "src")
 ORDER = ["assets.js", "employees.js", "pilot.js", "content.js", "state.js", "appraisal_calc.js", "evidence_map.js", "ui.js", "score.js",
-         "views_core.js", "views_goals.js", "views_chat.js", "views_monitor.js", "views_appraisal.js", "views_review.js", "events.js"]
+         "views_core.js", "views_goals.js", "views_chat.js", "views_monitor.js", "events.js"]
 OUT = os.path.join(ROOT, "public")
 
 def read(name):

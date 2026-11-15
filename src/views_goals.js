@@ -9,7 +9,7 @@ VIEWS.goals = function () {
   const v = planValidation(r), unread = chatUnread(r);
   const banner = g.status === "pending_alignment"
     ? `<div class="notice" style="margin-bottom:14px">${icon("info", "i-sm")}<span class="grow"><b>Pending Employee Alignment.</b> The plan has been shared with Omar.${r.align.ready ? " Omar is ready to go ahead." : ""}</span>${r.align.ready ? `<button class="btn sm primary" data-act="alignConfirm" id="align-confirm-page">Confirm alignment</button>` : ""}<button class="btn sm" data-act="reopenPlan">Edit the plan</button></div>`
-    : g.status === "approved" ? `<div class="notice good" style="margin-bottom:14px">${icon("check", "i-sm")}<span>The performance plan is confirmed for ${APP.cycleYear}. It carries forward into the year-end appraisal.</span></div>` : "";
+    : g.status === "approved" ? `<div class="notice good" style="margin-bottom:14px">${icon("check", "i-sm")}<span>The performance plan is confirmed for ${APP.cycleYear}.</span></div>` : "";
   const tabs = [["objectives", "Performance Objectives", g.objectives.length], ["competencies", "Competencies", g.comps.length]];
   return pageHead("Performance Management / Objectives", `Objectives · ${esc(E.name)}`, statusChip(g.status)) + `
   <div class="card pad" style="margin-bottom:14px"><div class="plan-head">

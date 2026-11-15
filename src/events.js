@@ -86,27 +86,8 @@ function releaseRound(k) {
   if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora's lower-priced Customer360 alternative put the Commercial Department under pressure.");
   ensureChatOpenings(r);
   save();
-  if (k === "r3") loadYearEnd();
 }
-async function loadYearEnd() {
-  const r = rec();
-  if (r.r3.dataset && r.r3.dataset.version === EVIDENCE_VERSION) return;   /* older saves hold an earlier record: reload the current one */
-  if (UI.busy === "yearend") return;
-  UI.busy = "yearend"; r.r3.error = null;
-  try {
-    const res = await api("/api/yearend", {});
-    r.r3.dataset = res.dataset; r.r3.tag = res.tag; UI.period = null;   /* show the newest period when results arrive */
-    /* A December Development increase needs DOCUMENTED follow-through in the record, never mid-year coaching quality alone */
-    const ft = (res.dataset.registers.development || []).filter(x => x.followThrough);
-    if (ft.length) applyPulse(r, "documented_followthrough", `Documented development follow-through: ${ft.map(x => x.record).join("; ")}.`);
-    else pulseNote(r, "intervention", "No documented development follow-through", "The year-end record shows no coaching or development activity after July: no Pulse change.", 3);
-  } catch (e) { r.r3.error = `The year-end update could not be loaded: ${e.message}`; }
-  UI.busy = null; save(); render();
-}
-function afterRoute() {
-  const r = rec();
-  if (S.session && UI.signedIn && ["yearend", "inbox", "appraisal"].includes(UI.route) && r3Status(r) !== "locked" && !(r.r3.dataset && r.r3.dataset.version === EVIDENCE_VERSION) && !r.r3.error) loadYearEnd();
-}
+function afterRoute() { /* the year-end round was removed: nothing to load on navigation */ }
 
 /* ---------- conversation ---------- */
 async function sendChat(kind, text) {
@@ -242,11 +223,10 @@ const ACTIONS = {
   /* --- rounds --- */
   releaseCode(el) {
     const k = el.dataset.k, v = ((document.getElementById("code-" + k) || {}).value || "").trim();
-    if (k === pendingRelease() && v === RELEASE_CODES[k]) { UI.codeErr = null; releaseRound(k); toast(k === "r2" ? "Mid-year business update received." : "Year-end update received."); k === "r2" ? go("home") : go("inbox", "yearend"); }
+    if (k === pendingRelease() && v === RELEASE_CODES[k]) { UI.codeErr = null; releaseRound(k); toast("Mid-year business update received."); go("home"); }
     else { UI.codeErr = k; render(); }
   },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
-  loadYearEnd() { rec().r3.error = null; loadYearEnd(); },
   rate(el) { setPath(S, el.dataset.path, +el.dataset.v); afterBind(el.dataset.path); save(); render(); },
   submitAppraisal() {
     const r = rec(), v = appraisalValidation(r), a = r.r3.appraisal;
@@ -258,6 +238,7 @@ const ACTIONS = {
     save(); toast("Appraisal submitted to Omar."); render();
   },
   apGoto(el) { UI.apPart = el.dataset.v; go("appraisal"); },
+  siteToggle() { UI.siteOpen = !UI.siteOpen; render(); if (UI.siteOpen) { const el = document.getElementById("nw-site"); if (el) el.scrollIntoView({ block: "nearest" }); } },
   saveDraft() { save(true); toast("Draft saved."); },
   apPart(el) { UI.apPart = el.dataset.v; UI.endConfirm = false; render(); const f = document.getElementById("appraisal-form"); if (f) f.scrollIntoView({ block: "start" }); },
   pdpAdd(el) { const p = rec().r3.appraisal.pdp, k = el.dataset.k; (p[k] = p[k] || []).push(k === "ld" ? { area: "", action: "" } : { course: "", source: "", date: "" }); save(); render(); },

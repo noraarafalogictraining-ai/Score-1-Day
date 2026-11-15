@@ -5,12 +5,11 @@
 /* Next event: "Wait for the facilitator message", then the participant enters the code announced in the room. */
 function pendingRelease(r = rec()) {
   if (!S.released.r2 && goalsApproved(r)) return "r2";
-  if (S.released.r2 && !S.released.r3 && r.r2.submitted) return "r3";
   return null;
 }
 function waitCard(r = rec()) {
   const k = pendingRelease(r); if (!k) return "";
-  const what = k === "r2" ? "the mid-year business update" : "the year-end performance update";
+  const what = "the mid-year business update";
   return `<section class="card wait-card" id="wait-card"><div class="wait-b">${icon("clock")}<div class="grow stack-sm">
       <h3>Wait for the facilitator message</h3>
       <p class="small t2">Your facilitator will announce when ${what} is available and give you a code. Enter it here to continue.</p>
@@ -68,11 +67,10 @@ function evMissing(d) { const m = []; if (!d.period.trim()) m.push("Date / Perio
    ========================================================= */
 const PERIODS_DASH = [
   { id: "start", l: "Start of Year", sub: "January 2027" },
-  { id: "mid", l: "Mid-Year", sub: "June / July 2027" },
-  { id: "year", l: "Year-End", sub: "December 2027" }
+  { id: "mid", l: "Mid-Year", sub: "June / July 2027" }
 ];
 const ceo = (id) => CEO_OBJECTIVES.find(o => o.id === id);
-function periodAvailable(id, r = rec()) { return id === "start" || (id === "mid" && S.released.r2) || (id === "year" && !!(r.r3.dataset && r.r3.dataset.company && r.r3.dataset.company.metrics)); }
+function periodAvailable(id, r = rec()) { return id === "start" || (id === "mid" && S.released.r2) || (id === "year" && false && !!(r.r3.dataset && r.r3.dataset.company && r.r3.dataset.company.metrics)); }
 function currentPeriod(r = rec()) {
   if (UI.period && periodAvailable(UI.period, r)) return UI.period;
   return periodAvailable("year", r) ? "year" : periodAvailable("mid", r) ? "mid" : "start";
@@ -196,7 +194,7 @@ VIEWS.round2 = function () {
     <div class="card"><div class="card-h"><div><h3>Your interpretation of the business data</h3><div class="xs muted">What do the mid-year results show, and what do they not tell you?</div></div></div><div class="card-b">
       ${r.r2.submitted ? `<div class="small t2" style="white-space:pre-line">${esc(r.r2.interpretation) || "<span class='muted'>None written</span>"}</div>` : `<textarea class="ta" rows="4" id="${P("r2", "interpretation")}" ${bind(P("r2", "interpretation"))} maxlength="3000" placeholder="Summarise what the mid-year business results show, what may explain them, and what you still need to find out.">${esc(r.r2.interpretation)}</textarea>`}
     </div></div>
-    ${r.r2.submitted ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Mid-year review submitted.</span></div>${r.r2.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r2.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round2">Retry assessment</button>` : ""}</div>` : ""}`
+    ${r.r2.submitted ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Mid-year review submitted. HR has sent you a message.</span><button class="btn sm" data-act="go" data-go="inbox/closed">Open message</button></div>${r.r2.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r2.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round2">Retry assessment</button>` : ""}</div>` : ""}`
     : `<div class="card pad row between"><span class="small t2">${ok ? "Everything is ready. Submitting records your interpretation, the conversation with Omar and your Evidence Log." : "Complete the checklist to submit the mid-year review."}</span><button class="btn primary" data-act="submitR2" id="submit-r2" ${!ok || UI.busy ? "disabled" : ""}>${UI.busy === "round2" ? "Submitting…" : "Submit mid-year review"}</button></div>`}
   </div>`;
 };

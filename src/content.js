@@ -12,11 +12,14 @@ const APP = {
 };
 const SIM_DATES = {
   start: "Mon 4 Jan 2027", deadline: "Mon 11 Jan 2027", submitted: "Fri 8 Jan 2027", approved: "Mon 11 Jan 2027",
-  alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 17 Dec 2027"
+  alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 9 Jul 2027"
 };
+/* NextWave company website shown in the collapsible section at the bottom of each page.
+   Leave url empty until the approved address is provided; never invent one. */
+const NEXTWAVE_WEBSITE = { url: "" };
 /* Codes the facilitator announces in the room; participants enter them on the "Wait for the facilitator message" card.
    (A local gate on each device; visible in the page source.) */
-const RELEASE_CODES = { r2: "4826", r3: "7319" };
+const RELEASE_CODES = { r2: "4826" };   /* the year-end round (former code 7319) was removed */
 
 /* Form vocabularies (EVIDENCE_SOURCES and FREQUENCIES come from employees.js) */
 const PERIODS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Q1", "Q2", "Q3", "Q4", "H1 (Jan–Jun)", "H2 (Jul–Dec)", "Full year"];
@@ -31,7 +34,7 @@ const RATING_SCALE = [
 const LEVELS = [{ id: "basic", l: "Basic" }, { id: "intermediate", l: "Intermediate" }, { id: "advanced", l: "Advanced" }];
 const OBJ_RANGE = { min: 3, max: 5, hardMax: 8 };
 const COMP_RANGE = { min: 3, max: 5 };
-const CHAT_LIMITS = { message: 1500, diagnosticMin: 3, appraisalMin: 1 };
+const CHAT_LIMITS = { message: 1500, diagnosticMin: 3 };
 const BIAS_LABEL = { recency: "Recency bias", halo: "Halo effect", horn: "Horn effect", confirmation: "Confirmation bias", leniency: "Leniency bias", severity: "Severity bias", anchoring: "Previous-rating anchoring" };
 
 /* ---------- HR messages (system text) ---------- */
@@ -46,15 +49,12 @@ function hrMessages() {
       body: ["Dear Commercial Director,", "Omar Hassan's performance expectations have been established and the performance contract is confirmed.", "Throughout the year, you are responsible for:", "__LIST__", "The next formal checkpoint will take place in six months. Please maintain your performance records throughout the year.", "NextWave HR"],
       list: ["Tracking progress.", "Documenting evidence.", "Monitoring performance gaps.", "Maintaining regular employee communication.", "Taking appropriate management action."],
       action: { l: "Open Evidence Log", go: "evidence" } },
-    yearend: { subject: "Year-End Performance Update and Appraisal", date: SIM_DATES.yearend,
-      body: ["Dear Commercial Director,", "Please find attached the year-end performance update for Omar Hassan.", "Review the evidence, compare the results with the objectives and competencies agreed in January, and complete the year-end appraisal.", "NextWave HR"],
-      action: { l: "Open Final Appraisal", go: "appraisal" } },
-    /* Closing email: delivered once, only after the appraisal is submitted AND the performance conversation is completed */
+    /* Closing email: delivered once, when the participant submits the mid-year review (the year-end round was removed) */
     closed: { subject: `Performance Cycle ${APP.cycleYear} — Thank You`, date: SIM_DATES.closed, closing: true,
       body: ["Dear Commercial Director,",
-        `Thank you for completing Omar Hassan's ${APP.cycleYear} performance appraisal and taking the time to discuss his achievements, challenges, and development opportunities.`,
+        `Thank you for leading Omar Hassan's ${APP.cycleYear} performance journey, from agreeing his performance expectations to reviewing his progress and coaching him through a changing business environment.`,
         "Your commitment to setting clear expectations, monitoring progress, providing feedback, and making evidence-based decisions helps build a culture where employees understand what is expected and have the support they need to perform and grow.",
-        `As we close the ${APP.cycleYear} performance cycle, remember that **performance management does not end with the annual appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.`,
+        "As you continue through the year, remember that **performance management does not end with a single review or appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.",
         "Thank you for your leadership and commitment to building a high-performance culture at NextWave.",
         "Best regards,\n**NextWave Human Resources**"] }
   };

@@ -96,8 +96,7 @@ function mailList() {
   const r = rec(), M = hrMessages(), out = [{ id: "start", kind: "hr", ...M.start }];
   if (goalsApproved(r)) out.unshift({ id: "approved", kind: "hr", ...M.approved });
   if (S.released.r2) STAKEHOLDER_EMAILS.forEach(e => out.unshift({ ...e, id: "sh-" + e.id, kind: "stakeholder" }));   /* newest first */
-  if (r3Status(r) !== "locked") out.unshift({ id: "yearend", kind: "hr", attach: true, ...M.yearend });
-  if (r.r3.done) out.unshift({ id: "closed", kind: "hr", ...M.closed });
+  if (r.r2.submitted) out.unshift({ id: "closed", kind: "hr", ...M.closed });   /* the journey ends with the mid-year review */
   return out.map(m => ({ ...m, unread: !S.read[m.id] }));
 }
 function markRead(id) { S.read[id] = true; save(); }
@@ -184,16 +183,16 @@ function pulseHistory(r, showRound = false) {
 }
 
 /* ---------- shell ---------- */
-const PM_ROUTES = ["goals", "evidence", "appraisal"];
+const PM_ROUTES = ["goals", "evidence"];
 function navItems() {
-  const r = rec(), unreadMail = mailList().filter(m => m.unread).length + chatUnread(r);
+  const r = rec(), unreadMail = mailList().filter(m => m.unread).length;
   return [
     { id: "home", l: "Home", icon: "home", dot: S.released.r2 && !r.r2.seenDashboard },
-    { id: "inbox", l: "My Inbox", icon: "mail", cnt: unreadMail },
+    { id: "inbox", l: "Inbox", icon: "mail", cnt: unreadMail },
+    { id: "chat", l: "Chat", icon: "chat", cnt: chatUnread(r) },
     { id: "pm", l: "Performance Management", icon: "layers", children: [
       { id: "goals", l: "Objectives", icon: "target" },
-      { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) },
-      { id: "appraisal", l: "Final Appraisal", icon: "clipboard", locked: appraisalStatus(r) === "locked" }
+      { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) }
     ] }
   ];
 }
@@ -238,6 +237,17 @@ function empChip() { const E = EMP(); return `<span class="row nowrap" style="ga
 function lockedPanel(title, text) { return `<div class="card"><div class="empty">${icon("lock")}<h3>${title}</h3><p class="small" style="max-width:58ch">${text}</p></div></div>`; }
 
 /* ---------- render ---------- */
+/* NextWave Company Website: collapsible, at the bottom of the main content on every page */
+function websiteSection() {
+  const url = (NEXTWAVE_WEBSITE.url || "").trim(), open = !!UI.siteOpen;
+  return `<section class="site-sec" id="nw-site">
+    <button class="site-h" data-act="siteToggle" aria-expanded="${open}" id="nw-site-toggle">${icon("home", "i-sm")}<b class="grow">NextWave Company Website</b>${url ? `<span class="xs muted">${esc(url.replace(/^https?:\/\//, ""))}</span>` : ""}${icon("chevdown", "i-sm")}</button>
+    ${open ? `<div class="site-b">${url
+      ? `<div class="row between site-bar"><span class="xs muted">Browse the website here, or open it in a new tab if it does not display.</span><a class="btn sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer" id="nw-site-newtab">${icon("eye", "i-sm")} Open in a new tab</a></div>
+         <iframe class="site-frame" src="${esc(url)}" title="NextWave Company Website" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>`
+      : `<p class="small t2" id="nw-site-pending">The NextWave company website will be available here soon.</p>`}</div>` : ""}
+  </section>`;
+}
 function render() {
   if (S.session && UI.signedIn) queueNewMail();
   const app = document.getElementById("app");
@@ -247,7 +257,7 @@ function render() {
   if (!S.session || !UI.signedIn) html = VIEWS.login();
   else {
     const v = VIEWS[UI.route] || VIEWS.home;
-    html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}</main></div>`;
+    html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}${websiteSection()}</main></div>`;
   }
   if (UI.chatOpen && S.session && UI.signedIn) markChatSeen();
   if (S.session && UI.signedIn) html += chatBubble() + chatPanel() + mailPopHTML();
