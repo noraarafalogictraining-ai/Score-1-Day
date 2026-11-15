@@ -45,7 +45,10 @@ async function send(req) {
     if (e instanceof Anthropic.AuthenticationError) throw new AIError("ai_auth", "The AI provider rejected the server's API key.", 503);
     if (e instanceof Anthropic.RateLimitError) throw new AIError("ai_busy", "The AI service is busy. Please try again in a moment.", 503);
     if (e instanceof Anthropic.APIConnectionError) throw new AIError("ai_network", "The server could not reach the AI service.", 503);
-    if (e instanceof Anthropic.APIError) throw new AIError("ai_error", `AI service error (${e.status}).`, 502);
+    if (e instanceof Anthropic.APIError) {
+      const why = String((e.error && e.error.error && e.error.error.message) || "").replace(/sk-[\w-]+/g, "[key]").slice(0, 200);
+      throw new AIError("ai_error", `AI service error (${e.status})${why ? `: ${why}` : "."}`, 502);
+    }
     throw e;
   }
   if (res.stop_reason === "refusal") throw new AIError("ai_refusal", "The AI declined to respond to this message. Please rephrase.", 422);
