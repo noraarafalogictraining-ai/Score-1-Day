@@ -722,13 +722,12 @@ table.tbl.reg { min-width: 640px; font-size: .8rem; } .tbl.reg td, .tbl.reg th {
 .chat-pane .chat-log { max-height: 520px; min-height: 360px; } .chat-pane .chat-foot { padding: 10px 12px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
 @media (max-width: 760px) { .chat-page .list { display: none; } .chat-pane { border-left: 0; } }
 /* NextWave Company Website section */
-.site-sec { margin-top: 28px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
-.site-h { width: 100%; display: flex; gap: 10px; align-items: center; padding: 12px 16px; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: left; }
-.site-h > svg:last-child { color: var(--muted); transition: transform .15s; } .site-h[aria-expanded="true"] > svg:last-child { transform: rotate(180deg); }
-.site-b { border-top: 1px solid var(--line); padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 10px; }
-.site-frame { width: 100%; height: 640px; border: 1px solid var(--line); border-radius: var(--r-sm); background: #fff; }
-@media (max-width: 760px) { .site-frame { height: 480px; } }
-.site-card { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: space-between; padding: 6px 0; }
+a.nav-item { text-decoration: none; }
+.nav-item .ext-i { margin-left: auto; color: var(--muted); display: inline-flex; transform: rotate(-45deg); }
+.prev-btn { width: 100%; display: flex; gap: 12px; align-items: center; padding: 14px 18px; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: left; border-radius: var(--r); }
+.prev-btn > span { display: flex; flex-direction: column; gap: 2px; }
+.prev-btn:hover { background: var(--bg-soft, rgba(0,0,0,.03)); }
+.prev-card.open .prev-btn { border-bottom: 1px solid var(--line); border-radius: var(--r) var(--r) 0 0; }
 </style>
 <div id="app"></div>
 <script>

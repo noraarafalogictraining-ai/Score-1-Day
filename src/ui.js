@@ -4,6 +4,7 @@
    ========================================================= */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const ICONS = {
+  globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.3 3.5 8.5s-1.1 6.1-3.5 8.5c-2.4-2.4-3.5-5.3-3.5-8.5s1.1-6.1 3.5-8.5Z"/>',
   home: '<path d="M4 11 12 4l8 7v9H4v-9Z"/><path d="M10 20v-5h4v5"/>',
   mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7 8 6 8-6"/>',
   bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
@@ -190,10 +191,12 @@ function navItems() {
     { id: "home", l: "Home", icon: "home", dot: S.released.r2 && !r.r2.seenDashboard },
     { id: "inbox", l: "Inbox", icon: "mail", cnt: unreadMail },
     { id: "chat", l: "Chat", icon: "chat", cnt: chatUnread(r) },
+    { id: "employee", l: "Omar Hassan – Employee Profile", icon: "user" },
     { id: "pm", l: "Performance Management", icon: "layers", children: [
       { id: "goals", l: "Objectives", icon: "target" },
-      { id: "evidence", l: "Evidence Log", icon: "log", locked: !goalsApproved(r) }
-    ] }
+      { id: "evidence", l: "Evidence Log", icon: "log" }
+    ] },
+    { id: "website", l: "NextWave Company Website", icon: "globe", href: NEXTWAVE_WEBSITE.url }
   ];
 }
 function header() {
@@ -218,6 +221,7 @@ function userDropdown() {
     <button class="dd-item" data-act="signout">${icon("logout", "i-sm")} Sign Out</button></div>`;
 }
 function navButton(n, child) {
+  if (n.href) return `<a class="nav-item ext" href="${esc(n.href)}" target="_blank" rel="noopener noreferrer" id="nav-website">${icon(n.icon)}<span>${n.l}</span><span class="ext-i" aria-label="Opens in a new tab">${icon("arrow", "i-xs")}</span></a>`;
   return `<button class="nav-item ${child ? "child" : ""} ${UI.route === n.id ? "on" : ""}" data-act="go" data-go="${n.id}">${icon(n.icon)}<span>${n.l}</span>${n.cnt ? `<span class="cnt">${n.cnt}</span>` : n.dot ? `<span class="ndot" aria-label="New"></span>` : n.locked ? `<span class="lock">${icon("lock", "i-sm")}</span>` : ""}</button>`;
 }
 function sidebar() {
@@ -237,19 +241,7 @@ function empChip() { const E = EMP(); return `<span class="row nowrap" style="ga
 function lockedPanel(title, text) { return `<div class="card"><div class="empty">${icon("lock")}<h3>${title}</h3><p class="small" style="max-width:58ch">${text}</p></div></div>`; }
 
 /* ---------- render ---------- */
-/* NextWave Company Website: collapsible, at the bottom of the main content on every page */
-function websiteSection() {
-  const url = (NEXTWAVE_WEBSITE.url || "").trim(), open = !!UI.siteOpen;
-  return `<section class="site-sec" id="nw-site">
-    <button class="site-h" data-act="siteToggle" aria-expanded="${open}" id="nw-site-toggle">${icon("home", "i-sm")}<b class="grow">NextWave Company Website</b>${url ? `<span class="xs muted">${esc(url.replace(/^https?:\/\//, ""))}</span>` : ""}${icon("chevdown", "i-sm")}</button>
-    ${open ? `<div class="site-b">${!url
-      ? `<p class="small t2" id="nw-site-pending">The NextWave company website will be available here soon.</p>`
-      : NEXTWAVE_WEBSITE.embed
-      ? `<div class="row between site-bar"><span class="xs muted">Browse the website here, or open it in a new tab if it does not display.</span><a class="btn sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer" id="nw-site-newtab">${icon("eye", "i-sm")} Open in a new tab</a></div>
-         <iframe class="site-frame" src="${esc(url)}" title="NextWave Company Website" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>`
-      : `<div class="site-card"><div class="grow stack-sm"><b>NextWave Digital</b><span class="small t2">${esc(COMPANY.slogan || "")} Explore our company, solutions and values on the NextWave website.</span><span class="xs muted">The website opens in a new tab, so your work here stays open.</span></div><a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener noreferrer" id="nw-site-newtab">${icon("eye", "i-sm")} Open the NextWave website</a></div>`}</div>` : ""}
-  </section>`;
-}
+/* NextWave Company Website: a permanent sidebar link (navItems) that opens the site in a new tab. */
 function render() {
   if (S.session && UI.signedIn) queueNewMail();
   const app = document.getElementById("app");
@@ -259,7 +251,7 @@ function render() {
   if (!S.session || !UI.signedIn) html = VIEWS.login();
   else {
     const v = VIEWS[UI.route] || VIEWS.home;
-    html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}${websiteSection()}</main></div>`;
+    html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}</main></div>`;
   }
   if (UI.chatOpen && S.session && UI.signedIn) markChatSeen();
   if (S.session && UI.signedIn) html += chatBubble() + chatPanel() + mailPopHTML();

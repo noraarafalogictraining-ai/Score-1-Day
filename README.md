@@ -107,6 +107,13 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 - HR's closing email is dated Fri 31 Dec 2027 and includes a short "What happened next" section: the documented outcome of the AI Acceleration and the documented year-end evidence about Omar (owner decision C).
 - The server still contains the unused year-end code (API endpoints and the evidence file); nothing in the participant interface reaches it.
 
+## Layout and navigation update
+
+- Sidebar: Home · Inbox · Chat · Omar Hassan – Employee Profile · Performance Management (Objectives, Evidence Log) · NextWave Company Website. No sidebar item is locked; the Evidence Log is open from the start.
+- **NextWave Company Website** is a sidebar link that opens https://nextwave-website-beta.vercel.app/ in a new tab (`navItems` in `src/ui.js`). The section at the bottom of every page was removed.
+- **Omar Hassan – Employee Profile** (`#employee`, `VIEWS.employee` in `src/views_core.js`) is the only place Omar's profile appears. It shows his role, responsibilities and strengths. A **Last Year's Performance Evidence** button opens and closes his 2026 appraisal (objectives, results, competency ratings, comments). Omar's card was removed from Home and Objectives; the Objectives submit button moved to the page header.
+- **Home** shows only the dashboard. At the start of the year it says no updates have been published. After the mid-year release it shows the business event and Omar's mid-year evidence. The GROW/RETAIN/SCALE/BUILD cards and "What happens next" box were removed from Home; the company targets remain under My Profile → My Performance Objectives.
+
 ## Alignment with the five participant documents
 
 Full comparison: `docs/DOCUMENT_ALIGNMENT_REVIEW.md`. Applied:

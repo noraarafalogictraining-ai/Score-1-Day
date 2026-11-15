@@ -238,7 +238,7 @@ const ACTIONS = {
     save(); toast("Appraisal submitted to Omar."); render();
   },
   apGoto(el) { UI.apPart = el.dataset.v; go("appraisal"); },
-  siteToggle() { UI.siteOpen = !UI.siteOpen; render(); if (UI.siteOpen) { const el = document.getElementById("nw-site"); if (el) el.scrollIntoView({ block: "nearest" }); } },
+  prevToggle() { UI.prevOpen = !UI.prevOpen; render(); const el = document.getElementById(UI.prevOpen ? "prev-2026" : "prev-btn"); if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" }); },
   saveDraft() { save(true); toast("Draft saved."); },
   apPart(el) { UI.apPart = el.dataset.v; UI.endConfirm = false; render(); const f = document.getElementById("appraisal-form"); if (f) f.scrollIntoView({ block: "start" }); },
   pdpAdd(el) { const p = rec().r3.appraisal.pdp, k = el.dataset.k; (p[k] = p[k] || []).push(k === "ld" ? { area: "", action: "" } : { course: "", source: "", date: "" }); save(); render(); },

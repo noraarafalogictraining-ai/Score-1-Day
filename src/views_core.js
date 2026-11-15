@@ -17,15 +17,29 @@ VIEWS.login = function () {
   </div>`;
 };
 
-/* ---------- Home: Commercial Overview ---------- */
+/* ---------- Home: the dashboard only ---------- */
 VIEWS.home = function () {
-  const E = EMP(), r = rec();
+  const r = rec();
   return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", `${DIRECTOR.title} · Commercial Department`) + `
   <div class="stack-lg">
     ${waitCard(r)}
-    <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee overview</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div>
-      <button class="btn" data-act="modal" data-m="profile" data-emp="${S.emp}">${icon("user", "i-sm")} View profile</button></div></div>
     ${commercialOverview(r)}
+  </div>`;
+};
+
+/* ---------- Omar Hassan – Employee Profile (dedicated sidebar section) ---------- */
+VIEWS.employee = function () {
+  const E = EMP(), open = !!UI.prevOpen;
+  return pageHead("Omar Hassan – Employee Profile", "Employee Profile") + `<div class="stack-lg">
+    <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee profile</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div></div></div>
+    <div class="info-grid">${[["clipboard", "Job title", E.title], ["layers", "Department", "Commercial"], ["arrow", "Reports to", E.role.reportsToRole], ["clock", "Time in current position", E.tenure.replace(" in position", "")], ["star", "Previous overall rating", E.prevRating]].map(([ic, k, v]) => `<div class="info-card"><span class="info-ic">${icon(ic, "i-sm")}</span><span><span class="xs muted">${k}</span><b class="small">${esc(v)}</b></span></div>`).join("")}</div>
+    <section class="purpose-card">${icon("compass")}<div><div class="eyebrow" style="color:#5ED3E2">Role purpose</div><p>${esc(E.role.purpose)}</p></div></section>
+    <section class="card"><div class="card-h"><h3>Core responsibilities</h3></div><ul class="acc-b" id="emp-resp">${E.role.responsibilities.map(x => `<li>${icon("check", "i-sm")}<span>${esc(x)}</span></li>`).join("")}</ul></section>
+    <section class="card"><div class="card-h"><h3>What Omar brings to the team</h3></div><div class="card-b stack-sm"><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div><p class="small t2">${esc(E.prevPerformance)}</p></div></section>
+    <section class="card prev-card ${open ? "open" : ""}">
+      <button class="prev-btn" id="prev-btn" data-act="prevToggle" aria-expanded="${open}" aria-controls="prev-2026">${icon("clipboard")}<span class="grow"><b>Last Year's Performance Evidence</b><span class="xs muted">2026 appraisal: objectives, results, competency ratings and comments</span></span>${icon(open ? "x" : "chevdown", "i-sm")}</button>
+      ${open && E.prev2026 ? `<div class="card-b">${prev2026(E.prev2026)}<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" data-act="prevToggle" id="prev-close">${icon("x", "i-sm")} Close</button></div></div>` : ""}
+    </section>
   </div>`;
 };
 
@@ -47,7 +61,7 @@ function profileOverview() {
 }
 function orgPerson(e, extra = "") {
   const E = EMPLOYEES[e];
-  return `<button class="org-node" data-act="modal" data-m="profile" data-emp="${e}">${avatar(e, "sm")}<span><b>${esc(E.name)}</b><span class="xs muted">${esc(E.title)}</span>${extra}</span></button>`;
+  return `<button class="org-node" ${PILOT.active.includes(e) ? `data-act="go" data-go="employee"` : `data-act="modal" data-m="profile" data-emp="${e}"`}>${avatar(e, "sm")}<span><b>${esc(E.name)}</b><span class="xs muted">${esc(E.title)}</span>${extra}</span></button>`;
 }
 function orgChart() {
   const D = DIRECTOR, n = S.session.name, open = UI.orgOpen !== false;
@@ -83,7 +97,7 @@ function prev2026(P) {
     <div class="table-wrap"><table class="tbl"><thead><tr><th>Competency</th><th style="width:60px">Rating</th><th>Performance evidence</th></tr></thead><tbody>${P.competencies.map(([c, n, r, e]) => `<tr><td><span class="xs muted">${esc(c)}</span><br>${esc(n)}</td><td class="num">${r}</td><td class="small">${esc(e)}</td></tr>`).join("")}</tbody></table></div>
     <div class="xs">Competency score: <b>${esc(P.competencyScore)}</b> · Average rating: ${esc(P.average)}</div>
     <div class="xs muted">Part II · Objectives (60%)</div>
-    <div class="table-wrap"><table class="tbl"><thead><tr><th>Objective</th><th>Measure</th><th>Target</th><th>Actual</th><th>Achieved</th><th>Weight</th><th>Score</th></tr></thead><tbody>${P.objectives.map(o => `<tr><td>${esc(o[0])}<div class="xs muted">${esc(o[7])}</div></td><td class="small">${esc(o[1])}</td>${o.slice(2, 7).map(x => `<td class="num">${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Objective</th><th>Measure</th><th>Target</th><th>Actual</th><th>Achieved</th><th>Weight</th><th>Score</th></tr></thead><tbody>${P.objectives.map(o => `<tr><td>${esc(o[0])}<div class="xs muted">Comment: ${esc(o[7])}</div></td><td class="small">${esc(o[1])}</td>${o.slice(2, 7).map(x => `<td class="num">${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
     <div class="xs">Objectives score: <b>${esc(P.objectivesScore)}</b></div>
     <div class="xs">Overall: ${P.overall.map(([c, w, sc, wc]) => `${esc(c)} ${esc(w)} × ${esc(sc)} = ${esc(wc)}`).join(" · ")} → <b>${esc(P.overallScore)}</b></div>
   </div>`;

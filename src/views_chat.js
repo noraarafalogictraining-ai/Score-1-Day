@@ -5,7 +5,7 @@
    (see chatThread / activeChatContext in state.js); each context is sent to the
    AI and assessed separately.
    ========================================================= */
-const CHAT_PAGES = ["inbox", "home", "goals", "evidence", "business", "round2", "profile"];
+const CHAT_PAGES = ["inbox", "home", "employee", "goals", "evidence", "business", "round2", "profile"];
 function chatBubbleVisible(r = rec()) {
   if (!S.session || !UI.signedIn || UI.chatOpen || UI.route === "chat") return false;
   return UI.route === "inbox" || chatUnread(r) > 0 || (activeChatContext(r) && CHAT_PAGES.includes(UI.route));

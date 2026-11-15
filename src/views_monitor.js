@@ -20,7 +20,6 @@ function waitCard(r = rec()) {
 
 VIEWS.evidence = function () {
   const r = rec(), E = EMP();
-  if (!goalsApproved(r)) return pageHead(`Evidence Log / ${esc(E.name)}`, "Evidence Log", empChip()) + lockedPanel("Available once the performance contract is approved", "Monitoring begins after you and your employee have aligned on the goal plan.");
   const items = planItems(r), f = UI.evFilter;
   const rows = r.evidence.filter(e => f === "all" || e.link === f);
   return pageHead(`Evidence Log / ${esc(E.name)}`, "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
@@ -74,30 +73,18 @@ function currentPeriod() {
   if (UI.period && periodAvailable(UI.period)) return UI.period;
   return periodAvailable("mid") ? "mid" : "start";
 }
-function kpisFor(period) {
-  return CEO_OBJECTIVES.map(o => ({ id: o.id, label: o.title, value: null, target: o.target, note: period === "start" ? "Company-wide target · results published through the year" : "No results published in this update", def: o.kpi, contribution: o.contribution }));
-}
-function kpiCard(k) {
-  const open = UI.kpiOpen === k.id;
-  return `<div class="kpi na ${open ? "open" : ""}"><button class="kpi-btn" data-act="kpi" data-id="${k.id}" aria-expanded="${open}" title="${esc(k.def)}"><span class="row between nowrap"><span class="kpi-l">${icon("target", "i-xs")} ${esc(k.label)}</span><span class="kpi-i">${icon(open ? "chevdown" : "info", "i-xs")}</span></span><b class="kpi-v num">—</b><span class="xs kpi-t">Target: ${esc(k.target)}</span><span class="xs kpi-note">${esc(k.note)}</span></button>
-    ${open ? `<div class="kpi-more xs"><div><b>Company objective:</b> ${esc(k.def)}</div><div><b>Commercial Director's contribution:</b> ${esc(k.contribution)}</div></div>` : ""}</div>`;
-}
 function commercialOverview(r) {
   const period = currentPeriod();
   if (period === "mid" && !r.r2.seenDashboard) { r.r2.seenDashboard = true; save(); }
   const pinfo = PERIODS_DASH.find(p => p.id === period);
   const filter = `<div class="period-filter" role="tablist" aria-label="Period">${PERIODS_DASH.map(p => { const ok = periodAvailable(p.id); return `<button role="tab" class="${period === p.id ? "on" : ""}" data-act="period" data-v="${p.id}" aria-selected="${period === p.id}" ${ok ? "" : `disabled title="Not yet available"`}>${ok ? "" : icon("lock", "i-xs")}${p.l}</button>`; }).join("")}</div>`;
-  const head = `<div class="dash-bar"><div><h2>Commercial Performance</h2><span class="xs">${pinfo.l} · ${pinfo.sub}</span></div>${filter}</div>`;
-  const kpis = `<div class="kpi-row">${kpisFor(period).map(kpiCard).join("")}</div>`;
+  const head = `<div class="dash-bar"><div><h2>Dashboard</h2><span class="xs">${pinfo.l} · ${pinfo.sub}</span></div>${filter}</div>`;
   const note = `<div class="insight neutral">${icon("info", "i-sm")}<span>Company and department results reflect many factors. They are not, on their own, evidence of any one employee's performance.</span></div>`;
-  if (period === "start") return `<section class="dash">${head}<div class="dash-body stack">${kpis}
-    <div class="dash-grid"><div class="card"><div class="card-h"><div><h3>${APP.cycleYear} company priorities</h3><div class="xs muted">Company-wide targets · NextWave Digital company profile</div></div><button class="btn ghost sm" data-act="go" data-go="profile/objectives">My contribution</button></div><div class="card-b stack-sm">
-      ${CEO_OBJECTIVES.map(o => `<div class="target-row"><span class="grow"><b class="small">${esc(o.title)}</b><span class="xs muted">${esc(o.kpi)}</span></span><span class="tag blue">${esc(o.target)}</span></div>`).join("")}
-    </div></div>
-    <div class="card"><div class="card-h"><h3>What happens next</h3></div><div class="card-b stack-sm small t2"><p>Results are published through the year. Figures appear here only when they are reported.</p>${note}</div></div></div>
+  if (period === "start") return `<section class="dash" id="dash">${head}<div class="dash-body stack">
+    <div class="card"><div class="card-b insights"><div class="insight neutral">${icon("info", "i-sm")}<span>No business updates have been published yet. Updates appear here when your facilitator releases them.</span></div></div></div>
   </div></section>`;
   const alert = `<button class="alert-bar" data-act="kpiAlert" aria-expanded="${!!UI.alertOpen}">${icon("alert")}<span class="grow"><b>Business event: the AI Acceleration.</b> Valtora Technologies has announced a major AI-enabled solution enhancement. NextWave Digital is accelerating its NextWave Insights enhancement in response.${UI.alertOpen ? `<span class="alert-more">${DASHBOARD.event.map(esc).join(" ")}</span>` : ""}</span>${icon(UI.alertOpen ? "chevdown" : "chev", "i-sm")}</button>`;
-  return `<section class="dash">${head}<div class="dash-body stack">${alert}${kpis}
+  return `<section class="dash" id="dash">${head}<div class="dash-body stack">${alert}
     <div class="card"><div class="card-h"><h3>Business update</h3><span class="xs muted">${pinfo.sub}</span></div><div class="card-b insights">
       ${DASHBOARD.event.map(t => `<div class="insight">${icon("spark", "i-sm")}<span>${esc(t)}</span></div>`).join("")}
       <div class="insight neutral">${icon("info", "i-sm")}<span>No mid-year business results have been published in this update.</span></div>
