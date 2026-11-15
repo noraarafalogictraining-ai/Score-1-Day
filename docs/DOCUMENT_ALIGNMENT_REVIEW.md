@@ -67,7 +67,7 @@ Status column: **Fix** = correction applied · **OK** = already consistent · **
 
 ## Decisions (answered by the owner) and how they were applied
 
-- **A. Event timing:** released at mid-year. Code 4826 releases Omar's mid-year evidence and Valtora Technologies' announcement together.
+- **A. Event timing:** released at mid-year. The "Start mid-year" button (no code) releases Omar's mid-year evidence and Valtora Technologies' announcement together.
 - **B. Dashboard:** applied as recommended. It shows only the four company targets and the event; no mid-year figures.
 - **C. Year-end evidence:** added to HR's closing email as "What happened next", together with the documented business outcome. The email is now dated 31 Dec 2027.
 - **D. Time in position:** about 4 years, everywhere in the app. Note: the printed Omar Hassan Profile still says "approximately 2 years" and should be corrected before the next session.

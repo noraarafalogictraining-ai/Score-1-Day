@@ -221,11 +221,7 @@ const ACTIONS = {
   evDrawer(el) { UI.drawer = { type: "evidence", id: el.dataset.id }; render(); },
 
   /* --- rounds --- */
-  releaseCode(el) {
-    const k = el.dataset.k, v = ((document.getElementById("code-" + k) || {}).value || "").trim();
-    if (k === pendingRelease() && v === RELEASE_CODES[k]) { UI.codeErr = null; releaseRound(k); toast("Mid-year business update received."); go("home"); }
-    else { UI.codeErr = k; render(); }
-  },
+  startMidyear() { if (pendingRelease() !== "r2") return; releaseRound("r2"); toast("Mid-year business update received."); go("home"); },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
   rate(el) { setPath(S, el.dataset.path, +el.dataset.v); afterBind(el.dataset.path); save(); render(); },
   submitAppraisal() {
@@ -259,7 +255,6 @@ document.addEventListener("click", (ev) => {
 });
 document.addEventListener("keydown", (ev) => {
   if (ev.key === "Escape") { if (UI.modal) { UI.modal = null; render(); } else if (UI.drawer) { UI.drawer = null; render(); } else if (UI.dd) { UI.dd = null; render(); } }
-  if (ev.key === "Enter" && ev.target.id && ev.target.id.startsWith("code-")) ACTIONS.releaseCode({ dataset: { k: ev.target.id.slice(5) } });
   if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey) && ev.target.dataset && /\.drafts\./.test(ev.target.dataset.bind || "")) { const k = ev.target.dataset.bind.split(".").pop(); ev.preventDefault(); ACTIONS.chatSend({ dataset: { k } }); }
 });
 function handleBind(el) { const path = el.dataset.bind; let v = el.type === "checkbox" ? el.checked : el.value; if (el.dataset.type === "num") v = v === "" ? "" : Number(v); setPath(S, path, v); afterBind(path); save(); }

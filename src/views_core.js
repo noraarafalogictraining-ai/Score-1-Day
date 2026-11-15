@@ -144,7 +144,7 @@ function mailView(m) {
 
 /* Removed routes (year-end round, Learning Score report): old links open Home */
 ["appraisal", "yearend", "reflection", "review"].forEach(k => { VIEWS[k] = function () { setTimeout(() => go("home"), 0); return ""; }; });
-/* The facilitator view was removed: events are released by the code participants enter on the "Wait for the facilitator message" card (waitCard). */
+/* The facilitator view was removed: the mid-year stage starts with the "Start mid-year" button (waitCard). */
 MODALS.reset = function () {
   return modalWrap("Reset this session?", `<p class="small t2">All plans, conversations, evidence and Pulse history saved on this device will be deleted. This cannot be undone.</p>`, `<button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" style="background:var(--risk);border-color:var(--risk)" data-act="doReset">Delete and reset</button>`);
 };

@@ -19,9 +19,6 @@ const SIM_DATES = {
    inside another site; participants open it in a new tab instead. Set embed: true if that header is removed
    (or replaced by "Content-Security-Policy: frame-ancestors https://score-short-simulation.vercel.app"). */
 const NEXTWAVE_WEBSITE = { url: "https://nextwave-website-beta.vercel.app/", embed: false };
-/* Codes the facilitator announces in the room; participants enter them on the "Wait for the facilitator message" card.
-   (A local gate on each device; visible in the page source.) */
-const RELEASE_CODES = { r2: "4826" };   /* the year-end round (former code 7319) was removed */
 
 /* Form vocabularies (EVIDENCE_SOURCES and FREQUENCIES come from employees.js) */
 const PERIODS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Q1", "Q2", "Q3", "Q4", "H1 (Jan–Jun)", "H2 (Jul–Dec)", "Full year"];

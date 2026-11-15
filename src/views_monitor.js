@@ -2,19 +2,17 @@
    MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · NEXT-EVENT CODE
    The app never generates evidence: managers record what they receive offline.
    ========================================================= */
-/* Next event: "Wait for the facilitator message", then the participant enters the code announced in the room. */
+/* Next stage: a "Start mid-year" button (no facilitator code). Shown once the January plan is agreed. */
 function pendingRelease(r = rec()) {
   if (!S.released.r2 && goalsApproved(r)) return "r2";
   return null;
 }
 function waitCard(r = rec()) {
   const k = pendingRelease(r); if (!k) return "";
-  const what = "the mid-year business update";
-  return `<section class="card wait-card" id="wait-card"><div class="wait-b">${icon("clock")}<div class="grow stack-sm">
-      <h3>Wait for the facilitator message</h3>
-      <p class="small t2">Your facilitator will announce when ${what} is available and give you a code. Enter it here to continue.</p>
-      <div class="row nowrap wait-row"><label class="sr" for="code-${k}">Code</label><input class="inp" id="code-${k}" placeholder="Enter the code" inputmode="numeric" autocomplete="off" maxlength="8"><button class="btn primary" data-act="releaseCode" data-k="${k}" id="code-go">Continue</button></div>
-      ${UI.codeErr === k ? `<div class="err-text" id="code-err">That code isn't valid. Check the code your facilitator gave you.</div>` : ""}
+  return `<section class="card wait-card" id="wait-card"><div class="wait-b">${icon("calendar")}<div class="grow stack-sm">
+      <h3>Ready for the mid-year review?</h3>
+      <p class="small t2">Start the mid-year stage when your facilitator asks you to, or when you are ready. It brings the mid-year business update, new emails and a message from Omar.</p>
+      <div class="row nowrap wait-row"><button class="btn primary" data-act="startMidyear" id="start-midyear">${icon("arrow", "i-sm")} Start mid-year</button></div>
     </div></div></section>`;
 }
 

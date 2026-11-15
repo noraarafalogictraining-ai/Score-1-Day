@@ -49,7 +49,7 @@ The participant sees a corporate employee platform, not a training exercise: no 
   - The year-end update arrives as an HR email with the evidence attached ("Open"), and the appraisal is opened from that email.
   - The Round 2 checklist is now **Mid-year review**, reached from the Evidence Log and the conversation.
   - SCORE Review is now a **feedback report**, shown to participants after the final appraisal (via the HR completion email) and to the facilitator at any time.
-  - **Event release:** when the next event is due, Home and the Inbox show **"Wait for the facilitator message"** with a code box. The facilitator announces the code in the room and participants enter it: **4826** releases the mid-year business event (after the January plan is confirmed), **7319** releases the year-end update (after the mid-year review is submitted). Codes only work at the right moment.
+  - **Starting mid-year:** there are no codes. Once the January plan is confirmed, Home and the Inbox show a **Start mid-year** button. The participant clicks it when the facilitator asks (or when ready); it releases the mid-year business event, emails and Omar's message.
 
 Configuration: the director profile, job description and CEO objectives are `DIRECTOR` and `CEO_OBJECTIVES` in `src/pilot.js` (provisional fictional targets, separate from Omar's data). Company year-end figures for the dashboard come from the server (`COMPANY_YEAR_END.metrics` in `api/_lib/scenario_omar.js`), so they stay hidden until released.
 
@@ -125,7 +125,7 @@ Full comparison: `docs/DOCUMENT_ALIGNMENT_REVIEW.md`. Applied:
 
 **Pilot assumptions (approved by the owner):**
 - Omar's time in position is about 4 years (the profile handout says about 2; the 2026 appraisal says about 4).
-- The business event is released at mid-year with code 4826, although the document places it across the second half of 2027.
+- The business event is released at mid-year (Start mid-year button), although the document places it across the second half of 2027.
 - The two assumptions Omar challenged:
   - that Valtora's AI features were mostly marketing;
   - that NextWave Insights could keep its current release plan.
@@ -281,12 +281,12 @@ These slots are separate from the written appraisal's slot (fair/unfair appraisa
 | Round | What happens | Facilitator |
 |---|---|---|
 | **1 · Setting Performance Expectations** | HR email → Goal Plan (objective, KPI with target, weight, evidence source, review frequency; weights must total 100%) → 3–5 competencies with expected proficiency levels (three observable levels shown) → *Submit for Employee Alignment* → status **Pending Employee Alignment** → **open-text AI conversation** with Omar, who opens with his fairness concern → *Confirm alignment* appears only when Omar's concern has been meaningfully addressed → HR "Contract Confirmed" email | — |
-| **2 · Performance Gaps, Diagnosis & Coaching** | Business alert → **Business Dashboard** (KPI cards, March–June trend chart, before/after bars, market intelligence indicators kept separate from business outcomes) → four stakeholder emails (Mariam's marked *secondhand, unverified*) → Omar's chat request → **open-text diagnostic and coaching conversation** (dashboard and inbox stay one click away) → participant writes their interpretation of the data and completes the Evidence Log → *Submit Round 2* | Announces Valtora (script in the Facilitator view), then releases it (code **4826** in the Facilitator View code box, or the release button) |
+| **2 · Performance Gaps, Diagnosis & Coaching** | Business alert → **Business Dashboard** (KPI cards, March–June trend chart, before/after bars, market intelligence indicators kept separate from business outcomes) → four stakeholder emails (Mariam's marked *secondhand, unverified*) → Omar's chat request → **open-text diagnostic and coaching conversation** (dashboard and inbox stay one click away) → participant writes their interpretation of the data and completes the Evidence Log → *Submit Round 2* | Announces Valtora (script in the Facilitator view), then releases it (code **the Start mid-year button** in the Facilitator View code box, or the release button) |
 | **3 · Final-Year Performance Evaluation** | Year-end performance record (the same for every participant) → appraisal pre-filled with the Round 1 objectives, KPIs, weights and competencies (WHAT, HOW, overall) → Omar responds in an **open-text appraisal conversation** → **bias reflection** grounded in the participant's own reasoning → reconsider or finalise → final SCORE assessment and Employee Pulse outcome | Releases the year-end update (code **7319**) |
 
 The **Employee Pulse** (Performance, Trust, Development; 0–100) is always visible in the header, with a full event history. The **SCORE Review** shows each round's criteria with the score, evidence quotes, reason, confidence and missing information.
 
-There is no facilitator view. Events are released only by the codes participants enter on the "Wait for the facilitator message" card (`waitCard` in `src/views_monitor.js`; codes in `src/content.js` → `RELEASE_CODES`). The master code 5050 and the manual controls (confirm alignment, end conversations, set pathway, finalize without AI, per-criterion overrides, device reset) were removed. Without live AI, a session can't pass the January alignment. Codes are a local gate on each device and are visible in the page source.
+There is no facilitator view and there are no codes. The mid-year stage starts with the **Start mid-year** button (`waitCard` in `src/views_monitor.js`, action `startMidyear`). The master code 5050 and the manual controls (confirm alignment, end conversations, set pathway, finalize without AI, per-criterion overrides, device reset) were removed. Without live AI, a session can't pass the January alignment.
 
 ---
 

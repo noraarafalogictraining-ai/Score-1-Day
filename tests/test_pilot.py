@@ -65,9 +65,9 @@ def badge(pg):
 ROUND_RX = re.compile(r"\bRound [123]\b|SCORE Performance Hub|\bpilot\b|simulation|training", re.I)
 def visible_text(pg):
     return pg.inner_text(".head") + "\n" + pg.inner_text(".side") + "\n" + pg.inner_text("main")
-def facilitator_code(pg, U, code):
-    """The participant enters the code announced by the facilitator on the 'Wait for the facilitator message' card."""
-    pg.goto(U + "#home"); pg.wait_for_timeout(250); pg.fill("#wait-card input", code); pg.click("#code-go"); pg.wait_for_timeout(500)
+def start_midyear(pg, U):
+    """The participant clicks 'Start mid-year' on Home (no facilitator code)."""
+    pg.goto(U + "#home"); pg.wait_for_timeout(250); pg.click("#start-midyear"); pg.wait_for_timeout(500)
 
 def add_obj(pg, i, obj, measure, due, w):
     act(pg, "addObj"); b = f".objectives.{i}."
@@ -456,16 +456,12 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             pg.goto(U + "#home"); pg.wait_for_timeout(200)
             check("Business event hidden until released", "Valtora" not in pg.inner_text("main") and "Start of Year" in pg.inner_text("main"))
             check("Old Business Dashboard link opens Home", (pg.goto(U + "#business"), pg.wait_for_timeout(300), pg.url.endswith("#home"))[2])
-            check("Home shows 'Wait for the facilitator message' with a code field", "Wait for the facilitator message" in pg.inner_text("#wait-card") and pg.locator("#wait-card input").count() == 1)
+            check("Home shows a 'Start mid-year' button, with no code box anywhere", pg.locator("#start-midyear").count() == 1 and pg.locator("#wait-card input").count() == 0 and "code" not in pg.inner_text("#wait-card").lower() and pg.evaluate("typeof RELEASE_CODES") == "undefined")
             check("Facilitator View removed from the user menu", (act(pg, "dd", dd="user") or True) and "Facilitator" not in pg.inner_text("header") and (act(pg, "dd", dd="user") or True))
-            pg.fill("#wait-card input", "7319"); pg.click("#code-go"); pg.wait_for_timeout(300)
-            check("A wrong code (including the year-end code) does not release the mid-year event", not S_rel(pg)["r2"] and not S_rel(pg)["r3"] and "isn't valid" in pg.inner_text("#wait-card"))
-            pg.fill("#wait-card input", "5050"); pg.click("#code-go"); pg.wait_for_timeout(300)
-            check("The old facilitator master code no longer works", not S_rel(pg)["r2"])
             pg.goto(U + "#inbox"); pg.wait_for_timeout(200)
-            check("The waiting card is also shown in the inbox", pg.locator("#wait-card").count() == 1)
-            facilitator_code(pg, U, "4826")
-            check("Release code 4826 starts the business event", S_rel(pg)["r2"])
+            check("The 'Start mid-year' button is also shown in the inbox", pg.locator("#start-midyear").count() == 1)
+            start_midyear(pg, U)
+            check("'Start mid-year' starts the business event", S_rel(pg)["r2"] and pg.locator("#start-midyear").count() == 0)
             check("Omar's chat notification appears immediately, before any email is read", badge(pg) == "1" and not any(R(pg) and state(pg)["read"].get("sh-" + x) for x in ["nadine", "youssef", "salma", "mariam", "nour"]))
             pg.wait_for_selector(".mail-pop", timeout=5000)
             check("Email pop-up shows sender photo, name, subject, preview and unread dot", "Nadine Farouk" in pg.inner_text(".mail-pop") and "NextWave Insights — Omar's Input" in pg.inner_text(".mail-pop") and pg.locator('.mail-pop img[src$="nadine.jpg"]').count() == 1 and pg.locator(".mail-pop .mp-dot").count() == 1)
@@ -538,7 +534,7 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             check("Submitting the mid-year review delivers HR's closing email once, with a notification", pg.evaluate("mailList().filter(m => m.id === 'closed').length") == 1 and (pg.locator(".mail-pop").count() == 1 or state(pg)["notified"].get("closed")))
             check("Mid-year page points to HR's message", "HR has sent you a message" in pg.inner_text("main"))
             pg.goto(U + "#home"); pg.wait_for_timeout(300)
-            check("No year-end waiting card, code or December period after the mid-year review", pg.locator("#wait-card").count() == 0 and pg.locator('[data-act="period"][data-v="year"]').count() == 0 and "7319" not in json.dumps(pg.evaluate("RELEASE_CODES")))
+            check("No further start button or December period after the mid-year review", pg.locator("#wait-card").count() == 0 and pg.locator('[data-act="period"][data-v="year"]').count() == 0)
             check("No Final Appraisal in the sidebar", "Final Appraisal" not in pg.inner_text("aside") and pg.locator('[data-go="appraisal"]').count() == 0)
             for old in ["appraisal", "yearend", "reflection", "review"]:
                 pg.goto(U + "#" + old); pg.wait_for_timeout(300)
