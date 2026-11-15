@@ -35,19 +35,19 @@ function converse(kind, history, ctx) {
     return { reply, ready, dismissive };
   }
   if (kind === "diagnostic") {
-    if (has(last, BLAME)) return { reply: "That's not a fair summary. The analysis passed review. What do you need from me?" };
+    if (has(last, BLAME)) return { reply: "That's not a fair summary. My reports were on time and the analysis was right. What do you need from me?" };
     const rules = [
-      [/(late|deadline|report|what happened|walk me through)/, "I spent two extra working days validating Valtora's pricing, so the June report slipped."],
-      [/(flag|escalat|tell me|let me know|raise|warn)/, "No. I assumed I could manage both. I should have told you and asked which came first."],
-      [/(nadine|meeting|present)/, "The analysis held up, but I defended the numbers instead of asking what Operations could implement."],
-      [/(priorit|expect|clear|clarif)/, "I knew the deadline, but after Valtora nobody said which came first."],
-      [/(skill|good at|develop|strength|hard for you)/, "The analysis is my strength. I could improve at presenting to non-analysts and influencing without debating."],
-      [/(feel|recogni|fair|motivat|credit)/, "It feels like recommendations that challenge leadership get less recognition. That's my view."],
-      [/(tool|resource|support|data|help)/, "I had the tools. The problem was competing deadlines I can't reprioritise alone."],
-      [/(plan|next step|agree|going forward|what could|what would)/, "I could send Operations a one-page options summary, flag deadline conflicts early, and join a session with Sales."]
+      [/(what happened|walk me through|respond|challenged|pushback|push back)/, "When Nadine and Youssef questioned my conclusions, I kept going back through the data instead of asking what worried them."],
+      [/(prepare|beforehand|before the meeting|talk to (them|nadine|youssef)|raise)/, "I raised both challenges for the first time in the meetings. I didn't talk to them beforehand."],
+      [/(nadine|review|operations|present)/, "She asked what it meant for the release plan, and I walked through the feature comparison instead of giving options."],
+      [/(expect|clear|clarif|role|disagree)/, "My reporting is clear. Nobody has said how I should raise findings that contradict senior people, or what my role is in the Insights work now."],
+      [/(skill|good at|develop|strength|hard for you)/, "The analysis is my strength. I'd like help giving shorter, option-based recommendations and handling pushback calmly."],
+      [/(feel|recogni|fair|motivat|credit)/, "When I challenge senior people, it turns into a discussion about my tone. I'm not sure it's worth raising difficult findings."],
+      [/(tool|resource|support|data|help)/, "I have the data and tools. I only contact Operations and Customer Success when I need something."],
+      [/(plan|next step|agree|going forward|what could|what would)/, "I could send a one-page options summary before meetings, talk to Nadine and Youssef first, and set up a regular slot with Operations."]
     ];
     const hit = rules.find(([rx]) => rx.test(lc(last)));
-    return { reply: hit ? hit[1] : "It's been a lot to juggle. Where would you like to start?" };
+    return { reply: hit ? hit[1] : "It's been a tense few weeks. Where would you like to start?" };
   }
   return appraisalTurn(history, ctx);
 }
@@ -165,8 +165,8 @@ function assess(task, inp) {
   if (task === "round2") {
     const all = inp.history.filter(m => m.from === "manager").map(m => m.text).join("\n");
     const blaming = has(all, BLAME);
-    const causes = [["expectations", /(priorit|expect|clear|clarif)/], ["situational", /(time|deadline|tool|resource|workload|competing)/], ["consequences", /(recogni|fair|credit|feel)/], ["skills", /(skill|strength|develop|good at)/]].filter(([, rx]) => rx.test(lc(all))).map(([k]) => k);
-    const coach = [/(priorit|escalat|flag)/, /(nadine|session|operations|sales)/, /(recogni|value|credit)/, /(follow-up|follow up|check-in|checkpoint|weekly|review)/, /(what could you|what would you|your ideas|how would you)/].filter(rx => rx.test(lc(all))).length;
+    const causes = [["expectations", /(priorit|expect|clear|clarif)/], ["situational", /(time|deadline|tool|resource|workload|competing|beforehand|prepare|contact)/], ["consequences", /(recogni|fair|credit|feel)/], ["skills", /(skill|strength|develop|good at)/]].filter(([, rx]) => rx.test(lc(all))).map(([k]) => k);
+    const coach = [/(priorit|escalat|flag|options|summary|prepare)/, /(nadine|session|operations|sales)/, /(recogni|value|credit)/, /(follow-up|follow up|check-in|checkpoint|weekly|review)/, /(what could you|what would you|your ideas|how would you)/].filter(rx => rx.test(lc(all))).length;
     const d = blaming ? 2 : causes.length * 3, c = blaming ? 1 : coach * 3;
     const ev = (rx) => firstSentence(all, rx);
     const interp = inp.interpretation, log = inp.evidence;

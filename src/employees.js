@@ -52,8 +52,8 @@ const EMP_ORDER = ["omar", "youssef", "salma"];
 const EMPLOYEES = {
   omar: {
     id: "omar", first: "Omar", name: "Omar Hassan", title: "Market Intelligence Analyst",
-    tenure: "4 years at NextWave Digital", total: "6 years total professional experience",
-    prevRating: "Exceeded Expectations", prevScore: 4,
+    tenure: "Approx. 4 years in position", total: "",
+    prevRating: "91.08% overall · 2026 appraisal", prevScore: null,
     prevPerformance: "Omar consistently delivered accurate market and competitor analysis and was recognized for the quality of his insights. His work supported several commercial decisions and helped leadership identify emerging opportunities.",
     story: "Omar is analytical, confident and willing to challenge assumptions when the evidence points in a different direction. His recommendations are often valuable, but discussions can become difficult when stakeholders challenge his analysis or disagree with his conclusions.",
     strengths: ["Strong analytical thinking", "High-quality market intelligence", "Evidence-based recommendations", "Willingness to challenge assumptions"],

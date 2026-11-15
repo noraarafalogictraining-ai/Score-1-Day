@@ -95,7 +95,7 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 
 ## Change request (November): website section, separate Chat, journey ends at mid-year
 
-- **NextWave Company Website:** a collapsible section at the bottom of every page (`websiteSection` in `src/ui.js`). The address is set in `src/content.js` → `NEXTWAVE_WEBSITE.url`. It is empty until the approved address is provided, and the section then says the website "will be available here soon". With an address, the site is embedded in a frame with an **Open in a new tab** button, in case the site blocks embedding.
+- **NextWave Company Website:** a collapsible section at the bottom of every page (`websiteSection` in `src/ui.js`), set in `src/content.js` → `NEXTWAVE_WEBSITE` (approved address https://nextwave-website-beta.vercel.app/). That site currently blocks being shown inside another site (`X-Frame-Options: SAMEORIGIN`), so the section offers **Open the NextWave website** in a new tab. If the site's owner allows embedding, set `embed: true` and it shows inside the page.
 - **Chat and Inbox are separate.** The sidebar shows **Home · Inbox · Chat · Performance Management**.
   - The **Inbox** holds email only, and its count is email only.
   - **Chat** is its own page with the whole Omar thread, history and AI behaviour, and its own unread count. The floating chat bubble still announces new messages on other pages.
@@ -104,7 +104,26 @@ Configuration: the director profile, job description and CEO objectives are `DIR
   - Old links (`#appraisal`, `#yearend`, `#reflection`, `#review`) open Home.
   - The journey now ends when the participant **submits the mid-year review**. HR's "Performance Cycle 2027 — Thank You" email then arrives once, with wording adapted to the shorter journey and the same closing block.
 - **The Learning Score is removed for participants.** The January and mid-year AI assessments still run in the background only because they drive the Employee Pulse and Omar's tone; no score is shown.
+- HR's closing email is dated Fri 31 Dec 2027 and includes a short "What happened next" section: the documented outcome of the AI Acceleration and the documented year-end evidence about Omar (owner decision C).
 - The server still contains the unused year-end code (API endpoints and the evidence file); nothing in the participant interface reaches it.
+
+## Alignment with the five participant documents
+
+Full comparison: `docs/DOCUMENT_ALIGNMENT_REVIEW.md`. Applied:
+- Company products are NextWave One, NextWave Insights and NextWave Solutions (the FlowOps / Customer360 / InsightIQ override was removed). The competitor is Valtora Technologies.
+- The Commercial Director's purpose and six responsibilities come from the Commercial Director Profile. The 2027 targets are the four **company-wide** priorities (GROW 18%, RETAIN 88→93%, SCALE 82→92%, BUILD), each with the Director's documented contribution. The earlier "CEO objectives" (15% growth, 35% win rate, +20% opportunities) were removed.
+- Omar's purpose, six responsibilities and strengths come from the Omar Hassan Profile. His 2026 appraisal is shown read-only exactly as documented (1–4 scale, six competencies, four objectives, 96.25% / 83.3% / 91.08%). The invented previous-year evidence and "4/5" rating were removed.
+- The mid-year storyline follows the 2027 evidence: no late report; reports on time; an early warning on AI-enabled competition; two challenged assumptions; two stakeholders reporting defensive, overly detailed responses. The business event is "The AI Acceleration" (Valtora Technologies' AI-enabled enhancement; NextWave accelerates NextWave Insights).
+- The Home dashboard shows only documented figures (the company targets). The earlier mid-year percentages and charts were not in any document and were removed.
+
+**Pilot assumptions (approved by the owner):**
+- Omar's time in position is about 4 years (the profile handout says about 2; the 2026 appraisal says about 4).
+- The business event is released at mid-year with code 4826, although the document places it across the second half of 2027.
+- The two assumptions Omar challenged:
+  - that Valtora's AI features were mostly marketing;
+  - that NextWave Insights could keep its current release plan.
+- The two stakeholders who reported defensive responses are Nadine Farouk and Youssef Ali.
+- Salma's, Mariam's (secondhand) and Nour's emails are scenario material not stated in the documents. They add no new performance facts about Omar beyond the documents.
 
 ## Year-end refinement and simulation closure
 

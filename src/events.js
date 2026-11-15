@@ -83,7 +83,7 @@ function releaseRound(k) {
   if (S.released[k]) return;
   S.released[k] = true; UI.period = null;
   const r = rec();
-  if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora's lower-priced Customer360 alternative put the Commercial Department under pressure.");
+  if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora Technologies' AI-enabled enhancement and NextWave's accelerated NextWave Insights response are putting pressure on the Commercial Department.");
   ensureChatOpenings(r);
   save();
 }

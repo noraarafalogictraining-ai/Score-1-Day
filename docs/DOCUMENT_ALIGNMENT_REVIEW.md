@@ -1,7 +1,7 @@
 # Document-to-Simulation Comparison — SCORE Short Simulation
 
 Compared: the five participant documents (NextWave Company Profile, Commercial Director Profile, Omar Hassan Profile, Omar's Last Year Appraisal 2026, Omar's Performance Evidence 2027) against everything the simulation shows or tells the AI.
-Status column: **Fix** = correction to apply · **OK** = already consistent · **Decision** = needs your approval (see the last section).
+Status column: **Fix** = correction applied · **OK** = already consistent · **Decision** = needs your approval (see the last section).
 
 ## 1. NextWave Company Profile
 
@@ -65,10 +65,18 @@ Status column: **Fix** = correction to apply · **OK** = already consistent · *
 - Mid-year Pulse note: "Valtora's lower-priced Customer360 alternative…".
 - The year-end evidence file on the server (late reports, pricing): no longer shown to participants. It would be removed or rewritten if Decision C brings year-end evidence back.
 
-## Decisions needed
+## Decisions (answered by the owner) and how they were applied
 
-- **A. When the business event happens.** The document places "The AI Acceleration" in the **second half** of 2027, after the mid-year evidence, but the simulation now ends at the mid-year review. Recommendation: the mid-year code (4826) releases the mid-year evidence and Valtora's announcement together; the coaching conversation covers Omar's defensive responses and how the team approaches the AI Acceleration starting now.
-- **B. The Home dashboard.** The documents give no mid-year business figures. Recommendation: show the four company priorities with their documented baselines and targets (18% growth; retention 88% → 93%; on-time delivery 82% → 92%), plus the event's documented qualitative outcome, and remove the undocumented charts and percentages.
-- **C. The year-end evidence (section 04).** With December removed, it has no place in the app. Options: keep it as the printed handout for an in-room debrief only; or add it to HR's closing email as a "what happened next" note.
-- **D. Omar's time in position.** Profile says ~2 years; the 2026 appraisal says ~4 years. Which is correct?
-- **E. The "two assumptions" Omar challenged.** The document doesn't say what they were. For Omar's AI and the emails to stay consistent, I propose: (1) that Valtora's AI features were mostly marketing and wouldn't change customer decisions; (2) that NextWave Insights could keep its current release plan. Please approve or replace them.
+- **A. Event timing:** released at mid-year. Code 4826 releases Omar's mid-year evidence and Valtora Technologies' announcement together.
+- **B. Dashboard:** applied as recommended. It shows only the four company targets and the event; no mid-year figures.
+- **C. Year-end evidence:** added to HR's closing email as "What happened next", together with the documented business outcome. The email is now dated 31 Dec 2027.
+- **D. Time in position:** about 4 years, everywhere in the app. Note: the printed Omar Hassan Profile still says "approximately 2 years" and should be corrected before the next session.
+- **E. The two assumptions:** approved as proposed:
+  - that Valtora's AI features were mostly marketing;
+  - that NextWave Insights could keep its current release plan.
+
+## Still open (not changed)
+
+- The printed Omar Hassan Profile says "approximately 2 years" in position (see D).
+- The 2026 appraisal's 91.08% falls in the form's 86–100% "Very Good" band. The document gives no band name, so the app shows only the percentage.
+- The server still holds the unused year-end evidence file and Final Appraisal prompts (old storyline). The participant interface cannot reach them; they can be deleted in a later clean-up.

@@ -59,9 +59,9 @@ function orgChart() {
   </div>`;
 }
 const RESP_GROUPS = [
-  { id: "strategy", t: "Strategy and targets", icon: "target", items: [0, 3, 8] },
-  { id: "team", t: "Leading the Commercial team", icon: "people", items: [1, 5, 6] },
-  { id: "ops", t: "Commercial operations and collaboration", icon: "layers", items: [2, 4, 7] }
+  { id: "strategy", t: "Objectives, growth and market intelligence", icon: "target", items: [0, 1, 2] },
+  { id: "ops", t: "Coordination and monitoring", icon: "layers", items: [3, 4] },
+  { id: "team", t: "Leading and developing the team", icon: "people", items: [5] }
 ];
 function profileResponsibilities() {
   const D = DIRECTOR, open = UI.respOpen || { strategy: true };
@@ -71,21 +71,32 @@ function profileResponsibilities() {
       ${open[g.id] ? `<ul class="acc-b">${g.items.map(i => `<li>${icon("check", "i-sm")}<span>${esc(D.responsibilities[i])}</span></li>`).join("")}</ul>` : ""}</section>`).join("")}
   </div>`;
 }
-const CEO_INDICATOR = { growth: "Commercial revenue growth", conversion: "Proposal win rate", pipeline: "Qualified opportunities", responsiveness: "Competitor developments and market intelligence reporting", team: "Performance management cycle for your direct reports" };
 function profileObjectives() {
-  return `<div class="stack"><p class="small t2">Your ${APP.cycleYear} objectives, set by the Chief Executive Officer. They are read-only and give the strategic context for the objectives you agree with your team.</p>
+  return `<div class="stack"><p class="small t2">NextWave Digital's ${APP.cycleYear} strategic targets are company-wide. As Commercial Director you contribute to them, but you do not own every result on your own. Read-only.</p>
     <div class="obj-grid">${CEO_OBJECTIVES.map((o, i) => { const on = UI.ceoOpen === o.id; return `<div class="ceo-card ${on ? "open" : ""}"><button class="ceo-btn" data-act="ceoToggle" data-id="${o.id}" aria-expanded="${on}"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span><span class="xs ceo-more">${on ? "Hide details" : "View details"} ${icon(on ? "chevdown" : "chev", "i-xs")}</span></button>
-      ${on ? `<div class="ceo-detail small"><div><span class="muted">Measure</span>${esc(o.kpi)}</div><div><span class="muted">Target</span>${esc(o.target)}</div><div><span class="muted">Tracked through</span>${esc(CEO_INDICATOR[o.id])}</div><div><span class="muted">Strategic context</span>One of the CEO's ${APP.cycleYear} priorities for the Commercial Department. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
+      ${on ? `<div class="ceo-detail small"><div><span class="muted">Company objective</span>${esc(o.kpi)}</div><div><span class="muted">Your contribution</span>${esc(o.contribution)}</div><div><span class="muted">Strategic context</span>A company-wide ${APP.cycleYear} priority from the NextWave Digital company profile. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
+}
+function prev2026(P) {
+  return `<div class="stack-sm" id="prev-2026"><h4>Last year's appraisal (2026)</h4>
+    <div class="xs muted">Rating period ${esc(P.period)} · Supervisor: ${esc(P.supervisor)} · Time in position: ${esc(P.timeInPosition)} · Historical record, read-only</div>
+    <div class="xs muted">Part I · Competencies (40%) · Rating scale: ${esc(P.scale)}</div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Competency</th><th style="width:60px">Rating</th><th>Performance evidence</th></tr></thead><tbody>${P.competencies.map(([c, n, r, e]) => `<tr><td><span class="xs muted">${esc(c)}</span><br>${esc(n)}</td><td class="num">${r}</td><td class="small">${esc(e)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="xs">Competency score: <b>${esc(P.competencyScore)}</b> · Average rating: ${esc(P.average)}</div>
+    <div class="xs muted">Part II · Objectives (60%)</div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Objective</th><th>Measure</th><th>Target</th><th>Actual</th><th>Achieved</th><th>Weight</th><th>Score</th></tr></thead><tbody>${P.objectives.map(o => `<tr><td>${esc(o[0])}<div class="xs muted">${esc(o[7])}</div></td><td class="small">${esc(o[1])}</td>${o.slice(2, 7).map(x => `<td class="num">${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="xs">Objectives score: <b>${esc(P.objectivesScore)}</b></div>
+    <div class="xs">Overall: ${P.overall.map(([c, w, sc, wc]) => `${esc(c)} ${esc(w)} × ${esc(sc)} = ${esc(wc)}`).join(" · ")} → <b>${esc(P.overallScore)}</b></div>
+  </div>`;
 }
 MODALS.profile = function (m) {
   const e = m.emp || S.emp, E = EMPLOYEES[e], active = PILOT.active.includes(e);
   return modalWrap("Employee profile", `
     <div class="row nowrap" style="gap:14px">${avatar(e, "lg")}<div><h3>${esc(E.name)}</h3><div class="small t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div></div>
-    ${active ? `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd><dt>Previous rating</dt><dd>${esc(E.prevRating)}</dd></dl>
-    <div class="stack-sm"><h4>Role responsibilities</h4><ul class="list-plain small t2">${E.role.responsibilities.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div class="stack-sm"><h4>Strengths</h4><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div></div>
-    <div class="stack-sm"><h4>Previous-year evidence</h4><ul class="list-plain small t2">${E.prevEvidence.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div class="stack-sm"><h4>Previous stakeholder feedback</h4>${E.prevFeedback.map(([w, t]) => `<div class="small"><b>${esc(w)}:</b> <span class="t2">“${esc(t)}”</span></div>`).join("")}</div>`
+    ${active ? `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd><dt>Previous overall rating</dt><dd>${esc(E.prevRating)}</dd></dl>
+    <div class="stack-sm"><h4>Role purpose</h4><p class="small t2">${esc(E.role.purpose)}</p></div>
+    <div class="stack-sm"><h4>Core responsibilities</h4><ul class="list-plain small t2">${E.role.responsibilities.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div class="stack-sm"><h4>What Omar brings to the team</h4><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div><p class="small t2">${esc(E.prevPerformance)}</p></div>
+    ${E.prev2026 ? prev2026(E.prev2026) : ""}`
     : `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd></dl><div class="stack-sm"><h4>Role purpose</h4><p class="small t2">${esc(E.role.purpose)}</p></div>`}`, `<button class="btn" data-act="closeModal">Close</button>`, true);
 };
 

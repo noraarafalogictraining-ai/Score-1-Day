@@ -12,7 +12,7 @@ const APP = {
 };
 const SIM_DATES = {
   start: "Mon 4 Jan 2027", deadline: "Mon 11 Jan 2027", submitted: "Fri 8 Jan 2027", approved: "Mon 11 Jan 2027",
-  alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 9 Jul 2027"
+  alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 31 Dec 2027"
 };
 /* NextWave company website shown in the collapsible section at the bottom of each page.
    embed: false because the site currently sends "X-Frame-Options: SAMEORIGIN", which blocks showing it
@@ -53,10 +53,13 @@ function hrMessages() {
       action: { l: "Open Evidence Log", go: "evidence" } },
     /* Closing email: delivered once, when the participant submits the mid-year review (the year-end round was removed) */
     closed: { subject: `Performance Cycle ${APP.cycleYear} — Thank You`, date: SIM_DATES.closed, closing: true,
+      list: ["He continued challenging assumptions, but began presenting alternative scenarios and recommendations more concisely. Stakeholder discussions became more constructive.", "His analysis remained strong. Presentations became shorter, but stakeholder reactions remained mixed.", "Reports remained accurate, but he offered fewer unsolicited recommendations and increasingly shared challenging evidence only when asked."],
       body: ["Dear Commercial Director,",
         `Thank you for leading Omar Hassan's ${APP.cycleYear} performance journey, from agreeing his performance expectations to reviewing his progress and coaching him through a changing business environment.`,
         "Your commitment to setting clear expectations, monitoring progress, providing feedback, and making evidence-based decisions helps build a culture where employees understand what is expected and have the support they need to perform and grow.",
-        "As you continue through the year, remember that **performance management does not end with a single review or appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.",
+        "**What happened next.** The AI Acceleration continued across the second half of 2027. The business outcome was mixed but positive: market interest and opportunities increased, while capacity was stretched; some priorities were delayed, customer questions increased, adoption varied and some rework occurred.",
+        "By the end of the year, the evidence on Omar showed:", "__LIST__",
+        "As you plan for the year ahead, remember that **performance management does not end with a single review or appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.",
         "Thank you for your leadership and commitment to building a high-performance culture at NextWave.",
         "Best regards,\n**NextWave Human Resources**"] }
   };

@@ -10,7 +10,7 @@ const GROUPS = [
     { id: "r1_kpi_relevance", max: 3, label: "Relevance to Omar's responsibilities", desc: "Objectives reflect the Market Intelligence Analyst role and its main purpose." },
     { id: "r1_kpi_clarity", max: 2, label: "Clarity of objectives", desc: "Each objective states clearly and specifically what must be achieved." },
     { id: "r1_kpi_measurable", max: 4, label: "Measurability", desc: "Each objective has a measurement that can be verified unambiguously; it is clear how the result would be known." },
-    { id: "r1_kpi_target", max: 3, label: "Target, due date and reasonableness", desc: "Each objective or measurement states a specific target and a due date within the rating period, realistic given Omar's track record (e.g. 11/12 on time, 95% quality, 6 recommendations) yet meaningful." },
+    { id: "r1_kpi_target", max: 3, label: "Target, due date and reasonableness", desc: "Each objective or measurement states a specific target and a due date within the rating period, realistic given Omar's 2026 results (9 of 10 reports on time, 12 of 12 competitor updates, 19 of 20 approved insight briefs, 15 of 15 planning requests) yet meaningful." },
     { id: "r1_kpi_control", max: 3, label: "Controllability / influence", desc: "Omar can materially influence each objective. Measurements that make him solely accountable for senior-management decisions (e.g. % of recommendations adopted) are NOT rewarded." },
     { id: "r1_kpi_priorities", max: 2, label: "Alignment with commercial priorities", desc: "Objectives support the Commercial Department's priorities set by the CEO (growth, conversion, pipeline, market responsiveness, team performance), especially market responsiveness to competitors. Evidence sources and review frequencies are not part of the form and must not be required." },
     { id: "r1_kpi_balance", max: 3, label: "Logical weighting and overall balance", desc: "Weights total 100%, reflect priorities, and the plan balances reliable delivery, actionable recommendations and stakeholder communication/collaboration." }
@@ -29,28 +29,28 @@ const GROUPS = [
   ] },
   /* ROUND 2 */
   { id: "r2_data", round: 2, label: "Business data interpretation", task: "round2", criteria: [
-    { id: "r2_data_accuracy", max: 2, label: "Accurate reading of the data", desc: "Interpretation uses the dashboard figures correctly (opportunities −12%, objections 18%→29%, win rate 32%→24%, Valtora in 35% of discussions, June drop)." },
-    { id: "r2_data_separate", max: 2, label: "Separates business outcomes from individual performance", desc: "Does not attribute the market decline to Omar; distinguishes company/department results from Omar's own evidence (analysis delivered and passed QA; June report 2 days late)." },
+    { id: "r2_data_accuracy", max: 2, label: "Accurate reading of the information", desc: "Interpretation reads the mid-year information correctly (Valtora Technologies' AI-enabled enhancement, NextWave's accelerated NextWave Insights response, the company-wide targets, Omar's mid-year evidence) and does not add business figures that were not given." },
+    { id: "r2_data_separate", max: 2, label: "Separates business outcomes from individual performance", desc: "Does not attribute the competitive pressure or company results to Omar; distinguishes the business context from Omar's own evidence (all reports on time, early warning supported by evidence, analysis found useful; two stakeholders reported defensive, overly detailed responses)." },
     { id: "r2_data_caution", max: 1, label: "Evidence-based caution", desc: "Notes what the data does not show and what needs investigating." }
   ] },
   { id: "r2_diag", round: 2, label: "Performance gap diagnosis", task: "round2", criteria: [
-    { id: "r2_diag_expect", max: 3, label: "Clear expectations explored", desc: "Investigates whether Omar knew there was a problem, whether expectations/priorities were clear after Valtora, and whether he understood them." },
-    { id: "r2_diag_situ", max: 3, label: "Situational constraints explored", desc: "Investigates time, competing deadlines, authority to reprioritise, conflicting directives, tools and support." },
+    { id: "r2_diag_expect", max: 3, label: "Clear expectations explored", desc: "Investigates whether Omar knew how stakeholders experienced his responses, whether expectations about raising challenging findings and his role after the Valtora Technologies announcement were clear, and whether he understood them." },
+    { id: "r2_diag_situ", max: 3, label: "Situational constraints explored", desc: "Investigates the conditions around the discussions: how and when challenges were raised, contact with stakeholders and other departments, time pressure from the NextWave Insights acceleration, tools and support." },
     { id: "r2_diag_conseq", max: 3, label: "Consequences and recognition explored", desc: "Explores whether good work is discouraged or unrecognised (Omar's fairness perception) and whether the manager's own practices contributed, without simply accepting or dismissing it." },
-    { id: "r2_diag_skills", max: 3, label: "Skills and abilities considered fairly", desc: "Recognises strong analytical skills and track record; identifies specific development areas (communication, influence, prioritisation/escalation) without assuming a general skill deficit." },
+    { id: "r2_diag_skills", max: 3, label: "Skills and abilities considered fairly", desc: "Recognises strong analytical skills and track record; identifies specific development areas (communication, influence, relationship building/escalation) without assuming a general skill deficit." },
     { id: "r2_diag_conclude", max: 3, label: "Evidence-based conclusions", desc: "Distinguishes facts, stakeholder perceptions (incl. Mariam's secondhand account), Omar's account and own assumptions; reaches conclusions supported by what was learned; does not blame Omar or Nadine." }
   ] },
   { id: "r2_coach", round: 2, label: "Coaching and intervention", task: "round2", criteria: [
     { id: "r2_coach_involve", max: 3, label: "Employee involvement", desc: "Asks Omar what he could do differently and builds the plan with him rather than dictating." },
-    { id: "r2_coach_priorities", max: 3, label: "Expectations, priorities and escalation", desc: "Reconfirms deadlines, agrees how urgent requests are prioritised and how deadline conflicts will be escalated." },
+    { id: "r2_coach_priorities", max: 3, label: "Expectations and ways of working", desc: "Agrees how Omar will raise challenging findings (e.g. concise options, preparing stakeholders) and clarifies his priorities and role in the NextWave Insights response." },
     { id: "r2_coach_comm", max: 3, label: "Coaching on stakeholder communication", desc: "Helps Omar present concise, actionable options and explore stakeholder concerns; may arrange a constructive follow-up with Nadine and Sales. Does not ask him to stop challenging leadership." },
     { id: "r2_coach_support", max: 3, label: "Manager support and recognition", desc: "Recognises the value of Omar's analysis and commits to specific support (not vague reassurance or generic training)." },
     { id: "r2_coach_followup", max: 3, label: "Concrete actions and follow-up", desc: "Agrees specific actions, owners and review checkpoints." }
   ] },
   { id: "r2_log", round: 2, label: "Evidence Log", task: "round2", criteria: [
-    { id: "r2_log_factual", max: 2, label: "Factual and specific", desc: "Entries describe observable facts (what, when, result) rather than personality judgements; perceptions are labelled as such (e.g. Mariam's account)." },
+    { id: "r2_log_factual", max: 2, label: "Factual and specific", desc: "Entries describe observable facts (what, when, result) rather than personality judgements; perceptions are labelled as such (e.g. Mariam's account, the two stakeholders' views)." },
     { id: "r2_log_relevance", max: 1, label: "Relevant with sources", desc: "Entries relate to the plan's objectives/competencies and name credible sources." },
-    { id: "r2_log_balance", max: 1, label: "Balanced", desc: "Records positive and negative evidence (e.g. analysis passed QA AND June report late)." },
+    { id: "r2_log_balance", max: 1, label: "Balanced", desc: "Records positive and negative evidence (e.g. reports on time and early warning supported AND stakeholders reported defensive responses)." },
     { id: "r2_log_followup", max: 1, label: "Clear follow-up", desc: "Manager actions/follow-ups are specific." }
   ] },
   /* ROUND 3 */

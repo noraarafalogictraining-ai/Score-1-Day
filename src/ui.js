@@ -144,7 +144,7 @@ function notifications() {
   const out = [], r = rec();
   const cu = chatUnread(r);
   if (cu) { const last = chatThread(r).filter(m => m.from === "employee").pop(); out.push({ t: `Omar Hassan sent you ${cu === 1 ? "a message" : cu + " messages"}`, d: last ? last.text.slice(0, 80) + (last.text.length > 80 ? "…" : "") : "", act: "openChat", icon: "chat" }); }
-  if (r2Status(r) !== "locked" && !r.r2.seenDashboard) out.push({ t: "Business alert: commercial indicators changed", d: "Valtora launched a lower-priced alternative to Customer360.", go: "business", icon: "alert" });
+  if (r2Status(r) !== "locked" && !r.r2.seenDashboard) out.push({ t: "Business event: the AI Acceleration", d: "Valtora Technologies announced a major AI-enabled enhancement; NextWave is accelerating NextWave Insights.", go: "home", icon: "alert" });
 
   mailList().filter(m => m.unread).forEach(m => out.push({ t: m.subject, d: `${senderOf(m).name} · ${m.date}`, go: "inbox/" + m.id, icon: "mail" }));
   return out.map(n => ({ ...n, unread: true }));

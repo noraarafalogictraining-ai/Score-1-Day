@@ -796,8 +796,8 @@ const EMP_ORDER = ["omar", "youssef", "salma"];
 const EMPLOYEES = {
   omar: {
     id: "omar", first: "Omar", name: "Omar Hassan", title: "Market Intelligence Analyst",
-    tenure: "4 years at NextWave Digital", total: "6 years total professional experience",
-    prevRating: "Exceeded Expectations", prevScore: 4,
+    tenure: "Approx. 4 years in position", total: "",
+    prevRating: "91.08% overall · 2026 appraisal", prevScore: null,
     prevPerformance: "Omar consistently delivered accurate market and competitor analysis and was recognized for the quality of his insights. His work supported several commercial decisions and helped leadership identify emerging opportunities.",
     story: "Omar is analytical, confident and willing to challenge assumptions when the evidence points in a different direction. His recommendations are often valuable, but discussions can become difficult when stakeholders challenge his analysis or disagree with his conclusions.",
     strengths: ["Strong analytical thinking", "High-quality market intelligence", "Evidence-based recommendations", "Willingness to challenge assumptions"],
@@ -967,45 +967,53 @@ ROLE_VIEW.mariam = [
    ========================================================= */
 const PILOT = { active: ["omar"], employee: "omar" };
 
-/* Company (pilot brief) */
-COMPANY.name = "NextWave";
-COMPANY.products = [
-  { id: "flowops", name: "FlowOps", kind: "Operations management solution" },
-  { id: "c360", name: "Customer360", kind: "Customer management solution" },
-  { id: "insightiq", name: "InsightIQ", kind: "Data analytics solution" }
-];
+/* Company: uses COMPANY from employees.js unchanged (NextWave Digital company profile handout). */
 
-/* Omar's profile (pilot brief — replaces the classic profile for this pilot) */
+/* Omar's profile (Omar Hassan Profile handout + Omar's Last Year Appraisal 2026 handout).
+   Time in position: ~4 years (owner decision; the profile handout's "approximately 2 years" is superseded). */
 Object.assign(EMPLOYEES.omar, {
   title: "Market Intelligence Analyst",
-  tenure: "4 years at NextWave",
-  prevRating: "4/5 · Exceeds Expectations", prevScore: 4,
-  prevPerformance: "Reliable, accurate market intelligence with valuable opportunity insights; development areas in business-friendly communication and stakeholder influence.",
-  strengths: ["Strong analytical ability", "Accurate and reliable research", "Identifies valuable market opportunities", "Takes pride in evidence-based recommendations"],
+  tenure: "Approx. 4 years in position",
+  total: "",
+  prevRating: "91.08% overall · 2026 appraisal", prevScore: null,
+  prevPerformance: "Recognised for his analytical contribution and his ability to adjust to changing reporting priorities.",
+  strengths: ["Data gathering", "Competitor tracking", "Identifying patterns in customer and market information", "Adjusting to changing reporting priorities"],
   role: {
-    purpose: "Turn market, competitor and customer information into accurate, timely intelligence and actionable commercial recommendations.",
+    purpose: "Provide timely, reliable market and competitor intelligence, identify customer and segment trends, and translate findings into useful insights for commercial decisions.",
     reportsTo: "You (Commercial Director)", reportsToRole: "Commercial Director",
     responsibilities: [
-      "Monitor market trends, competitors, and customer needs.",
-      "Analyze commercial pipeline, customer segments, and market opportunities.",
-      "Prepare accurate and timely market intelligence reports.",
-      "Translate analysis into actionable commercial recommendations.",
-      "Communicate findings and collaborate with commercial stakeholders."
+      "Monitor competitor activity and emerging market developments.",
+      "Prepare regular market intelligence reports and competitor updates.",
+      "Analyze customer and segment information to identify opportunities and risks.",
+      "Prepare clear insight briefs and recommendations for commercial planning.",
+      "Respond to agreed requests from Commercial and coordinate information with relevant departments.",
+      "Maintain accuracy, traceability and timely delivery of analytical outputs."
     ]
   },
-  prevEvidence: [
-    "11 of 12 monthly market intelligence reports delivered on time.",
-    "95% of reports passed internal quality review without major corrections.",
-    "Six evidence-based commercial recommendations submitted.",
-    "Three recommendations adopted by management.",
-    "Identified a promising customer segment that contributed to a successful commercial initiative."
-  ],
-  prevFeedback: [
-    ["Commercial leadership", "Omar produces reliable analysis, but his presentations sometimes contain excessive technical detail."],
-    ["Business Development Manager", "His insights are valuable, but he sometimes concentrates on defending the data rather than exploring stakeholder concerns."],
-    ["Sales representative", "Omar's research contributed to an important opportunity, but the commercial team received most of the recognition."]
-  ]
+  /* 2026 appraisal exactly as documented (1–4 scale; not recalculated). */
+  prev2026: {
+    period: "01 Jan 2026 – 31 Dec 2026", supervisor: "Commercial Manager", timeInPosition: "Approx. 4 years",
+    scale: "4 Exceptional · 3 Meets Expectations · 2 Needs Improvement · 1 Unsatisfactory",
+    competencies: [
+      ["Core", "Presenting & Communicating", 2, "Analyses were detailed, but recommendations were not consistently tailored to commercial stakeholders."],
+      ["Core", "Adapting", 3, "Adjusted reporting priorities during changes in competitor activity and urgent requests."],
+      ["Core", "Problem Solving", 3, "Identified trends and investigated inconsistencies in competitor and customer data."],
+      ["Functional", "Persuading & Negotiating", 2, "Found it difficult to secure stakeholder agreement on the implications of his analysis."],
+      ["Functional", "Relationship Building", 2, "Cross-functional relationships were mostly reactive; limited direct follow-up with stakeholders."],
+      ["Managerial", "Managing Self & People", 3, "Managed assigned work independently and shared analytical methods with colleagues; people-management behaviours not directly observed."]
+    ],
+    competencyScore: "83.3%", average: "2.5 / 4",
+    objectives: [
+      ["Deliver scheduled market intelligence reports", "Reports delivered on time", "10", "9", "90%", "25%", "22.50%", "One report was late after priorities changed."],
+      ["Complete competitor monitoring updates", "Monthly updates delivered", "12", "12", "100%", "30%", "30.00%", "Consistent monitoring and useful trend identification."],
+      ["Produce customer and segment insights", "Approved insight briefs", "20", "19", "95%", "25%", "23.75%", "Strong analysis; business recommendations sometimes unclear."],
+      ["Support commercial planning requests", "Requests completed by agreed dates", "15", "15", "100%", "20%", "20.00%", "Delivered analyses, but stakeholder engagement was reactive."]
+    ],
+    objectivesScore: "96.25%",
+    overall: [["Objectives", "60%", "96.25%", "57.75%"], ["Competencies", "40%", "83.3%", "33.33%"]], overallScore: "91.08%"
+  }
 });
+delete EMPLOYEES.omar.prevEvidence; delete EMPLOYEES.omar.prevFeedback;
 const STAKEHOLDERS = {
   nadine: { name: "Nadine Farouk", title: "Operations Director", initials: "NF", img: "assets/people/nadine.jpg" },
   nour: { name: "Nour", title: "Account Manager", initials: "N", img: "assets/people/nour.jpg" },
@@ -1046,36 +1054,38 @@ const CHAT = {
   dates: { history: "December 2026", alignment: "January 2027", diagnostic: "June 2027", appraisal: "December 2027" }
 };
 
-/* ---------- Round 2: Valtora event ---------- */
-const VALTORA_ANNOUNCEMENT = "Valtora, one of NextWave's main competitors, has introduced a lower-priced alternative to Customer360 and launched an aggressive campaign targeting NextWave's existing and potential customers.\n\nThe announcement is creating pressure across the Commercial Department.\n\nAs Commercial Director, review the latest business performance information and communications in your Performance Hub.";
+/* ---------- Mid-year: business event "The AI Acceleration" (Omar's Performance Evidence 2027, sections 02–03) ----------
+   Released at mid-year (owner decision). No business figures are given in the documents, so none are shown. */
+const VALTORA_ANNOUNCEMENT = "Valtora Technologies has announced a major AI-enabled solution enhancement, emphasizing faster implementation, simpler analytics and AI-supported decisions.\n\nNextWave Digital has decided to accelerate its own NextWave Insights enhancement in response. This will shape the second half of 2027 for the Commercial Department.\n\nAs Commercial Director, review Omar's mid-year evidence and the latest communications in your Performance Hub.";
 const DASHBOARD = {
-  kpis: [
-    { id: "opps", label: "Qualified opportunities", value: "−12%", sub: "vs pre-launch baseline", dir: "down" },
-    { id: "obj", label: "Price-related objections", value: "29%", sub: "of recorded objections · was 18%", dir: "up-bad" },
-    { id: "win", label: "Proposal win rate", value: "24%", sub: "was 32%", dir: "down" },
-    { id: "val", label: "Valtora mentions", value: "35%", sub: "of active customer discussions", dir: "flat" }
+  event: [
+    "Valtora Technologies announced a major AI-enabled solution enhancement: faster implementation, simpler analytics and AI-supported decisions.",
+    "NextWave Digital is accelerating its own NextWave Insights enhancement in response.",
+    "The event spans the second half of 2027 and is not under any one employee's control."
   ],
-  months: ["March", "April", "May", "June"],
-  win: [33, 32, 31, 24],
-  objections: [17, 18, 20, 29],
+  /* Omar's mid-year evidence, before the business event (document section 02) */
   mi: [
-    { t: "Requested competitor analysis delivered", st: "ok" },
-    { t: "Competitor analysis passed internal quality review", st: "ok" },
-    { t: "Scheduled monthly market intelligence report submitted two working days late", st: "late" },
-    { t: "Omar's recommendation remains under management review", st: "open" },
-    { t: "NextWave's commercial response is still being evaluated", st: "open" }
+    { t: "All scheduled market and competitor reports delivered on time", st: "ok" },
+    { t: "Identified increasing competitive pressure around AI-enabled solutions; the available evidence supported his recommendation", st: "ok" },
+    { t: "Commercial stakeholders described his analysis as useful", st: "ok" },
+    { t: "Challenged two assumptions held by senior stakeholders", st: "open" },
+    { t: "Two stakeholders reported that his responses became defensive and overly detailed when challenged", st: "late" }
   ]
 };
-/* Released with the Valtora business event. "me" = the participant (Commercial Director). */
+/* Pilot assumption (approved): the two senior-stakeholder assumptions Omar challenged were
+   (1) that Valtora's AI features were mostly marketing and would not change customer decisions, and
+   (2) that NextWave Insights could keep its current release plan.
+   The two stakeholders who reported defensive, overly detailed responses are Nadine and Youssef.
+   Released with the business event. "me" = the participant (Commercial Director). */
 const STAKEHOLDER_EMAILS = [
-  { id: "nadine", from: "nadine", to: ["me"], subject: "Valtora Response — Need for Faster Decisions", date: "Mon 5 Jul 2027",
-    body: ["Hi,", "Following our meeting about Valtora, I'm concerned that we're taking too long to agree on a response.", "Omar's analysis raised valid points about the risks of matching Valtora's prices. However, when I asked how we could respond quickly, he focused mainly on explaining the data rather than discussing practical options.", "We need recommendations that balance commercial risks with the urgency of the situation.", "Let's agree on the next steps soon.", "Best,\nNadine\nOperations Director"] },
-  { id: "youssef", from: "youssef", to: ["me"], subject: "Valtora — Commercial Team Needs Direction", date: "Mon 5 Jul 2027",
-    body: ["Hi,", "The team is facing more customer questions about Valtora's pricing, and we're finding it difficult to respond consistently.", "Omar's analysis helped us understand why matching their prices across the board could be risky. However, we still need clearer alternatives that the team can discuss with customers.", "I think it would help if we could work together on a few practical options.", "Thanks,\nYoussef"] },
-  { id: "salma", from: "salma", to: ["Youssef Ali — Business Development Manager"], cc: ["me"], subject: "Customer Updates — Valtora Pricing Objections", date: "Tue 6 Jul 2027",
-    body: ["Hi Youssef,", "A few customers have been comparing our Customer360 offering with Valtora's lower prices.", "Some are asking whether we can provide better offers, and a few opportunities are becoming harder to close.", "Omar's findings helped us understand the risks of simply matching their prices, but we still need guidance on what alternatives we can offer.", "Could we align on a response before the next customer meetings?", "Thanks,\nSalma"] },
+  { id: "nadine", from: "nadine", to: ["me"], subject: "NextWave Insights — Omar's Input in Our Review", date: "Mon 5 Jul 2027",
+    body: ["Hi,", "Omar's work on Valtora Technologies' AI direction has been useful, and with their announcement it looks like he raised the issue at the right time.", "In our planning review he challenged our assumption that NextWave Insights could keep its current release plan. That was a fair point to raise. However, when I questioned his conclusions, his responses became defensive and he went into a lot of detail rather than helping us see the options.", "Now that we're accelerating the NextWave Insights enhancement, Operations needs his input in a form we can act on quickly.", "Could we discuss how we work together on this?", "Best,\nNadine\nOperations Director"] },
+  { id: "youssef", from: "youssef", to: ["me"], subject: "Valtora Announcement — Working With Omar's Analysis", date: "Mon 5 Jul 2027",
+    body: ["Hi,", "Omar flagged early that Valtora's AI features could change how customers compare us. Some of us thought it was mostly marketing, and he challenged that view. The announcement shows he had a point.", "His analysis is useful to the team. My concern is how the discussions go: when I pushed back on some of his conclusions, he became defensive and his answers got very detailed, and the team struggled to take away what to do next.", "I'd like us to find a better way to work through his findings together.", "Thanks,\nYoussef"] },
+  { id: "salma", from: "salma", to: ["Youssef Ali — Business Development Manager"], cc: ["me"], subject: "Customer Questions — Valtora's AI Features", date: "Tue 6 Jul 2027",
+    body: ["Hi Youssef,", "Since Valtora Technologies' announcement, a few customers have asked how NextWave Insights compares with Valtora's AI-supported features.", "Omar's competitor updates have helped me understand what Valtora is offering, which made these conversations easier.", "Could we agree what we can say to customers about our NextWave Insights plans before the next meetings?", "Thanks,\nSalma"] },
   { id: "mariam", from: "mariam", to: ["me"], subject: "Concern About Omar", date: "Tue 6 Jul 2027", secondhand: true,
-    body: ["Hi,", "I wanted to flag something following a conversation I had with Omar.", "He seemed quite frustrated about the Valtora discussions. He feels that his analysis was challenged before everyone had properly considered the evidence, and that the pressure to provide quick answers is affecting his work.", "He also mentioned spending additional time checking the competitor analysis, which contributed to his latest scheduled report being submitted late.", "I thought you should know because he seemed more frustrated than usual.", "Best,\nMariam"] },
+    body: ["Hi,", "I wanted to flag something following a conversation I had with Omar.", "He seemed quite frustrated after the recent planning discussions. He feels that when his analysis challenges what senior people expect, the discussion turns to how he said it rather than what the evidence shows.", "He also said he isn't sure it's worth raising difficult findings if they're not welcome.", "I thought you should know because he seemed more frustrated than usual.", "Best,\nMariam"] },
   { id: "nour", from: "nour", to: ["Sales Team", "Account Management Team", "Operations Team", "HR Team"], cc: ["Chief Executive Officer (CEO)", "Chief Human Resources Officer (CHRO)", "Nadine Farouk — Operations Director", "me"], subject: "Great Customer Feedback — Well Done, Team!", date: "Wed 7 Jul 2027",
     body: ["Hi everyone,", "I wanted to share some great feedback we received from one of our customers!", "The customer recently launched a new product and told us that the insights provided by NextWave helped them better understand their target market and make more confident launch decisions.", "They particularly appreciated the quality of our analysis and how useful the findings were in shaping their launch approach.", "It's great to see our work making a real difference for customers.", "Well done to everyone involved!", "Best,\nNour\nAccount Manager"] }
 ];
@@ -1092,7 +1102,7 @@ const PULSE = {
   events: {
     fair_alignment: { slot: "alignment", round: 1, label: "Fair and clear alignment", d: { performance: 2, trust: 6, development: 3 } },
     dismissive_alignment: { slot: "alignment", round: 1, label: "Dismissive alignment", d: { performance: 0, trust: -8, development: -2 } },
-    midyear_disruption: { slot: "disruption", round: 2, label: "Mid-year business disruption (Valtora)", d: { performance: -5, trust: 0, development: 0 } },
+    midyear_disruption: { slot: "disruption", round: 2, label: "Mid-year business event (the AI Acceleration)", d: { performance: -5, trust: 0, development: 0 } },
     constructive: { slot: "coaching", round: 2, label: "Constructive diagnosis and coaching", d: { performance: 0, trust: 5, development: 4 } },
     punitive: { slot: "coaching", round: 2, label: "Punitive or blaming conversation", d: { performance: 0, trust: -9, development: -4 } },
     /* December: only DOCUMENTED follow-through (a development record marked followThrough) can raise Development. The 2027 record has none. */
@@ -1107,48 +1117,34 @@ const PULSE = {
 };
 
 /* ---------- The participant: Commercial Director (My Profile) ----------
-   CEO-set objectives are provisional fictional pilot targets; edit here.
-   They are kept separate from Omar's individual objectives. */
+   Commercial Director Profile handout. The 2027 strategic targets are company-wide
+   (NextWave company profile); the Director contributes to them but does not own every result. */
 const DIRECTOR = {
-  title: "Commercial Director", department: "Commercial", company: "NextWave",
+  title: "Commercial Director", department: "Commercial", company: "NextWave Digital",
   joined: "December 2026", reportsTo: "Chief Executive Officer (CEO)", status: "Active",
   location: "Corporate Office", directReports: 3, year: "January – December 2027",
   leave: "Leave information not available in pilot",
-  purpose: "Lead NextWave's commercial strategy and performance, ensuring sustainable revenue growth, effective market positioning, strong customer relationships, and alignment between commercial priorities and organizational objectives.",
+  purpose: "Lead commercial growth while protecting the quality of customer relationships. Translate market intelligence into practical decisions, coordinate stakeholders and create the conditions for your team to deliver sustainable results.",
   responsibilities: [
-    "Translate company strategy into commercial objectives and measurable performance targets.",
-    "Lead and develop the Commercial Department.",
-    "Monitor commercial performance, sales opportunities, and customer trends.",
-    "Evaluate market intelligence and competitor developments to support business decisions.",
-    "Coordinate commercial activities across Sales, Business Development, Market Intelligence, and Proposal Design.",
-    "Establish clear performance expectations and conduct regular performance reviews.",
-    "Coach employees, address performance gaps, and support employee development.",
-    "Collaborate with other departments to respond to market and customer needs.",
-    "Report commercial performance and strategic recommendations to the CEO."
+    "Set clear departmental objectives and align individual work with the company's GROW and RETAIN priorities.",
+    "Lead market development, customer acquisition and commercial opportunity management.",
+    "Use market and competitor intelligence to inform commercial decisions and customer proposals.",
+    "Build effective coordination with Product & Operations and Customer Success to deliver on customer commitments.",
+    "Monitor progress using reliable evidence; respond to risks and changing priorities.",
+    "Coach, recognize and develop team members; conduct fair, evidence-based performance conversations."
   ],
   team: ["omar", "youssef", "salma", "mariam"],
   /* reporting lines inside the Commercial Department */
   directs: ["omar", "youssef", "mariam"],
   indirect: { youssef: ["salma"] }
 };
+/* Company-wide 2027 priorities with the Director's documented contribution. Figures exactly as in the company profile. */
 const CEO_OBJECTIVES = [
-  { id: "growth", title: "Drive Commercial Growth", kpi: "Achieve at least 15% annual commercial revenue growth compared with 2026.", target: "≥ 15%", short: "Revenue growth vs 2026" },
-  { id: "conversion", title: "Improve Sales Conversion", kpi: "Achieve an average annual proposal win rate of at least 35%.", target: "≥ 35%", short: "Average proposal win rate" },
-  { id: "pipeline", title: "Strengthen Commercial Pipeline", kpi: "Increase qualified commercial opportunities by at least 20% compared with the 2026 baseline.", target: "+20%", short: "Qualified opportunities vs 2026" },
-  { id: "responsiveness", title: "Strengthen Market Responsiveness", kpi: "Ensure significant competitor developments are assessed and translated into documented commercial response recommendations within an agreed business timeframe.", target: "Within agreed timeframe", short: "Competitor response" },
-  { id: "team", title: "Build a High-Performing Commercial Team", kpi: "Complete performance goal alignment, scheduled check-ins, and final evaluations for all direct reports within the company's performance management cycle.", target: "All direct reports", short: "Performance cycle completion" }
+  { id: "GROW", title: "GROW", kpi: "Achieve 18% revenue growth.", target: "18% revenue growth", short: "Company-wide revenue growth", contribution: "Build qualified opportunities, improve conversion and support customer expansion." },
+  { id: "RETAIN", title: "RETAIN", kpi: "Improve customer retention from 88% to 93%.", target: "88% → 93%", short: "Company-wide customer retention", contribution: "Strengthen expectations, handovers and proactive customer communication." },
+  { id: "SCALE", title: "SCALE", kpi: "Improve on-time delivery from 82% to 92%.", target: "82% → 92%", short: "Company-wide on-time delivery", contribution: "Coordinate realistic commitments and escalate delivery risks early." },
+  { id: "BUILD", title: "BUILD", kpi: "Strengthen critical capabilities, succession readiness and the talent pipeline; reduce key-person dependency.", target: "Capability & talent", short: "Capabilities, succession and talent pipeline", contribution: "Develop people, share knowledge and reduce reliance on individuals." }
 ];
-
-/* ---------- Commercial dashboard: one data source for Home and Business Dashboard ----------
-   Start of year: CEO targets with baseline placeholders (no invented results).
-   After the Valtora event: the agreed mid-year figures (DASHBOARD above).
-   Year-end: company figures delivered by the server with the year-end update. */
-const DASHBOARD_INFO = {
-  opps: { obj: "pipeline", def: "Qualified commercial opportunities in the pipeline, compared with the baseline.", source: "CRM pipeline report" },
-  obj: { obj: "conversion", def: "Share of recorded customer objections that relate to price.", source: "CRM objection records" },
-  win: { obj: "conversion", def: "Share of submitted proposals that were won.", source: "Proposal tracker" },
-  val: { obj: "responsiveness", def: "Share of active customer discussions in which Valtora was mentioned.", source: "CRM discussion notes" }
-};
 
 /* =========================================================
    SCORE PERFORMANCE HUB — GENERAL CONTENT CONFIGURATION
@@ -1164,7 +1160,7 @@ const APP = {
 };
 const SIM_DATES = {
   start: "Mon 4 Jan 2027", deadline: "Mon 11 Jan 2027", submitted: "Fri 8 Jan 2027", approved: "Mon 11 Jan 2027",
-  alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 9 Jul 2027"
+  alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 31 Dec 2027"
 };
 /* NextWave company website shown in the collapsible section at the bottom of each page.
    embed: false because the site currently sends "X-Frame-Options: SAMEORIGIN", which blocks showing it
@@ -1205,10 +1201,13 @@ function hrMessages() {
       action: { l: "Open Evidence Log", go: "evidence" } },
     /* Closing email: delivered once, when the participant submits the mid-year review (the year-end round was removed) */
     closed: { subject: `Performance Cycle ${APP.cycleYear} — Thank You`, date: SIM_DATES.closed, closing: true,
+      list: ["He continued challenging assumptions, but began presenting alternative scenarios and recommendations more concisely. Stakeholder discussions became more constructive.", "His analysis remained strong. Presentations became shorter, but stakeholder reactions remained mixed.", "Reports remained accurate, but he offered fewer unsolicited recommendations and increasingly shared challenging evidence only when asked."],
       body: ["Dear Commercial Director,",
         `Thank you for leading Omar Hassan's ${APP.cycleYear} performance journey, from agreeing his performance expectations to reviewing his progress and coaching him through a changing business environment.`,
         "Your commitment to setting clear expectations, monitoring progress, providing feedback, and making evidence-based decisions helps build a culture where employees understand what is expected and have the support they need to perform and grow.",
-        "As you continue through the year, remember that **performance management does not end with a single review or appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.",
+        "**What happened next.** The AI Acceleration continued across the second half of 2027. The business outcome was mixed but positive: market interest and opportunities increased, while capacity was stretched; some priorities were delayed, customer questions increased, adoption varied and some rework occurred.",
+        "By the end of the year, the evidence on Omar showed:", "__LIST__",
+        "As you plan for the year ahead, remember that **performance management does not end with a single review or appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.",
         "Thank you for your leadership and commitment to building a high-performance culture at NextWave.",
         "Best regards,\n**NextWave Human Resources**"] }
   };
@@ -1954,7 +1953,7 @@ function notifications() {
   const out = [], r = rec();
   const cu = chatUnread(r);
   if (cu) { const last = chatThread(r).filter(m => m.from === "employee").pop(); out.push({ t: `Omar Hassan sent you ${cu === 1 ? "a message" : cu + " messages"}`, d: last ? last.text.slice(0, 80) + (last.text.length > 80 ? "…" : "") : "", act: "openChat", icon: "chat" }); }
-  if (r2Status(r) !== "locked" && !r.r2.seenDashboard) out.push({ t: "Business alert: commercial indicators changed", d: "Valtora launched a lower-priced alternative to Customer360.", go: "business", icon: "alert" });
+  if (r2Status(r) !== "locked" && !r.r2.seenDashboard) out.push({ t: "Business event: the AI Acceleration", d: "Valtora Technologies announced a major AI-enabled enhancement; NextWave is accelerating NextWave Insights.", go: "home", icon: "alert" });
 
   mailList().filter(m => m.unread).forEach(m => out.push({ t: m.subject, d: `${senderOf(m).name} · ${m.date}`, go: "inbox/" + m.id, icon: "mail" }));
   return out.map(n => ({ ...n, unread: true }));
@@ -2205,9 +2204,9 @@ function orgChart() {
   </div>`;
 }
 const RESP_GROUPS = [
-  { id: "strategy", t: "Strategy and targets", icon: "target", items: [0, 3, 8] },
-  { id: "team", t: "Leading the Commercial team", icon: "people", items: [1, 5, 6] },
-  { id: "ops", t: "Commercial operations and collaboration", icon: "layers", items: [2, 4, 7] }
+  { id: "strategy", t: "Objectives, growth and market intelligence", icon: "target", items: [0, 1, 2] },
+  { id: "ops", t: "Coordination and monitoring", icon: "layers", items: [3, 4] },
+  { id: "team", t: "Leading and developing the team", icon: "people", items: [5] }
 ];
 function profileResponsibilities() {
   const D = DIRECTOR, open = UI.respOpen || { strategy: true };
@@ -2217,21 +2216,32 @@ function profileResponsibilities() {
       ${open[g.id] ? `<ul class="acc-b">${g.items.map(i => `<li>${icon("check", "i-sm")}<span>${esc(D.responsibilities[i])}</span></li>`).join("")}</ul>` : ""}</section>`).join("")}
   </div>`;
 }
-const CEO_INDICATOR = { growth: "Commercial revenue growth", conversion: "Proposal win rate", pipeline: "Qualified opportunities", responsiveness: "Competitor developments and market intelligence reporting", team: "Performance management cycle for your direct reports" };
 function profileObjectives() {
-  return `<div class="stack"><p class="small t2">Your ${APP.cycleYear} objectives, set by the Chief Executive Officer. They are read-only and give the strategic context for the objectives you agree with your team.</p>
+  return `<div class="stack"><p class="small t2">NextWave Digital's ${APP.cycleYear} strategic targets are company-wide. As Commercial Director you contribute to them, but you do not own every result on your own. Read-only.</p>
     <div class="obj-grid">${CEO_OBJECTIVES.map((o, i) => { const on = UI.ceoOpen === o.id; return `<div class="ceo-card ${on ? "open" : ""}"><button class="ceo-btn" data-act="ceoToggle" data-id="${o.id}" aria-expanded="${on}"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span><span class="xs ceo-more">${on ? "Hide details" : "View details"} ${icon(on ? "chevdown" : "chev", "i-xs")}</span></button>
-      ${on ? `<div class="ceo-detail small"><div><span class="muted">Measure</span>${esc(o.kpi)}</div><div><span class="muted">Target</span>${esc(o.target)}</div><div><span class="muted">Tracked through</span>${esc(CEO_INDICATOR[o.id])}</div><div><span class="muted">Strategic context</span>One of the CEO's ${APP.cycleYear} priorities for the Commercial Department. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
+      ${on ? `<div class="ceo-detail small"><div><span class="muted">Company objective</span>${esc(o.kpi)}</div><div><span class="muted">Your contribution</span>${esc(o.contribution)}</div><div><span class="muted">Strategic context</span>A company-wide ${APP.cycleYear} priority from the NextWave Digital company profile. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
+}
+function prev2026(P) {
+  return `<div class="stack-sm" id="prev-2026"><h4>Last year's appraisal (2026)</h4>
+    <div class="xs muted">Rating period ${esc(P.period)} · Supervisor: ${esc(P.supervisor)} · Time in position: ${esc(P.timeInPosition)} · Historical record, read-only</div>
+    <div class="xs muted">Part I · Competencies (40%) · Rating scale: ${esc(P.scale)}</div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Competency</th><th style="width:60px">Rating</th><th>Performance evidence</th></tr></thead><tbody>${P.competencies.map(([c, n, r, e]) => `<tr><td><span class="xs muted">${esc(c)}</span><br>${esc(n)}</td><td class="num">${r}</td><td class="small">${esc(e)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="xs">Competency score: <b>${esc(P.competencyScore)}</b> · Average rating: ${esc(P.average)}</div>
+    <div class="xs muted">Part II · Objectives (60%)</div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Objective</th><th>Measure</th><th>Target</th><th>Actual</th><th>Achieved</th><th>Weight</th><th>Score</th></tr></thead><tbody>${P.objectives.map(o => `<tr><td>${esc(o[0])}<div class="xs muted">${esc(o[7])}</div></td><td class="small">${esc(o[1])}</td>${o.slice(2, 7).map(x => `<td class="num">${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="xs">Objectives score: <b>${esc(P.objectivesScore)}</b></div>
+    <div class="xs">Overall: ${P.overall.map(([c, w, sc, wc]) => `${esc(c)} ${esc(w)} × ${esc(sc)} = ${esc(wc)}`).join(" · ")} → <b>${esc(P.overallScore)}</b></div>
+  </div>`;
 }
 MODALS.profile = function (m) {
   const e = m.emp || S.emp, E = EMPLOYEES[e], active = PILOT.active.includes(e);
   return modalWrap("Employee profile", `
     <div class="row nowrap" style="gap:14px">${avatar(e, "lg")}<div><h3>${esc(E.name)}</h3><div class="small t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div></div>
-    ${active ? `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd><dt>Previous rating</dt><dd>${esc(E.prevRating)}</dd></dl>
-    <div class="stack-sm"><h4>Role responsibilities</h4><ul class="list-plain small t2">${E.role.responsibilities.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div class="stack-sm"><h4>Strengths</h4><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div></div>
-    <div class="stack-sm"><h4>Previous-year evidence</h4><ul class="list-plain small t2">${E.prevEvidence.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div class="stack-sm"><h4>Previous stakeholder feedback</h4>${E.prevFeedback.map(([w, t]) => `<div class="small"><b>${esc(w)}:</b> <span class="t2">“${esc(t)}”</span></div>`).join("")}</div>`
+    ${active ? `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd><dt>Previous overall rating</dt><dd>${esc(E.prevRating)}</dd></dl>
+    <div class="stack-sm"><h4>Role purpose</h4><p class="small t2">${esc(E.role.purpose)}</p></div>
+    <div class="stack-sm"><h4>Core responsibilities</h4><ul class="list-plain small t2">${E.role.responsibilities.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div class="stack-sm"><h4>What Omar brings to the team</h4><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div><p class="small t2">${esc(E.prevPerformance)}</p></div>
+    ${E.prev2026 ? prev2026(E.prev2026) : ""}`
     : `<dl class="kv"><dt>Reports to</dt><dd>${esc(E.role.reportsTo)}</dd></dl><div class="stack-sm"><h4>Role purpose</h4><p class="small t2">${esc(E.role.purpose)}</p></div>`}`, `<button class="btn" data-act="closeModal">Close</button>`, true);
 };
 
@@ -2468,7 +2478,7 @@ VIEWS.evidence = function () {
   const rows = r.evidence.filter(e => f === "all" || e.link === f);
   return pageHead(`Evidence Log / ${esc(E.name)}`, "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
   <div class="stack">
-    <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${r3Status(r) !== "locked" ? `<button class="btn ghost sm" data-act="go" data-go="yearend">${icon("calendar", "i-sm")} Year-end update</button>` : ""}</div>
+    <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${""}</div>
     <div class="row between">
       <div class="row nowrap" style="gap:8px">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by objective or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:260px"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>
       <span class="xs muted">${plural(rows.length, "entry", "entries")} shown</span>
@@ -2503,122 +2513,51 @@ function evMissing(d) { const m = []; if (!d.period.trim()) m.push("Date / Perio
 
 
 /* =========================================================
-   COMMERCIAL DASHBOARD (Home) — one source of truth for business figures
-   Periods follow the facilitator's releases: Start of Year → Mid-Year → Year-End.
-   Only figures defined in the scenario are shown; year-end company figures
-   arrive from the server with the year-end update.
+   COMMERCIAL DASHBOARD (Home)
+   Only figures stated in the participant documents are shown: the company-wide
+   2027 targets and baselines. The documents give no mid-year business results,
+   so no results are shown (no invented numbers).
    ========================================================= */
 const PERIODS_DASH = [
   { id: "start", l: "Start of Year", sub: "January 2027" },
-  { id: "mid", l: "Mid-Year", sub: "June / July 2027" }
+  { id: "mid", l: "Mid-Year", sub: "July 2027" }
 ];
-const ceo = (id) => CEO_OBJECTIVES.find(o => o.id === id);
-function periodAvailable(id, r = rec()) { return id === "start" || (id === "mid" && S.released.r2) || (id === "year" && false && !!(r.r3.dataset && r.r3.dataset.company && r.r3.dataset.company.metrics)); }
-function currentPeriod(r = rec()) {
-  if (UI.period && periodAvailable(UI.period, r)) return UI.period;
-  return periodAvailable("year", r) ? "year" : periodAvailable("mid", r) ? "mid" : "start";
+function periodAvailable(id) { return id === "start" || (id === "mid" && S.released.r2); }
+function currentPeriod() {
+  if (UI.period && periodAvailable(UI.period)) return UI.period;
+  return periodAvailable("mid") ? "mid" : "start";
 }
-/* The business figures by period (the single data source). null = not defined for that period. */
-function bizData(r = rec()) {
-  const y = periodAvailable("year", r) ? r.r3.dataset.company.metrics : null;
-  return {
-    winRate: { start: null, preLaunch: 32, mid: 24, year: y ? y.win : null, target: 35 },
-    objections: { start: null, preLaunch: 18, mid: 29, year: y ? y.objections : null },
-    opps: { start: null, mid: -12, year: y ? y.opps : null, target: 20 },
-    valtora: { mid: 35, year: null },
-    growth: { target: 15 },
-    months: y ? [...DASHBOARD.months, y.month] : [...DASHBOARD.months],
-    win: y ? [...DASHBOARD.win, y.win] : [...DASHBOARD.win],
-    objectionSeries: y ? [...DASHBOARD.objections, y.objections] : [...DASHBOARD.objections]
-  };
+function kpisFor(period) {
+  return CEO_OBJECTIVES.map(o => ({ id: o.id, label: o.title, value: null, target: o.target, note: period === "start" ? "Company-wide target · results published through the year" : "No results published in this update", def: o.kpi, contribution: o.contribution }));
 }
-const fmtPct = (v, sign) => v == null ? "—" : `${sign && v > 0 ? "+" : ""}${v}%`;
-function kpisFor(period, r = rec()) {
-  const d = bizData(r);
-  const val = (o) => period === "start" ? null : period === "mid" ? o.mid : o.year;
-  return [
-    { id: "growth", focus: "growth", label: "Commercial revenue growth", icon: "trend", value: null, target: `≥ ${d.growth.target}%`, note: period === "start" ? "First results after Q1" : "Not published in this update", obj: "growth", def: "Annual commercial revenue growth compared with 2026.", source: "Finance revenue reports", series: [] },
-    { id: "win", focus: "conversion", label: "Proposal win rate", icon: "target", value: val(d.winRate), target: `≥ ${d.winRate.target}% avg`, note: period === "start" ? "Baseline not yet published" : period === "mid" ? "Pre-launch: 32%" : "June: 24% · pre-launch: 32%", tone: "bad", obj: "conversion", def: DASHBOARD_INFO.win.def, source: DASHBOARD_INFO.win.source, series: [["Pre-launch", 32], ["Mid-Year (June)", 24], ...(d.winRate.year != null ? [["Year-End (Dec)", d.winRate.year]] : [])] },
-    { id: "opps", focus: "pipeline", label: "Qualified opportunities", icon: "layers", value: val(d.opps), sign: true, target: `+${d.opps.target}% vs 2026`, note: period === "start" ? "2026 baseline to be confirmed" : "vs pre-launch baseline", tone: "bad", obj: "pipeline", def: DASHBOARD_INFO.opps.def, source: DASHBOARD_INFO.opps.source, series: [["Mid-Year (June)", -12], ...(d.opps.year != null ? [["Year-End (Dec)", d.opps.year]] : [])] },
-    { id: "obj", focus: "conversion", label: "Price-related objections", icon: "alert", value: val(d.objections), target: null, sub: "Share of recorded customer objections", note: period === "start" ? "Tracking from Q1" : period === "mid" ? "Pre-launch: 18%" : "June: 29% · pre-launch: 18%", tone: "bad", obj: "conversion", def: DASHBOARD_INFO.obj.def, source: DASHBOARD_INFO.obj.source, series: [["Pre-launch", 18], ["Mid-Year (June)", 29], ...(d.objections.year != null ? [["Year-End (Dec)", d.objections.year]] : [])] },
-    { id: "mi", focus: "market", label: "Market intelligence reporting", icon: "log", value: period === "start" ? "12" : null, raw: true, target: null, sub: period === "start" ? "Monthly reports scheduled" : "Reported in Business insights", note: period === "start" ? "January – December 2027" : "Individual work evidence", obj: "responsiveness", def: "Scheduled monthly market intelligence reports for the Commercial Department.", source: "Reporting tracker", series: [] }
-  ];
-}
-const FOCUS = [["all", "All"], ["conversion", "Conversion"], ["pipeline", "Pipeline"], ["market", "Market"], ["growth", "Growth"]];
-function kpiCard(k, period) {
-  const open = UI.kpiOpen === k.id, o = ceo(k.obj), dim = UI.focus && UI.focus !== "all" && k.focus !== UI.focus;
-  const shown = k.value == null ? "—" : k.raw ? k.value : fmtPct(k.value, k.sign);
-  return `<div class="kpi ${k.value == null ? "na" : k.tone || "target"} ${open ? "open" : ""} ${dim ? "dim" : ""}"><button class="kpi-btn" data-act="kpi" data-id="${k.id}" aria-expanded="${open}" title="${esc(k.def)}"><span class="row between nowrap"><span class="kpi-l">${icon(k.icon, "i-xs")} ${esc(k.label)}</span><span class="kpi-i">${icon(open ? "chevdown" : "info", "i-xs")}</span></span><b class="kpi-v num">${esc(shown)}</b><span class="xs kpi-t">${k.target ? `Target ${esc(k.target)}` : esc(k.sub || "")}</span><span class="xs kpi-note">${esc(k.note)}</span></button>
-    ${open ? `<div class="kpi-more xs"><div><b>What it measures:</b> ${esc(k.def)}</div><div><b>Source:</b> ${esc(k.source)}</div>${o ? `<div><b>CEO objective:</b> ${esc(o.title)} (${esc(o.target)})</div>` : ""}${k.series.length ? `<div class="kpi-series">${k.series.map(([l, v]) => `<span><span class="muted">${l}</span><b class="num">${fmtPct(v, k.sign)}</b></span>`).join("")}</div>` : ""}</div>` : ""}</div>`;
-}
-function chartWidth(full) { const vw = window.innerWidth || 1200, main = vw > 1100 ? vw - 330 : vw - 60; return Math.round(Math.max(290, Math.min(full ? 1100 : 760, full ? main : (vw > 1100 ? main * 0.6 : main)))); }
-function lineChart(d) {
-  const show = UI.series || { win: true, obj: true };
-  const W = chartWidth(false), small = W < 480, H = small ? 220 : 260, pad = { l: 42, r: 16, t: 22, b: 34 }, max = 40, n = d.months.length;
-  const xs = (i) => pad.l + i * ((W - pad.l - pad.r) / Math.max(1, n - 1)), ys = (v) => H - pad.b - (v / max) * (H - pad.t - pad.b);
-  const path = (arr) => arr.map((v, i) => `${i ? "L" : "M"}${xs(i).toFixed(1)},${ys(v).toFixed(1)}`).join("");
-  const sel = UI.month != null && UI.month < n ? UI.month : null;
-  const pts = (arr, cls, name) => arr.map((v, i) => `<circle cx="${xs(i)}" cy="${ys(v)}" r="${sel === i ? 6 : 4}" class="${cls}"><title>${d.months[i]} · ${name}: ${v}%</title></circle>${small && sel !== i ? "" : `<text x="${xs(i)}" y="${ys(v) - 10}" text-anchor="middle" class="lab ${cls}">${v}%</text>`}`).join("");
-  const launch = 2.5;
-  return `<svg class="chart" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly proposal win rate and price-related objections">
-    ${[0, 10, 20, 30, 40].map(v => `<line x1="${pad.l}" x2="${W - pad.r}" y1="${ys(v)}" y2="${ys(v)}" class="gl"/><text x="${pad.l - 8}" y="${ys(v) + 4}" text-anchor="end" class="ax">${v}%</text>`).join("")}
-    ${d.months.map((mo, i) => `<rect x="${xs(i) - 24}" y="${pad.t}" width="48" height="${H - pad.t - pad.b}" class="hit ${sel === i ? "sel" : ""}" data-act="month" data-i="${i}"><title>${mo}: win rate ${d.win[i]}%, price objections ${d.objectionSeries[i]}%</title></rect><text x="${xs(i)}" y="${H - 12}" text-anchor="${i === n - 1 ? "end" : i === 0 ? "start" : "middle"}" class="ax ${sel === i ? "axsel" : ""}">${mo.slice(0, 3)}</text>`).join("")}
-    <line x1="${xs(launch)}" x2="${xs(launch)}" y1="${pad.t}" y2="${H - pad.b}" class="ev"/><text x="${xs(launch) - 4}" y="${H - pad.b - 8}" text-anchor="end" class="ax evl">Valtora launch</text>
-    ${show.win ? `<line x1="${pad.l}" x2="${W - pad.r}" y1="${ys(35)}" y2="${ys(35)}" class="tg"/><text x="${((xs(0) + xs(1)) / 2).toFixed(1)}" y="${ys(35) - 6}" text-anchor="middle" class="ax tgl">Win-rate target 35%</text>` : ""}
-    ${show.win ? `<path d="${path(d.win)}" class="s1"/>${pts(d.win, "s1", "Proposal win rate")}` : ""}${show.obj ? `<path d="${path(d.objectionSeries)}" class="s2"/>${pts(d.objectionSeries, "s2", "Price-related objections")}` : ""}
-  </svg><div class="legend"><button class="lg ${show.win ? "on" : ""}" data-act="series" data-k="win" aria-pressed="${show.win}"><i class="s1"></i>Proposal win rate</button><button class="lg ${show.obj ? "on" : ""}" data-act="series" data-k="obj" aria-pressed="${show.obj}"><i class="s2"></i>Price-related objections</button><span class="muted">Hover for values · select a month</span></div>${monthDetail(d)}`;
-}
-function monthDetail(d) {
-  const i = UI.month; if (i == null || i >= d.months.length) return "";
-  const prev = i > 0 ? i - 1 : null, df = (a) => prev == null ? "" : ` <span class="${a[i] - a[prev] < 0 ? "neg" : a[i] - a[prev] > 0 ? "pos" : "muted"}">(${a[i] - a[prev] > 0 ? "+" : ""}${a[i] - a[prev]} pts vs ${d.months[prev]})</span>`;
-  return `<div class="month-detail"><b>${d.months[i]}</b><span>Proposal win rate <b class="num">${d.win[i]}%</b>${df(d.win)}</span><span>Price-related objections <b class="num">${d.objectionSeries[i]}%</b>${df(d.objectionSeries)}</span><button class="btn ghost sm" data-act="month" data-i="${i}">Clear</button></div>`;
-}
-function compareBars(d, period) {
-  const rows = [["Proposal win rate", [["Pre-launch", 32], ["June", 24], ...(period === "year" ? [["December", d.winRate.year]] : [])], 35], ["Price-related objections", [["Pre-launch", 18], ["June", 29], ...(period === "year" ? [["December", d.objections.year]] : [])], null]];
-  return rows.map(([l, vals, tg]) => `<div class="cmp"><div class="row between small"><b>${l}</b><span class="num">${vals.map(v => `${v[1]}%`).join(" → ")}</span></div>
-    ${vals.map(([lb, v], i) => `<div class="cmp-row"><span class="xs muted">${lb}</span><span class="cbar" title="${lb}: ${v}%"><i class="c${i}" style="width:${v * 2.5}%"></i>${tg ? `<b class="cbar-tg" style="left:${tg * 2.5}%" title="Target ${tg}%"></b>` : ""}</span><span class="num xs">${v}%</span></div>`).join("")}</div>`).join("");
-}
-function donut(value, label, cls, sub) {
-  const R = 42, c = 2 * Math.PI * R, off = c * (1 - value / 100);
-  return `<div class="donut ${cls}" title="${esc(label)}: ${value}%"><svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="${R}" class="d-bg"/><circle cx="55" cy="55" r="${R}" class="d-fg" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 55 55)"/><text x="55" y="60" text-anchor="middle" class="d-v">${value}%</text></svg><b class="small">${esc(label)}</b><span class="xs muted">${esc(sub)}</span></div>`;
-}
-function gauge(value, target, label) {
-  const pct = Math.min(1, value / target), a = Math.PI * (1 - pct), x = 60 + 46 * Math.cos(a), y = 60 - 46 * Math.sin(a);
-  return `<div class="gauge" title="${esc(label)}: ${value}% of a ${target}% target"><svg width="120" height="74" viewBox="0 0 120 74" aria-hidden="true"><path d="M14 60 A46 46 0 0 1 106 60" class="g-bg"/><path d="M14 60 A46 46 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" class="g-fg"/><text x="60" y="58" text-anchor="middle" class="d-v">${value}%</text></svg><b class="small">${esc(label)}</b><span class="xs muted">Target ${target}% · gap ${target - value} pts</span></div>`;
+function kpiCard(k) {
+  const open = UI.kpiOpen === k.id;
+  return `<div class="kpi na ${open ? "open" : ""}"><button class="kpi-btn" data-act="kpi" data-id="${k.id}" aria-expanded="${open}" title="${esc(k.def)}"><span class="row between nowrap"><span class="kpi-l">${icon("target", "i-xs")} ${esc(k.label)}</span><span class="kpi-i">${icon(open ? "chevdown" : "info", "i-xs")}</span></span><b class="kpi-v num">—</b><span class="xs kpi-t">Target: ${esc(k.target)}</span><span class="xs kpi-note">${esc(k.note)}</span></button>
+    ${open ? `<div class="kpi-more xs"><div><b>Company objective:</b> ${esc(k.def)}</div><div><b>Commercial Director's contribution:</b> ${esc(k.contribution)}</div></div>` : ""}</div>`;
 }
 function commercialOverview(r) {
-  const period = currentPeriod(r), d = bizData(r), kp = kpisFor(period, r);
+  const period = currentPeriod();
   if (period === "mid" && !r.r2.seenDashboard) { r.r2.seenDashboard = true; save(); }
   const pinfo = PERIODS_DASH.find(p => p.id === period);
-  const filter = `<div class="period-filter" role="tablist" aria-label="Period">${PERIODS_DASH.map(p => { const ok = periodAvailable(p.id, r); return `<button role="tab" class="${period === p.id ? "on" : ""}" data-act="period" data-v="${p.id}" aria-selected="${period === p.id}" ${ok ? "" : `disabled title="Not yet available"`}>${ok ? "" : icon("lock", "i-xs")}${p.l}</button>`; }).join("")}</div>`;
-  const focus = `<div class="focus-chips" role="group" aria-label="Focus">${FOCUS.map(([id, l]) => `<button class="${(UI.focus || "all") === id ? "on" : ""}" data-act="focus" data-v="${id}">${l}</button>`).join("")}</div>`;
+  const filter = `<div class="period-filter" role="tablist" aria-label="Period">${PERIODS_DASH.map(p => { const ok = periodAvailable(p.id); return `<button role="tab" class="${period === p.id ? "on" : ""}" data-act="period" data-v="${p.id}" aria-selected="${period === p.id}" ${ok ? "" : `disabled title="Not yet available"`}>${ok ? "" : icon("lock", "i-xs")}${p.l}</button>`; }).join("")}</div>`;
   const head = `<div class="dash-bar"><div><h2>Commercial Performance</h2><span class="xs">${pinfo.l} · ${pinfo.sub}</span></div>${filter}</div>`;
-  const alert = period !== "start" ? `<button class="alert-bar" data-act="kpiAlert" aria-expanded="${!!UI.alertOpen}">${icon("alert")}<span class="grow"><b>Business alert:</b> Valtora has introduced a lower-priced alternative to Customer360 and launched an aggressive campaign targeting NextWave's existing and potential customers.${UI.alertOpen ? `<span class="alert-more">Department indicators changed in June: qualified opportunities −12%, price-related objections 18% → 29%, proposal win rate 32% → 24%. Valtora is mentioned in 35% of active customer discussions.</span>` : ""}</span>${icon(UI.alertOpen ? "chevdown" : "chev", "i-sm")}</button>` : "";
-  const kpis = `<div class="kpi-row">${kp.map(k => kpiCard(k, period)).join("")}</div>`;
-  if (period === "start") return `<section class="dash">${head}<div class="dash-body stack">${focus}${kpis}
-    <div class="dash-grid"><div class="card"><div class="card-h"><div><h3>${APP.cycleYear} commercial targets</h3><div class="xs muted">Set by the CEO for the Commercial Department</div></div><button class="btn ghost sm" data-act="go" data-go="profile/objectives">My objectives</button></div><div class="card-b stack-sm">
-      ${CEO_OBJECTIVES.map(o => `<div class="target-row ${UI.focus && UI.focus !== "all" && !kp.some(k => k.obj === o.id && k.focus === UI.focus) ? "dim" : ""}"><span class="grow"><b class="small">${esc(o.title)}</b><span class="xs muted">${esc(o.kpi)}</span></span><span class="tag blue">${esc(o.target)}</span></div>`).join("")}
+  const kpis = `<div class="kpi-row">${kpisFor(period).map(kpiCard).join("")}</div>`;
+  const note = `<div class="insight neutral">${icon("info", "i-sm")}<span>Company and department results reflect many factors. They are not, on their own, evidence of any one employee's performance.</span></div>`;
+  if (period === "start") return `<section class="dash">${head}<div class="dash-body stack">${kpis}
+    <div class="dash-grid"><div class="card"><div class="card-h"><div><h3>${APP.cycleYear} company priorities</h3><div class="xs muted">Company-wide targets · NextWave Digital company profile</div></div><button class="btn ghost sm" data-act="go" data-go="profile/objectives">My contribution</button></div><div class="card-b stack-sm">
+      ${CEO_OBJECTIVES.map(o => `<div class="target-row"><span class="grow"><b class="small">${esc(o.title)}</b><span class="xs muted">${esc(o.kpi)}</span></span><span class="tag blue">${esc(o.target)}</span></div>`).join("")}
     </div></div>
-    <div class="card"><div class="card-h"><h3>What happens next</h3></div><div class="card-b stack-sm small t2"><p>Results are published through the year. Actual figures appear here when they become available.</p><p class="xs muted">Company and department results describe the business. They are not evidence of any one employee's performance.</p></div></div></div>
+    <div class="card"><div class="card-h"><h3>What happens next</h3></div><div class="card-b stack-sm small t2"><p>Results are published through the year. Figures appear here only when they are reported.</p>${note}</div></div></div>
   </div></section>`;
-  const showConv = !UI.focus || ["all", "conversion"].includes(UI.focus), showMarket = !UI.focus || ["all", "market"].includes(UI.focus);
-  const yr = period === "year";
-  return `<section class="dash">${head}<div class="dash-body stack">${focus}${alert}${kpis}
-    <div class="dash-grid">
-      ${showConv ? `<div class="card"><div class="card-h"><h3>${UI.dashView === "compare" ? "Before and after the Valtora launch" : "Monthly trend"}</h3><div class="seg" role="tablist"><button class="${UI.dashView !== "compare" ? "on" : ""}" data-act="dashView" data-v="trend">Trend</button><button class="${UI.dashView === "compare" ? "on" : ""}" data-act="dashView" data-v="compare">Compare periods</button></div></div><div class="card-b stack">${UI.dashView === "compare" ? compareBars(d, period) : lineChart(d)}</div></div>` : ""}
-      <div class="card"><div class="card-h"><h3>Against target</h3></div><div class="card-b vis-row">
-        ${showConv ? gauge(yr ? d.winRate.year : d.winRate.mid, 35, `Win rate · ${yr ? "December" : "June"}`) : ""}
-        ${showConv ? donut(yr ? d.objections.year : d.objections.mid, "Price-related objections", "dn-orange", "Share of recorded objections") : ""}
-        ${showMarket && !yr ? donut(d.valtora.mid, "Valtora mentions", "dn-purple", "Share of active discussions") : ""}
-        ${(UI.focus === "pipeline" || UI.focus === "all" || !UI.focus) ? `<div class="stat-tile"><span class="xs muted">Qualified opportunities</span><b class="num">${fmtPct(yr ? d.opps.year : d.opps.mid, true)}</b><span class="xs muted">vs pre-launch · target +20% vs 2026</span></div>` : ""}
-        ${UI.focus === "growth" ? `<div class="stat-tile"><span class="xs muted">Revenue growth</span><b class="num">—</b><span class="xs muted">Not published in this update · target ≥ 15%</span></div>` : ""}
-      </div></div>
-    </div>
-    <div class="card"><div class="card-h"><h3>Business insights</h3><span class="xs muted">${pinfo.sub}</span></div><div class="card-b insights">
-      <div class="insight">${icon("alert", "i-sm")}<span><b>Competitive pressure.</b> Valtora's lower-priced Customer360 alternative coincides with the June drop in win rate and the rise in price-related objections.</span></div>
-      ${yr ? `<div class="insight good">${icon("trend", "i-sm")}<span><b>Partial recovery by December.</b> Win rate ${d.winRate.year}% (June 24%), price-related objections ${d.objections.year}% (June 29%), qualified opportunities ${fmtPct(d.opps.year, true)} vs pre-launch (June −12%). ${esc(r.r3.dataset.business ? r.r3.dataset.business.response : "")}</span></div>` : ""}
-      ${!yr && showMarket ? `<div class="insight neutral">${icon("log", "i-sm")}<span><b>Market intelligence (individual work evidence · Omar Hassan).</b> ${DASHBOARD.mi.map(x => esc(x.t)).join("; ")}.</span></div>` : ""}
-      <div class="insight neutral">${icon("info", "i-sm")}<span>Company and department results reflect many factors. A drop in sales or win rate is not, on its own, evidence of an individual's performance.</span></div>
+  const alert = `<button class="alert-bar" data-act="kpiAlert" aria-expanded="${!!UI.alertOpen}">${icon("alert")}<span class="grow"><b>Business event: the AI Acceleration.</b> Valtora Technologies has announced a major AI-enabled solution enhancement. NextWave Digital is accelerating its NextWave Insights enhancement in response.${UI.alertOpen ? `<span class="alert-more">${DASHBOARD.event.map(esc).join(" ")}</span>` : ""}</span>${icon(UI.alertOpen ? "chevdown" : "chev", "i-sm")}</button>`;
+  return `<section class="dash">${head}<div class="dash-body stack">${alert}${kpis}
+    <div class="card"><div class="card-h"><h3>Business update</h3><span class="xs muted">${pinfo.sub}</span></div><div class="card-b insights">
+      ${DASHBOARD.event.map(t => `<div class="insight">${icon("spark", "i-sm")}<span>${esc(t)}</span></div>`).join("")}
+      <div class="insight neutral">${icon("info", "i-sm")}<span>No mid-year business results have been published in this update.</span></div>
+    </div></div>
+    <div class="card" id="omar-midyear"><div class="card-h"><div><h3>Omar's mid-year evidence</h3><div class="xs muted">Individual work evidence · Omar Hassan · before the business event</div></div></div><div class="card-b insights">
+      ${DASHBOARD.mi.map(x => `<div class="insight ${x.st === "ok" ? "good" : x.st === "late" ? "" : "neutral"}">${icon(x.st === "ok" ? "check" : x.st === "late" ? "alert" : "info", "i-sm")}<span>${esc(x.t)}.</span></div>`).join("")}
+      ${note}
     </div></div>
   </div></section>`;
 }
@@ -2630,12 +2569,12 @@ VIEWS.business = function () { setTimeout(() => go("home"), 0); return ""; };
 VIEWS.round2 = function () {
   const r = rec();
   if (r2Status(r) === "locked") return pageHead("Mid-year review", "Mid-year performance review") + lockedPanel("Not available yet", "The mid-year review opens at the mid-year checkpoint.");
-  const items = [["Reviewed the mid-year business results on Home", r.r2.seenDashboard, "home"], ["Wrote your interpretation of the business data (below)", r.r2.interpretation.trim().length >= 15, "round2"], ["Talked with Omar about what has been happening", managerCount(r.r2.diag.log) >= CHAT_LIMITS.diagnosticMin, "chat"], ["Recorded evidence in the Evidence Log", r.evidence.length > 0, "evidence"]];
+  const items = [["Reviewed the mid-year business update and Omar's evidence on Home", r.r2.seenDashboard, "home"], ["Wrote your interpretation of the mid-year information (below)", r.r2.interpretation.trim().length >= 15, "round2"], ["Talked with Omar about what has been happening", managerCount(r.r2.diag.log) >= CHAT_LIMITS.diagnosticMin, "chat"], ["Recorded evidence in the Evidence Log", r.evidence.length > 0, "evidence"]];
   const ok = items.every(x => x[1]), a = r.r2.assessment;
   return pageHead("Performance Management / Mid-year review", "Mid-year performance review", statusChip(r2Status(r)), "Omar Hassan · July 2027") + `<div class="stack-lg">
     <div class="card"><div class="card-h"><h3>Checklist</h3></div><div class="card-b checklist">${items.map(([l, done, goTo]) => `<button class="ck-row ${done ? "ok" : ""}" ${goTo === "chat" ? `data-act="openChat"` : `data-act="go" data-go="${goTo}"`}>${icon(done ? "check" : "info", "i-sm")}<span class="grow">${l}</span>${icon("chev", "i-sm")}</button>`).join("")}</div></div>
-    <div class="card"><div class="card-h"><div><h3>Your interpretation of the business data</h3><div class="xs muted">What do the mid-year results show, and what do they not tell you?</div></div></div><div class="card-b">
-      ${r.r2.submitted ? `<div class="small t2" style="white-space:pre-line">${esc(r.r2.interpretation) || "<span class='muted'>None written</span>"}</div>` : `<textarea class="ta" rows="4" id="${P("r2", "interpretation")}" ${bind(P("r2", "interpretation"))} maxlength="3000" placeholder="Summarise what the mid-year business results show, what may explain them, and what you still need to find out.">${esc(r.r2.interpretation)}</textarea>`}
+    <div class="card"><div class="card-h"><div><h3>Your interpretation of the mid-year information</h3><div class="xs muted">What does the business event mean for your team, what does Omar's evidence show, and what does it not tell you?</div></div></div><div class="card-b">
+      ${r.r2.submitted ? `<div class="small t2" style="white-space:pre-line">${esc(r.r2.interpretation) || "<span class='muted'>None written</span>"}</div>` : `<textarea class="ta" rows="4" id="${P("r2", "interpretation")}" ${bind(P("r2", "interpretation"))} maxlength="3000" placeholder="Summarise what the business event means, what Omar's evidence shows, and what you still need to find out.">${esc(r.r2.interpretation)}</textarea>`}
     </div></div>
     ${r.r2.submitted ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Mid-year review submitted. HR has sent you a message.</span><button class="btn sm" data-act="go" data-go="inbox/closed">Open message</button></div>${r.r2.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r2.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round2">Retry assessment</button>` : ""}</div>` : ""}`
     : `<div class="card pad row between"><span class="small t2">${ok ? "Everything is ready. Submitting records your interpretation, the conversation with Omar and your Evidence Log." : "Complete the checklist to submit the mid-year review."}</span><button class="btn primary" data-act="submitR2" id="submit-r2" ${!ok || UI.busy ? "disabled" : ""}>${UI.busy === "round2" ? "Submitting…" : "Submit mid-year review"}</button></div>`}
@@ -2727,7 +2666,7 @@ function releaseRound(k) {
   if (S.released[k]) return;
   S.released[k] = true; UI.period = null;
   const r = rec();
-  if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora's lower-priced Customer360 alternative put the Commercial Department under pressure.");
+  if (k === "r2") applyPulse(r, "midyear_disruption", "Valtora Technologies' AI-enabled enhancement and NextWave's accelerated NextWave Insights response are putting pressure on the Commercial Department.");
   ensureChatOpenings(r);
   save();
 }
