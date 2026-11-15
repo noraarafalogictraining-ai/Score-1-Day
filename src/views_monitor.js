@@ -2,7 +2,8 @@
    MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · NEXT-EVENT CODE
    The app never generates evidence: managers record what they receive offline.
    ========================================================= */
-/* Next stage: a "Start mid-year" button (no facilitator code). Shown once the January plan is agreed. */
+/* Next stage: the "End-year" button in the Evidence Log (no facilitator code). Shown once the January plan is agreed;
+   it releases the mid-year business update, the stakeholder emails and Omar's message. */
 function pendingRelease(r = rec()) {
   if (!S.released.r2 && goalsApproved(r)) return "r2";
   return null;
@@ -10,9 +11,9 @@ function pendingRelease(r = rec()) {
 function waitCard(r = rec()) {
   const k = pendingRelease(r); if (!k) return "";
   return `<section class="card wait-card" id="wait-card"><div class="wait-b">${icon("calendar")}<div class="grow stack-sm">
-      <h3>Ready for the mid-year review?</h3>
-      <p class="small t2">Start the mid-year stage when your facilitator asks you to, or when you are ready. It brings the mid-year business update, new emails and a message from Omar.</p>
-      <div class="row nowrap wait-row"><button class="btn primary" data-act="startMidyear" id="start-midyear">${icon("arrow", "i-sm")} Start mid-year</button></div>
+      <h3>Move to the next stage</h3>
+      <p class="small t2">When your facilitator asks, click <b>End-year</b> to continue. You will receive the latest business update, new emails and a message from Omar.</p>
+      <div class="row nowrap wait-row"><button class="btn primary" data-act="startMidyear" id="end-year">${icon("arrow", "i-sm")} End-year</button></div>
     </div></div></section>`;
 }
 
@@ -22,6 +23,7 @@ VIEWS.evidence = function () {
   const rows = r.evidence.filter(e => f === "all" || e.link === f);
   return pageHead(`Evidence Log / ${esc(E.name)}`, "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
   <div class="stack">
+    ${waitCard(r)}
     <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${""}</div>
     <div class="row between">
       <div class="row nowrap" style="gap:8px">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by objective or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:260px"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>

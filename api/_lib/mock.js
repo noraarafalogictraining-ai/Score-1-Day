@@ -26,7 +26,8 @@ function converse(kind, history, ctx) {
   const mgr = history.filter(m => m.from === "manager").map(m => m.text);
   const last = mgr[mgr.length - 1] || "", all = mgr.join("\n");
   if (kind === "alignment") {
-    const ready = has(all, ADDRESS_A) && has(all, ADDRESS_B);
+    const nMgr = mgr.length, addressed = has(all, ADDRESS_A) || has(all, ADDRESS_B);
+    const ready = addressed || (nMgr >= 3 && !has(last, DISMISS)) || nMgr >= 5;   /* same rule as live: little debate */
     if (!ready && /(what('s| is) (the|your) concern|tell me more|what concern|go ahead|what's on your mind)/.test(lc(last))) return { reply: "Last year some of my recommendations weren't adopted, even though the analysis was solid. I don't want my rating to depend on whether management agrees with me.", ready: false, dismissive: false };
     const dismissive = !ready && has(last, DISMISS);
     const reply = ready ? "That's clear, thank you. Judged on quality, relevance and actionability, I'm happy to confirm the plan."

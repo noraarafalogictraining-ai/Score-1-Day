@@ -22,7 +22,6 @@ VIEWS.home = function () {
   const r = rec();
   return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", `${DIRECTOR.title} · Commercial Department`) + `
   <div class="stack-lg">
-    ${waitCard(r)}
     ${commercialOverview(r)}
   </div>`;
 };
@@ -117,7 +116,7 @@ MODALS.profile = function (m) {
 VIEWS.inbox = function () {
   const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
-  return pageHead("My Inbox", "My Inbox") + waitCard() + `<div class="card split" ${pendingRelease() ? 'style="margin-top:14px"' : ""}>
+  return pageHead("My Inbox", "My Inbox") + `<div class="card split">
     <div class="list"><div class="list-h">Email</div>${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
     <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
   </div>`;
@@ -144,7 +143,7 @@ function mailView(m) {
 
 /* Removed routes (year-end round, Learning Score report): old links open Home */
 ["appraisal", "yearend", "reflection", "review"].forEach(k => { VIEWS[k] = function () { setTimeout(() => go("home"), 0); return ""; }; });
-/* The facilitator view was removed: the mid-year stage starts with the "Start mid-year" button (waitCard). */
+/* The facilitator view was removed: the next stage starts with the "End-year" button in the Evidence Log (waitCard). */
 MODALS.reset = function () {
   return modalWrap("Reset this session?", `<p class="small t2">All plans, conversations, evidence and Pulse history saved on this device will be deleted. This cannot be undone.</p>`, `<button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" style="background:var(--risk);border-color:var(--risk)" data-act="doReset">Delete and reset</button>`);
 };

@@ -221,7 +221,7 @@ const ACTIONS = {
   evDrawer(el) { UI.drawer = { type: "evidence", id: el.dataset.id }; render(); },
 
   /* --- rounds --- */
-  startMidyear() { if (pendingRelease() !== "r2") return; releaseRound("r2"); toast("Mid-year business update received."); go("home"); },
+  startMidyear() { if (pendingRelease() !== "r2") return; releaseRound("r2"); toast("Business update received. Check Home, your Inbox and Chat."); go("home"); },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
   rate(el) { setPath(S, el.dataset.path, +el.dataset.v); afterBind(el.dataset.path); save(); render(); },
   submitAppraisal() {

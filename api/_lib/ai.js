@@ -60,8 +60,19 @@ async function employeeReply({ system, history, stance }) {
   for (const m of history) messages.push({ role: m.from === "manager" ? "user" : "assistant", content: m.text });
   if (messages[messages.length - 1].role === "assistant") messages.push({ role: "user", content: "(The manager is waiting for you to continue.)" });
   if (stance) messages.push({ role: "system", content: stance });
-  const out = await send({ system, messages, max_tokens: 2000, output_config: { effort: "low" } });
-  return out.text.replace(/^Omar:\s*/i, "").trim();
+  const out = await send({ system, messages, max_tokens: 400, output_config: { effort: "low" } });
+  return capReply(out.text.replace(/^Omar:\s*/i, "").trim());
+}
+/* Omar's replies are capped at three sentences (about three lines in the chat) and 60 words. */
+function capReply(text, maxSentences = 3, maxWords = 60) {
+  const parts = text.replace(/\s+/g, " ").match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) || [text];
+  let out = "", words = 0;
+  for (const p of parts.slice(0, maxSentences)) {
+    const w = p.trim().split(" ").length;
+    if (out && words + w > maxWords) break;
+    out += (out ? " " : "") + p.trim(); words += w;
+  }
+  return out || text;
 }
 
 /* Assessment: returns parsed JSON matching schema */
@@ -94,4 +105,4 @@ function normalise(defs, raw) {
 }
 const groupTotals = (crit) => crit.reduce((a, c) => { a[c.group] = (a[c.group] || 0) + c.score; return a; }, {});
 
-module.exports = { MODEL, provider, AIError, employeeReply, assessJSON, verifyQuotes, normalise, groupTotals };
+module.exports = { MODEL, provider, AIError, employeeReply, capReply, assessJSON, verifyQuotes, normalise, groupTotals };

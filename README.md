@@ -49,7 +49,8 @@ The participant sees a corporate employee platform, not a training exercise: no 
   - The year-end update arrives as an HR email with the evidence attached ("Open"), and the appraisal is opened from that email.
   - The Round 2 checklist is now **Mid-year review**, reached from the Evidence Log and the conversation.
   - SCORE Review is now a **feedback report**, shown to participants after the final appraisal (via the HR completion email) and to the facilitator at any time.
-  - **Starting mid-year:** there are no codes. Once the January plan is confirmed, Home and the Inbox show a **Start mid-year** button. The participant clicks it when the facilitator asks (or when ready); it releases the mid-year business event, emails and Omar's message.
+  - **Moving on:** there are no codes. Once the January plan is confirmed, the **Evidence Log** shows an **End-year** button (owner's chosen name). The participant clicks it when the facilitator asks; it releases the mid-year business event, emails and Omar's message.
+  - **Omar keeps it short and cooperative:** every reply is capped at 3 sentences / 60 words (`capReply` in `api/_lib/ai.js`). He raises a concern once, accepts a reasonable answer, and closes once next steps are agreed. In January he goes ahead once the concern is reasonably addressed, or after three manager messages that are not dismissive (five at most).
 
 Configuration: the director profile, job description and CEO objectives are `DIRECTOR` and `CEO_OBJECTIVES` in `src/pilot.js` (provisional fictional targets, separate from Omar's data). Company year-end figures for the dashboard come from the server (`COMPANY_YEAR_END.metrics` in `api/_lib/scenario_omar.js`), so they stay hidden until released.
 
@@ -125,7 +126,7 @@ Full comparison: `docs/DOCUMENT_ALIGNMENT_REVIEW.md`. Applied:
 
 **Pilot assumptions (approved by the owner):**
 - Omar's time in position is about 4 years (the profile handout says about 2; the 2026 appraisal says about 4).
-- The business event is released at mid-year (Start mid-year button), although the document places it across the second half of 2027.
+- The business event is released at mid-year (End-year button in the Evidence Log), although the document places it across the second half of 2027.
 - The two assumptions Omar challenged:
   - that Valtora's AI features were mostly marketing;
   - that NextWave Insights could keep its current release plan.
@@ -286,7 +287,7 @@ These slots are separate from the written appraisal's slot (fair/unfair appraisa
 
 The **Employee Pulse** (Performance, Trust, Development; 0–100) is always visible in the header, with a full event history. The **SCORE Review** shows each round's criteria with the score, evidence quotes, reason, confidence and missing information.
 
-There is no facilitator view and there are no codes. The mid-year stage starts with the **Start mid-year** button (`waitCard` in `src/views_monitor.js`, action `startMidyear`). The master code 5050 and the manual controls (confirm alignment, end conversations, set pathway, finalize without AI, per-criterion overrides, device reset) were removed. Without live AI, a session can't pass the January alignment.
+There is no facilitator view and there are no codes. The mid-year stage starts with the **End-year** button in the Evidence Log (`waitCard` in `src/views_monitor.js`, action `startMidyear`). The master code 5050 and the manual controls (confirm alignment, end conversations, set pathway, finalize without AI, per-criterion overrides, device reset) were removed. Without live AI, a session can't pass the January alignment.
 
 ---
 

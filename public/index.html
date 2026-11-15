@@ -2155,7 +2155,6 @@ VIEWS.home = function () {
   const r = rec();
   return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", `${DIRECTOR.title} · Commercial Department`) + `
   <div class="stack-lg">
-    ${waitCard(r)}
     ${commercialOverview(r)}
   </div>`;
 };
@@ -2250,7 +2249,7 @@ MODALS.profile = function (m) {
 VIEWS.inbox = function () {
   const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
-  return pageHead("My Inbox", "My Inbox") + waitCard() + `<div class="card split" ${pendingRelease() ? 'style="margin-top:14px"' : ""}>
+  return pageHead("My Inbox", "My Inbox") + `<div class="card split">
     <div class="list"><div class="list-h">Email</div>${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
     <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
   </div>`;
@@ -2277,7 +2276,7 @@ function mailView(m) {
 
 /* Removed routes (year-end round, Learning Score report): old links open Home */
 ["appraisal", "yearend", "reflection", "review"].forEach(k => { VIEWS[k] = function () { setTimeout(() => go("home"), 0); return ""; }; });
-/* The facilitator view was removed: the mid-year stage starts with the "Start mid-year" button (waitCard). */
+/* The facilitator view was removed: the next stage starts with the "End-year" button in the Evidence Log (waitCard). */
 MODALS.reset = function () {
   return modalWrap("Reset this session?", `<p class="small t2">All plans, conversations, evidence and Pulse history saved on this device will be deleted. This cannot be undone.</p>`, `<button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" style="background:var(--risk);border-color:var(--risk)" data-act="doReset">Delete and reset</button>`);
 };
@@ -2454,7 +2453,8 @@ VIEWS.conversations = function () { setTimeout(() => go("chat"), 0); return ""; 
    MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · NEXT-EVENT CODE
    The app never generates evidence: managers record what they receive offline.
    ========================================================= */
-/* Next stage: a "Start mid-year" button (no facilitator code). Shown once the January plan is agreed. */
+/* Next stage: the "End-year" button in the Evidence Log (no facilitator code). Shown once the January plan is agreed;
+   it releases the mid-year business update, the stakeholder emails and Omar's message. */
 function pendingRelease(r = rec()) {
   if (!S.released.r2 && goalsApproved(r)) return "r2";
   return null;
@@ -2462,9 +2462,9 @@ function pendingRelease(r = rec()) {
 function waitCard(r = rec()) {
   const k = pendingRelease(r); if (!k) return "";
   return `<section class="card wait-card" id="wait-card"><div class="wait-b">${icon("calendar")}<div class="grow stack-sm">
-      <h3>Ready for the mid-year review?</h3>
-      <p class="small t2">Start the mid-year stage when your facilitator asks you to, or when you are ready. It brings the mid-year business update, new emails and a message from Omar.</p>
-      <div class="row nowrap wait-row"><button class="btn primary" data-act="startMidyear" id="start-midyear">${icon("arrow", "i-sm")} Start mid-year</button></div>
+      <h3>Move to the next stage</h3>
+      <p class="small t2">When your facilitator asks, click <b>End-year</b> to continue. You will receive the latest business update, new emails and a message from Omar.</p>
+      <div class="row nowrap wait-row"><button class="btn primary" data-act="startMidyear" id="end-year">${icon("arrow", "i-sm")} End-year</button></div>
     </div></div></section>`;
 }
 
@@ -2474,6 +2474,7 @@ VIEWS.evidence = function () {
   const rows = r.evidence.filter(e => f === "all" || e.link === f);
   return pageHead(`Evidence Log / ${esc(E.name)}`, "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
   <div class="stack">
+    ${waitCard(r)}
     <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${""}</div>
     <div class="row between">
       <div class="row nowrap" style="gap:8px">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by objective or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:260px"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>
@@ -2788,7 +2789,7 @@ const ACTIONS = {
   evDrawer(el) { UI.drawer = { type: "evidence", id: el.dataset.id }; render(); },
 
   /* --- rounds --- */
-  startMidyear() { if (pendingRelease() !== "r2") return; releaseRound("r2"); toast("Mid-year business update received."); go("home"); },
+  startMidyear() { if (pendingRelease() !== "r2") return; releaseRound("r2"); toast("Business update received. Check Home, your Inbox and Chat."); go("home"); },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
   rate(el) { setPath(S, el.dataset.path, +el.dataset.v); afterBind(el.dataset.path); save(); render(); },
   submitAppraisal() {

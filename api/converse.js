@@ -45,7 +45,9 @@ module.exports = H.handler(async (body) => {
   if (kind === "alignment") {
     const t = PR.task("alignment_turn", { plan: ctx.plan, history });
     const v = await AI.assessJSON({ system: PR.ASSESSOR, user: t.user, schema: t.schema, effort: "low" });
-    ready = !!v.concern_addressed; dismissive = !!v.dismissive && !ready;
+    /* Little debate: Omar goes ahead once the concern is addressed, or after three manager messages that are not dismissive. */
+    const mgr = history.filter(m => m.from === "manager").length;
+    ready = !!v.concern_addressed || (mgr >= 3 && !v.dismissive) || mgr >= 5; dismissive = !!v.dismissive && !ready;
     stance = ready ? SC.ALIGNMENT.stance.ready : dismissive ? SC.ALIGNMENT.stance.guarded : SC.ALIGNMENT.stance.open;
   }
   let complete = false;
