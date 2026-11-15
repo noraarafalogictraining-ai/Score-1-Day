@@ -28,17 +28,19 @@ VIEWS.home = function () {
 
 /* ---------- Omar Hassan – Employee Profile (dedicated sidebar section) ---------- */
 VIEWS.employee = function () {
-  const E = EMP(), open = !!UI.prevOpen;
+  const E = EMP();
   return pageHead("", "Employee Profile") + `<div class="stack-lg">
     <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee profile</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div></div></div>
     <section class="purpose-card">${icon("compass")}<div><div class="eyebrow" style="color:#5ED3E2">Role purpose</div><p>${esc(E.role.purpose)}</p></div></section>
     <section class="card"><div class="card-h"><h3>Core responsibilities</h3></div><ul class="acc-b" id="emp-resp">${E.role.responsibilities.map(x => `<li>${icon("check", "i-sm")}<span>${esc(x)}</span></li>`).join("")}</ul></section>
     <section class="card"><div class="card-h"><h3>What Omar brings to the team</h3></div><div class="card-b stack-sm"><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div><p class="small t2">${esc(E.prevPerformance)}</p></div></section>
-    <section class="card prev-card ${open ? "open" : ""}">
-      <button class="prev-btn" id="prev-btn" data-act="prevToggle" aria-expanded="${open}" aria-controls="prev-2026">${icon("clipboard")}<span class="grow"><b>Last Year's Performance Evidence</b><span class="xs muted">2026 appraisal: objectives, results, competency ratings and comments</span></span>${icon(open ? "x" : "chevdown", "i-sm")}</button>
-      ${open && E.prev2026 ? `<div class="card-b">${prev2026(E.prev2026)}<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" data-act="prevToggle" id="prev-close">${icon("x", "i-sm")} Close</button></div></div>` : ""}
-    </section>
   </div>`;
+};
+
+/* ---------- Team Profile → Last Year's Performance Evidence (2026) ---------- */
+VIEWS.history = function () {
+  const E = EMP();
+  return pageHead("", "Last Year's Performance Evidence (2026)", "", `${esc(E.name)} · ${esc(E.title)}`) + `<div class="card"><div class="card-b">${prev2026(E.prev2026)}</div></div>`;
 };
 
 /* ---------- My Profile (the participant) ---------- */
@@ -82,11 +84,11 @@ function profileResponsibilities() {
 }
 function profileObjectives() {
   return `<div class="stack"><p class="small t2">NextWave Digital's ${APP.cycleYear} strategic targets are company-wide. As Commercial Director you contribute to them, but you do not own every result on your own.</p>
-    <div class="obj-row">${CEO_OBJECTIVES.map((o, i) => `<div class="ceo-card fixed"><div class="ceo-top"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span></div>
+    <div class="prio-row">${CEO_OBJECTIVES.map((o, i) => `<div class="ceo-card fixed"><div class="ceo-top"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span></div>
       <div class="ceo-detail small"><div><span class="muted">Company objective</span>${esc(o.kpi)}</div><div><span class="muted">Your contribution</span>${esc(o.contribution)}</div></div></div>`).join("")}</div></div>`;
 }
 function prev2026(P) {
-  return `<div class="stack-sm" id="prev-2026"><h4>Last year's appraisal (2026)</h4>
+  return `<div class="stack-sm" id="prev-2026"><h3>2026 Performance Appraisal</h3>
     <div class="xs muted">Part I · Competencies (40%) · Rating scale: ${esc(P.scale)}</div>
     <div class="table-wrap"><table class="tbl"><thead><tr><th>Competency</th><th style="width:60px">Rating</th><th>Performance evidence</th></tr></thead><tbody>${P.competencies.map(([c, n, r, e]) => `<tr><td><span class="xs muted">${esc(c)}</span><br>${esc(n)}</td><td class="num">${r}</td><td class="small">${esc(e)}</td></tr>`).join("")}</tbody></table></div>
     <div class="xs">Competency score: <b>${esc(P.competencyScore)}</b> · Average rating: ${esc(P.average)}</div>
@@ -110,11 +112,11 @@ MODALS.profile = function (m) {
 };
 
 VIEWS.inbox = function () {
-  const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
+  const ms = mailList(), cur = ms.find(m => m.id === UI.sub);
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
   return pageHead("", "My Inbox") + `<div class="card split">
     <div class="list"><div class="list-h">Email</div>${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
-    <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
+    <div>${cur ? mailView(cur) : `<div class="empty" id="mail-none">${icon("mail")}<b>${ms.length ? "Select an email to read it" : "No messages."}</b></div>`}</div>
   </div>`;
 };
 function mailView(m) {
@@ -125,13 +127,7 @@ function mailView(m) {
   return `<article class="mail">
     <h2>${esc(m.subject)}</h2>
     <div class="mail-meta">${senderAvatar(m)}<div class="grow"><div class="row between"><span><b class="small">${esc(s.name)}</b> <span class="xs muted">${esc(s.title)}</span></span><span class="xs muted">${m.date}</span></div><div class="xs t2 mail-rcpt"><span class="muted">To:</span> ${to.map(esc).join("; ")}</div>${cc.length ? `<div class="xs t2 mail-rcpt"><span class="muted">Cc:</span> ${cc.map(esc).join("; ")}</div>` : ""}</div></div>
-    ${m.secondhand ? `<div class="notice warn">${icon("info", "i-sm")}<span><b>Secondhand account.</b> Mariam is reporting what she observed and what Omar told her. It has not been verified.</span></div>` : ""}
     <div class="mail-body">${body}</div>
-    ${m.closing ? `<section class="cycle-close" id="cycle-close">
-      <div class="cc-title">${APP.cycleYear} PERFORMANCE CYCLE COMPLETED</div>
-      <p class="cc-quote">Great performance is not managed once a year. It is built through everyday leadership.</p>
-      <ol class="score-journey" aria-label="The SCORE journey">${["SET", "CHECK", "OPTIMIZE", "REVIEW", "EVOLVE"].map((w, i) => `${i ? `<li class="sj-arrow" aria-hidden="true">→</li>` : ""}<li class="sj-step"><b>${w[0]}</b>${w.slice(1)}</li>`).join("")}</ol>
-    </section>` : ""}
     ${attach}
     ${m.action ? `<div><button class="btn primary" data-act="go" data-go="${m.action.go}">${esc(m.action.l)} ${icon("arrow", "i-sm")}</button></div>` : ""}
   </article>`;

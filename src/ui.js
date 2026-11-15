@@ -4,6 +4,8 @@
    ========================================================= */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const ICONS = {
+  sound: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
+  mute: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.3 3.5 8.5s-1.1 6.1-3.5 8.5c-2.4-2.4-3.5-5.3-3.5-8.5s1.1-6.1 3.5-8.5Z"/>',
   home: '<path d="M4 11 12 4l8 7v9H4v-9Z"/><path d="M10 20v-5h4v5"/>',
   mail: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7 8 6 8-6"/>',
@@ -97,7 +99,7 @@ function mailList() {
   const r = rec(), M = hrMessages(), out = [{ id: "start", kind: "hr", ...M.start }];
   if (goalsApproved(r)) out.unshift({ id: "approved", kind: "hr", ...M.approved });
   if (S.released.r2) STAKEHOLDER_EMAILS.forEach(e => out.unshift({ ...e, id: "sh-" + e.id, kind: "stakeholder" }));   /* newest first */
-  if (r.r2.submitted) out.unshift({ id: "closed", kind: "hr", ...M.closed });   /* the journey ends with the mid-year review */
+  if (r.fa.completed || r.r2.submitted) out.unshift({ id: "closed", kind: "hr", ...M.closed });   /* after "Complete Final Appraisal" (r2.submitted: sessions from the earlier version) */
   return out.map(m => ({ ...m, unread: !S.read[m.id] }));
 }
 function markRead(id) { S.read[id] = true; save(); }
@@ -109,6 +111,47 @@ function senderAvatar(m, size = "") {
   return `<span class="hr-av ${size}">${esc(s.initials)}</span>`;
 }
 const recipient = (x) => x === "me" ? `${S.session.name} (${DIRECTOR.title})` : x;
+
+/* ---------- Notification sounds ----------
+   Browsers block audio until the person interacts with the page, so the audio context is created and
+   unlocked on the first click or key press. Sounds play only for newly delivered emails and new chat
+   messages (never for old ones on refresh or when reopening a conversation). Visual notifications work
+   regardless. On/off is a per-device preference. */
+const SOUND = {
+  ctx: null, log: [],
+  on() { try { return localStorage.getItem("score-sound") !== "off"; } catch (e) { return true; } },
+  set(v) { try { localStorage.setItem("score-sound", v ? "on" : "off"); } catch (e) {} },
+  unlock() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      if (!SOUND.ctx) SOUND.ctx = new AC();
+      if (SOUND.ctx.state === "suspended") SOUND.ctx.resume();
+    } catch (e) {}
+  },
+  /* chat: two quick rising notes · email: a softer three-note chime */
+  play(kind) {
+    const c = SOUND.ctx, entry = { kind, played: false };
+    SOUND.log.push(entry);
+    if (!SOUND.on() || !c || c.state !== "running") return;
+    const notes = kind === "chat" ? [[880, 0], [1320, 0.11]] : [[659, 0], [784, 0.14], [988, 0.28]];
+    notes.forEach(([f, t]) => {
+      const o = c.createOscillator(), g = c.createGain(), at = c.currentTime + t;
+      o.type = kind === "chat" ? "sine" : "triangle"; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.18, at + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.22);
+      o.connect(g).connect(c.destination); o.start(at); o.stop(at + 0.25);
+    });
+    entry.played = true;
+  }
+};
+["pointerdown", "keydown", "touchstart"].forEach(t => document.addEventListener(t, SOUND.unlock, { capture: true, passive: true }));
+/* New chat messages from Omar: compared with the count already shown, so a refresh or reopening never replays it */
+function chatSoundCheck() {
+  if (!S.session || !UI.signedIn) return;
+  const n = incoming(rec());
+  if (UI.lastIncoming == null) { UI.lastIncoming = n; return; }
+  if (n > UI.lastIncoming) SOUND.play("chat");
+  UI.lastIncoming = n;
+}
 
 /* ---------- Incoming email notifications (Outlook/Gmail-style) ----------
    Event-driven: any email that becomes available and has not been announced is queued once.
@@ -128,7 +171,7 @@ function pumpMailQueue() {
     UI.mailTimer = null;
     while (UI.mailQueue.length && S.read[UI.mailQueue[0]]) UI.mailQueue.shift();   /* already opened */
     const id = UI.mailQueue.shift(); if (!id) return;
-    UI.mailPop = id; render();
+    UI.mailPop = id; SOUND.play("email"); render();
     clearTimeout(UI.mailHide); UI.mailHide = setTimeout(() => dismissMailPop(), 6500);
   }, UI.mailGap);
 }
@@ -191,7 +234,10 @@ function navItems() {
     { id: "home", l: "Home", icon: "home", dot: S.released.r2 && !r.r2.seenDashboard },
     { id: "inbox", l: "Inbox", icon: "mail", cnt: unreadMail },
     { id: "chat", l: "Chat", icon: "chat", cnt: chatUnread(r) },
-    { id: "employee", l: "Omar Hassan – Employee Profile", icon: "user" },
+    { id: "team", l: "Team Profile", icon: "people", children: [
+      { id: "employee", l: "Omar Hassan – Employee Profile", icon: "user" },
+      { id: "history", l: "Last Year's Performance Evidence (2026)", icon: "clipboard" }
+    ] },
     { id: "pm", l: "Performance Management", icon: "layers", children: [
       { id: "goals", l: "Objectives", icon: "target" },
       { id: "evidence", l: "Evidence Log", icon: "log" }
@@ -207,6 +253,7 @@ function header() {
     <span class="grow"></span>
     ${pulseWidget()}
     <span class="head-tools">
+      <button class="icon-btn" data-act="soundToggle" id="sound-toggle" aria-pressed="${SOUND.on()}" aria-label="${SOUND.on() ? "Notification sounds on (click to turn off)" : "Notification sounds off (click to turn on)"}" title="${SOUND.on() ? "Sounds on" : "Sounds off"}">${icon(SOUND.on() ? "sound" : "mute")}</button>
       <span style="position:relative"><button class="icon-btn" data-act="dd" data-dd="notif" aria-label="Notifications">${icon("bell")}${notes.length ? `<span class="badge">${notes.length}</span>` : ""}</button>${UI.dd === "notif" ? notifDropdown(notes) : ""}</span>
       <span style="position:relative"><button class="user-btn" data-act="dd" data-dd="user" aria-label="Account menu"><span class="initials">${esc(initials(S.session.name))}</span><span class="uname small">${esc(S.session.name)}</span>${icon("chevdown", "i-xs")}</button>${UI.dd === "user" ? userDropdown() : ""}</span>
     </span>
@@ -225,11 +272,11 @@ function navButton(n, child) {
   return `<button class="nav-item ${child ? "child" : ""} ${UI.route === n.id ? "on" : ""}" data-act="go" data-go="${n.id}">${icon(n.icon)}<span>${n.l}</span>${n.cnt ? `<span class="cnt">${n.cnt}</span>` : n.dot ? `<span class="ndot" aria-label="New"></span>` : n.locked ? `<span class="lock">${icon("lock", "i-sm")}</span>` : ""}</button>`;
 }
 function sidebar() {
-  const open = UI.pmOpen !== false || PM_ROUTES.includes(UI.route);
+  const isOpen = (n) => (UI.groupOpen || {})[n.id] !== false || n.children.some(c => c.id === UI.route);
   return `<div class="scrim-side ${UI.side ? "open" : ""}" data-act="side"></div><aside class="side ${UI.side ? "open" : ""}" aria-label="Navigation">
-    <nav class="nav">${navItems().map(n => n.children ? `<div class="nav-group ${open ? "open" : ""}">
-        <button class="nav-item parent ${PM_ROUTES.includes(UI.route) ? "in" : ""}" data-act="pmToggle" aria-expanded="${open}">${icon(n.icon)}<span>${n.l}</span><span class="caret">${icon("chevdown", "i-sm")}</span></button>
-        ${open ? `<div class="nav-children">${n.children.map(c => navButton(c, true)).join("")}</div>` : ""}
+    <nav class="nav">${navItems().map(n => n.children ? `<div class="nav-group ${isOpen(n) ? "open" : ""}">
+        <button class="nav-item parent ${n.children.some(c => c.id === UI.route) ? "in" : ""}" data-act="groupToggle" data-id="${n.id}" id="nav-${n.id}" aria-expanded="${isOpen(n)}">${icon(n.icon)}<span>${n.l}</span><span class="caret">${icon("chevdown", "i-sm")}</span></button>
+        ${isOpen(n) ? `<div class="nav-children">${n.children.map(c => navButton(c, true)).join("")}</div>` : ""}
       </div>` : navButton(n)).join("")}</nav>
     <div class="side-foot">NextWave · ${APP.cycleYear}</div>
   </aside>`;
@@ -243,7 +290,7 @@ function lockedPanel(title, text) { return `<div class="card"><div class="empty"
 /* ---------- render ---------- */
 /* NextWave Company Website: a permanent sidebar link (navItems) that opens the site in a new tab. */
 function render() {
-  if (S.session && UI.signedIn) queueNewMail();
+  if (S.session && UI.signedIn) { queueNewMail(); chatSoundCheck(); }
   const app = document.getElementById("app");
   const ae = document.activeElement, key = ae && (ae.getAttribute("data-bind") || ae.id), selS = ae && ae.selectionStart, selE = ae && ae.selectionEnd;
   const chat = document.getElementById("chat-log"), chatScroll = chat ? chat.scrollTop : null, chatBottom = chat ? chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40 : true;
@@ -251,7 +298,9 @@ function render() {
   if (!S.session || !UI.signedIn) html = VIEWS.login();
   else {
     const v = VIEWS[UI.route] || VIEWS.home;
-    html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${v()}</main></div>`;
+    if (UI.chatOpen) markChatSeen();
+    const page = v();   /* first: opening an email marks it read before the counts are drawn */
+    html = header() + `<div class="shell">${sidebar()}<main class="main" id="main">${aiNotice()}${page}</main></div>`;
   }
   if (UI.chatOpen && S.session && UI.signedIn) markChatSeen();
   if (S.session && UI.signedIn) html += chatBubble() + chatPanel() + mailPopHTML();

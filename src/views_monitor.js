@@ -2,10 +2,10 @@
    MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · NEXT-EVENT CODE
    The app never generates evidence: managers record what they receive offline.
    ========================================================= */
-/* Next stage: the "End-year" button in the Evidence Log (no facilitator code). Shown once the January plan is agreed;
+/* Next stage: the "End-year" button in the Evidence Log (no facilitator code). Available at any time;
    it releases the mid-year business update, the stakeholder emails and Omar's message. */
 function pendingRelease(r = rec()) {
-  if (!S.released.r2 && goalsApproved(r)) return "r2";
+  if (!S.released.r2) return "r2";   /* available at any time: no sequential restrictions */
   return null;
 }
 function waitCard(r = rec()) {
@@ -21,19 +21,19 @@ VIEWS.evidence = function () {
   const r = rec(), E = EMP();
   const items = planItems(r), f = UI.evFilter;
   const rows = r.evidence.filter(e => f === "all" || e.link === f);
-  return pageHead("", "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
+  return pageHead("", "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up.") + `
   <div class="stack">
     ${waitCard(r)}
-    <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${""}</div>
+    <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals">${icon("target", "i-sm")} Performance plan</button><button class="btn ghost sm" data-act="go" data-go="history">${icon("clipboard", "i-sm")} 2026 evidence</button>${""}</div>
     <div class="row between">
-      <div class="row nowrap" style="gap:8px">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by objective or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:260px"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>
+      <div class="row nowrap" style="gap:8px;min-width:0;max-width:100%">${icon("filter", "i-sm")}<label class="sr" for="ev-filter">Filter by objective or competency</label><select class="sel" id="ev-filter" data-act-change="evFilter" style="width:auto;min-width:min(260px, 100%);max-width:100%"><option value="all">All objectives and competencies (${r.evidence.length})</option>${items.map(it => `<option value="${it.id}" ${f === it.id ? "selected" : ""}>${esc(it.l)} (${r.evidence.filter(e => e.link === it.id).length})</option>`).join("")}<option value="general" ${f === "general" ? "selected" : ""}>General / other (${r.evidence.filter(e => e.link === "general").length})</option></select></div>
       <span class="xs muted">${plural(rows.length, "entry", "entries")} shown</span>
     </div>
     <div class="table-wrap"><table class="tbl"><thead><tr><th style="width:110px">Date / Period</th><th style="width:170px">Objective / Competency</th><th>Evidence / Observation</th><th style="width:130px">Source</th><th style="width:160px">Impact</th><th style="width:170px">Manager action / Follow-up</th><th style="width:96px">Status</th><th style="width:84px"><span class="sr">Actions</span></th></tr></thead><tbody>
       ${rows.length ? rows.map(e => `<tr id="ev-${e.id}"><td>${esc(e.period)}</td><td>${esc(linkLabel(e.link))}</td><td>${esc(e.text)}</td><td>${esc(e.source === "Other" ? e.sourceOther || "Other" : e.source)}</td><td>${esc(e.impact) || "<span class='muted'>—</span>"}</td><td>${esc(e.action) || "<span class='muted'>—</span>"}</td><td><span class="chip ${e.status === "Completed" ? "st-completed" : e.status === "Ongoing" ? "st-in_progress" : "st-draft"}">${esc(e.status)}</span></td><td><span class="row nowrap" style="gap:0"><button class="icon-btn" data-act="evEdit" data-id="${e.id}" aria-label="Edit entry">${icon("edit", "i-sm")}</button><button class="icon-btn" data-act="evDel" data-id="${e.id}" aria-label="Delete entry">${icon("trash", "i-sm")}</button></span></td></tr>`).join("")
         : `<tr><td colspan="8"><div class="empty">${icon("log")}<b>${r.evidence.length ? "No entries for this filter" : "No evidence recorded yet"}</b><span class="small">Use <b>Add evidence entry</b> to document each item from your handouts.</span></div></td></tr>`}
     </tbody></table></div>
-    ${r2Status(r) !== "locked" && !r.r2.submitted ? `<div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="go" data-go="round2">Mid-year review ${icon("arrow", "i-sm")}</button></div>` : ""}
+    ${finalAppraisal(r)}
   </div>`;
 };
 function evDraft(e) { return e ? JSON.parse(JSON.stringify(e)) : { id: null, period: "", link: "", text: "", source: "", sourceOther: "", impact: "", action: "", status: "Open" }; }
@@ -81,14 +81,10 @@ function commercialOverview(r) {
   const head = `<div class="dash-bar"><div><h2>Dashboard</h2><span class="xs">${pinfo.sub ? `${pinfo.l} · ${pinfo.sub}` : pinfo.l}</span></div>${filter}</div>`;
   const note = `<div class="insight neutral">${icon("info", "i-sm")}<span>Company and department results reflect many factors. They are not, on their own, evidence of any one employee's performance.</span></div>`;
   if (period === "start") return `<section class="dash" id="dash">${head}<div class="dash-body stack">
-    <div class="card"><div class="card-b insights"><div class="insight neutral">${icon("info", "i-sm")}<span>No business updates have been published yet. Updates appear here when your facilitator releases them.</span></div></div></div>
+    <div class="card"><div class="card-b insights"><div class="insight neutral">${icon("info", "i-sm")}<span>No business updates have been published yet. They appear here after you click End-year in the Evidence Log.</span></div></div></div>
   </div></section>`;
   const alert = `<button class="alert-bar" data-act="kpiAlert" aria-expanded="${!!UI.alertOpen}">${icon("alert")}<span class="grow"><b>Business event: the AI Acceleration.</b> Valtora Technologies has announced a major AI-enabled solution enhancement. NextWave Digital is accelerating its NextWave Insights enhancement in response.${UI.alertOpen ? `<span class="alert-more">${DASHBOARD.event.map(esc).join(" ")}</span>` : ""}</span>${icon(UI.alertOpen ? "chevdown" : "chev", "i-sm")}</button>`;
   return `<section class="dash" id="dash">${head}<div class="dash-body stack">${alert}
-    <div class="card"><div class="card-h"><h3>Business update</h3><span class="xs muted">${pinfo.sub}</span></div><div class="card-b insights">
-      ${DASHBOARD.event.map(t => `<div class="insight">${icon("spark", "i-sm")}<span>${esc(t)}</span></div>`).join("")}
-      <div class="insight neutral">${icon("info", "i-sm")}<span>No mid-year business results have been published in this update.</span></div>
-    </div></div>
     <div class="card" id="omar-midyear"><div class="card-h"><div><h3>Omar's mid-year evidence</h3><div class="xs muted">Individual work evidence · Omar Hassan · before the business event</div></div></div><div class="card-b insights">
       ${DASHBOARD.mi.map(x => `<div class="insight ${x.st === "ok" ? "good" : x.st === "late" ? "" : "neutral"}">${icon(x.st === "ok" ? "check" : x.st === "late" ? "alert" : "info", "i-sm")}<span>${esc(x.t)}.</span></div>`).join("")}
       ${note}
@@ -99,18 +95,25 @@ function commercialOverview(r) {
 /* The detailed dashboard now lives on Home; keep the old route working. */
 VIEWS.business = function () { setTimeout(() => go("home"), 0); return ""; };
 
-/* ---------- Round 2 checklist & submission ---------- */
-VIEWS.round2 = function () {
-  const r = rec();
-  if (r2Status(r) === "locked") return pageHead("", "Mid-year performance review") + lockedPanel("Not available yet", "The mid-year review opens at the mid-year checkpoint.");
-  const items = [["Reviewed the mid-year business update and Omar's evidence on Home", r.r2.seenDashboard, "home"], ["Wrote your interpretation of the mid-year information (below)", r.r2.interpretation.trim().length >= 15, "round2"], ["Talked with Omar about what has been happening", managerCount(r.r2.diag.log) >= CHAT_LIMITS.diagnosticMin, "chat"], ["Recorded evidence in the Evidence Log", r.evidence.length > 0, "evidence"]];
-  const ok = items.every(x => x[1]), a = r.r2.assessment;
-  return pageHead("", "Mid-year performance review", statusChip(r2Status(r)), "Omar Hassan · July 2027") + `<div class="stack-lg">
-    <div class="card"><div class="card-h"><h3>Checklist</h3></div><div class="card-b checklist">${items.map(([l, done, goTo]) => `<button class="ck-row ${done ? "ok" : ""}" ${goTo === "chat" ? `data-act="openChat"` : `data-act="go" data-go="${goTo}"`}>${icon(done ? "check" : "info", "i-sm")}<span class="grow">${l}</span>${icon("chev", "i-sm")}</button>`).join("")}</div></div>
-    <div class="card"><div class="card-h"><div><h3>Your interpretation of the mid-year information</h3><div class="xs muted">What does the business event mean for your team, what does Omar's evidence show, and what does it not tell you?</div></div></div><div class="card-b">
-      ${r.r2.submitted ? `<div class="small t2" style="white-space:pre-line">${esc(r.r2.interpretation) || "<span class='muted'>None written</span>"}</div>` : `<textarea class="ta" rows="4" id="${P("r2", "interpretation")}" ${bind(P("r2", "interpretation"))} maxlength="3000" placeholder="Summarise what the business event means, what Omar's evidence shows, and what you still need to find out.">${esc(r.r2.interpretation)}</textarea>`}
-    </div></div>
-    ${r.r2.submitted ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Mid-year review submitted. HR has sent you a message.</span><button class="btn sm" data-act="go" data-go="inbox/closed">Open message</button></div>${r.r2.error ? `<div class="notice risk">${icon("alert", "i-sm")}<span class="grow">${esc(r.r2.error)}</span>${aiReady() ? `<button class="btn sm" data-act="assessRetry" data-k="round2">Retry assessment</button>` : ""}</div>` : ""}`
-    : `<div class="card pad row between"><span class="small t2">${ok ? "Everything is ready. Submitting records your interpretation, the conversation with Omar and your Evidence Log." : "Complete the checklist to submit the mid-year review."}</span><button class="btn primary" data-act="submitR2" id="submit-r2" ${!ok || UI.busy ? "disabled" : ""}>${UI.busy === "round2" ? "Submitting…" : "Submit mid-year review"}</button></div>`}
-  </div>`;
-};
+/* ---------- Final Appraisal (part of the Evidence Log; not a separate round) ----------
+   Two overall ratings on a 1–5 scale and one overall evaluation. Nothing is mandatory, no score is calculated.
+   "Complete Final Appraisal" saves the entries and delivers HR's closing email once. */
+const FA_SCALE = [[1, "Significantly Below Expectations"], [2, "Below Expectations"], [3, "Meets Expectations"], [4, "Exceeds Expectations"], [5, "Outstanding"]];
+function faScale(key, label, hint, val) {
+  const path = P("fa", key);
+  return `<div class="field fa-q"><span class="lbl">${label}</span><span class="xs muted">${hint}</span>
+    <div class="fa-scale" role="radiogroup" aria-label="${label}">${FA_SCALE.map(([v, l]) => `<button role="radio" aria-checked="${val === v}" class="${val === v ? "on" : ""}" data-act="rate" data-path="${path}" data-v="${v}" id="fa-${key}-${v}"><b class="num">${v}</b><span>${l}</span></button>`).join("")}</div></div>`;
+}
+function finalAppraisal(r) {
+  const f = r.fa;
+  return `<section class="card" id="final-appraisal"><div class="card-h"><div><h3>Final Appraisal</h3><div class="xs muted">Omar Hassan · 2027 · rate on the 1–5 scale</div></div>${f.completed ? `<span class="chip st-approved">Completed</span>` : ""}</div><div class="card-b stack">
+    ${faScale("obj", "A. Overall Objectives Rating", "Omar's overall achievement against the objective you set.", f.obj)}
+    ${faScale("comp", "B. Overall Competency Rating", "Omar's overall competency performance, based on the evidence available.", f.comp)}
+    <div class="field"><label class="lbl" for="${P("fa", "text")}">C. Overall Performance Evaluation</label><textarea class="ta" rows="5" id="${P("fa", "text")}" ${bind(P("fa", "text"))} maxlength="4000" placeholder="Explain your overall evaluation of Omar's performance in 2027, covering both objective achievement and competencies.">${esc(f.text || "")}</textarea></div>
+    ${f.completed ? `<div class="notice good">${icon("check", "i-sm")}<span class="grow">Final appraisal completed. HR has sent you a message. Your entries stay editable and are saved automatically.</span><button class="btn sm" data-act="go" data-go="inbox/closed">Open message</button></div>`
+      : `<div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="completeFA" id="complete-fa">${icon("check", "i-sm")} Complete Final Appraisal</button></div>`}
+  </div></section>`;
+}
+
+/* The Mid-year Review page was removed: old links open the Evidence Log. */
+VIEWS.round2 = function () { setTimeout(() => go("evidence"), 0); return ""; };

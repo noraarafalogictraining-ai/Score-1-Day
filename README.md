@@ -115,6 +115,18 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 - **Omar Hassan – Employee Profile** (`#employee`, `VIEWS.employee` in `src/views_core.js`) is the only place Omar's profile appears. It shows his role, responsibilities and strengths. A **Last Year's Performance Evidence** button opens and closes his 2026 appraisal (objectives, results, competency ratings, comments). Omar's card was removed from Home and Objectives; the Objectives submit button moved to the page header.
 - **Home** shows only the dashboard. At the start of the year it says no updates have been published. After the mid-year release it shows the business event and Omar's mid-year evidence. The GROW/RETAIN/SCALE/BUILD cards and "What happens next" box were removed from Home; the company targets remain under My Profile → My Performance Objectives.
 
+## Final revisions (owner request)
+
+- **Flow (all sections unlocked, nothing mandatory):** start of year → one objective + three competencies → January conversation with Omar → **End-year** (Evidence Log, available at any time) releases the business event, emails and Omar's second message → Evidence Log → second conversation → **Final Appraisal** (bottom of the Evidence Log) → HR's closing email.
+- **Objectives:** one objective; every field optional; due date limited to 1 Jan–31 Dec 2027 (other years are cleared); no weight total, no 3–5 hint, no Acknowledgement, no validation panels; Submit for Employee Alignment is never blocked. The Add Objective layout bug (a CSS class shared with the profile cards) is fixed.
+- **Competencies:** up to three (counter 0/3–3/3), level only (Basic / Intermediate / Advanced); the behavioural standard field and validation were removed.
+- **Inbox:** HR goal-setting email reworded; no long dashes in emails; Nour Khalil; Youssef and Salma in August, Mariam in September, customer feedback in October; Mariam's "secondhand" notice removed. An email is marked read only when opened; counts update immediately and persist.
+- **Team Profile** (sidebar) holds Omar's profile and **Last Year's Performance Evidence (2026)** (`#history`), which moved out of the profile page.
+- **Sounds:** a chat sound for new messages from Omar and a different email sound for newly delivered emails (`SOUND` in `src/ui.js`). Audio unlocks on the first click or key press (browser autoplay rules); old messages never replay; on/off button in the top bar (saved per device).
+- **Second conversation:** like the first, a structured reading of the manager's messages (`diagnostic_turn`) sets Omar's stance; once the manager has listened, explored and agreed next steps (without blaming), Omar closes naturally and the chat shows "Conversation completed".
+- **Removed:** the Mid-year Review page (`#round2` opens the Evidence Log) and its interpretation field; the "Business update" card; the closing email's "What happened next" section and SCORE closing block.
+- **Final Appraisal:** overall objectives rating and overall competency rating (1–5: Significantly Below Expectations … Outstanding), one overall evaluation box, no score calculated. "Complete Final Appraisal" saves and delivers HR's closing email once. In the background (live AI only) the mid-year conversation is assessed to update the Employee Pulse, as before.
+
 ## UI refinements (owner request)
 
 - Home: subtitle shows only "Commercial Director"; dashboard filters are **Start of Year** and **End of Year** (the second shows the business event and Omar's mid-year evidence, unchanged).

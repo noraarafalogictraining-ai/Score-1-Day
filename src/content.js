@@ -31,8 +31,8 @@ const RATING_SCALE = [
   { v: 1, l: "Unsatisfactory", d: "Performance is significantly below the criteria required for successful job performance." }
 ];
 const LEVELS = [{ id: "basic", l: "Basic" }, { id: "intermediate", l: "Intermediate" }, { id: "advanced", l: "Advanced" }];
-const OBJ_RANGE = { min: 3, max: 5, hardMax: 8 };
-const COMP_RANGE = { min: 3, max: 5 };
+const OBJ_RANGE = { min: 1, max: 1, hardMax: 1 };   /* the activity sets one objective */
+const COMP_RANGE = { min: 3, max: 3 };   /* select three competencies */
 const CHAT_LIMITS = { message: 1500, diagnosticMin: 3 };
 const BIAS_LABEL = { recency: "Recency bias", halo: "Halo effect", horn: "Horn effect", confirmation: "Confirmation bias", leniency: "Leniency bias", severity: "Severity bias", anchoring: "Previous-rating anchoring" };
 
@@ -40,22 +40,19 @@ const BIAS_LABEL = { recency: "Recency bias", halo: "Halo effect", horn: "Horn e
 const HR_SENDER = { name: "NextWave HR", addr: "hr@nextwave.example" };
 function hrMessages() {
   return {
-    start: { subject: "Annual Performance Goal Setting — Action Required", date: SIM_DATES.start,
+    start: { subject: "Annual Performance Goal Setting - Action Required", date: SIM_DATES.start,
       body: ["Dear Commercial Director,", `The ${APP.cycleYear} performance cycle (${APP.cycleLabel}) has started. Please complete the performance goal plan for Omar Hassan, Market Intelligence Analyst.`, "__LIST__", `Deadline: ${SIM_DATES.deadline}.`, "NextWave HR"],
-      list: ["Review Omar's role, previous-year evidence and job description (printed handouts).", "Complete the Objectives of the Year form: SMART objectives, each with a measurement, due date and weight (total 100%).", "Select role-relevant competencies, expected proficiency levels and behavioral standards.", "Discuss and acknowledge the performance standards and expectations with Omar."],
+      list: ["Review Omar's role, previous-year evidence and job description.", "Complete the Objectives of the Year form: one SMART objective with a measurement, due date and weight.", "Select three role-relevant competencies and their expected proficiency levels.", "Discuss the performance standards and expectations with Omar."],
       action: { l: "Open Performance Goal Plan", go: "goals" } },
-    approved: { subject: "Performance Contract Confirmed — Monitoring Begins", date: SIM_DATES.approved,
+    approved: { subject: "Performance Contract Confirmed - Monitoring Begins", date: SIM_DATES.approved,
       body: ["Dear Commercial Director,", "Omar Hassan's performance expectations have been established and the performance contract is confirmed.", "Throughout the year, you are responsible for:", "__LIST__", "The next formal checkpoint will take place in six months. Please maintain your performance records throughout the year.", "NextWave HR"],
       list: ["Tracking progress.", "Documenting evidence.", "Monitoring performance gaps.", "Maintaining regular employee communication.", "Taking appropriate management action."],
       action: { l: "Open Evidence Log", go: "evidence" } },
-    /* Closing email: delivered once, when the participant submits the mid-year review (the year-end round was removed) */
-    closed: { subject: `Performance Cycle ${APP.cycleYear} — Thank You`, date: SIM_DATES.closed, closing: true,
-      list: ["He continued challenging assumptions, but began presenting alternative scenarios and recommendations more concisely. Stakeholder discussions became more constructive.", "His analysis remained strong. Presentations became shorter, but stakeholder reactions remained mixed.", "Reports remained accurate, but he offered fewer unsolicited recommendations and increasingly shared challenging evidence only when asked."],
+    /* Closing email: delivered once, when the participant clicks "Complete Final Appraisal" in the Evidence Log */
+    closed: { subject: `Performance Cycle ${APP.cycleYear} - Thank You`, date: SIM_DATES.closed,
       body: ["Dear Commercial Director,",
         `Thank you for leading Omar Hassan's ${APP.cycleYear} performance journey, from agreeing his performance expectations to reviewing his progress and coaching him through a changing business environment.`,
         "Your commitment to setting clear expectations, monitoring progress, providing feedback, and making evidence-based decisions helps build a culture where employees understand what is expected and have the support they need to perform and grow.",
-        "**What happened next.** The AI Acceleration continued across the second half of 2027. The business outcome was mixed but positive: market interest and opportunities increased, while capacity was stretched; some priorities were delayed, customer questions increased, adoption varied and some rework occurred.",
-        "By the end of the year, the evidence on Omar showed:", "__LIST__",
         "As you plan for the year ahead, remember that **performance management does not end with a single review or appraisal.** It is an ongoing process of setting direction, checking progress, coaching performance, reviewing results, and supporting continuous development.",
         "Thank you for your leadership and commitment to building a high-performance culture at NextWave.",
         "Best regards,\n**NextWave Human Resources**"] }

@@ -13,6 +13,7 @@ function freshRecord() {
     align: { log: [], ready: false, confirmed: false, assessment: null, error: null, manual: false },
     plan: { assessment: null, error: null },
     evidence: [],
+    fa: { obj: null, comp: null, text: "", completed: false },   /* simplified Final Appraisal (Evidence Log) */
     r2: { seenDashboard: false, interpretation: "", diag: { log: [], ended: false }, submitted: false, assessment: null, error: null, pathway: null, manual: false },
     r3: {
       dataset: null, error: null,
@@ -118,7 +119,7 @@ function pulseNote(r, slot, label, reason, round) { /* records a "no change" dec
 const STATUS_LABEL = { not_started: "Not Started", draft: "Draft", pending_alignment: "Pending Employee Alignment", approved: "Approved", in_progress: "In Progress", completed: "Completed", locked: "Not Yet Open", submitted: "Submitted", action: "Action Required" };
 const goalsApproved = (r = rec()) => r.goals.status === "approved";
 function currentRound() { return S.released.r3 ? 3 : S.released.r2 ? 2 : 1; }
-function r2Status(r = rec()) { if (!S.released.r2 || !goalsApproved(r)) return "locked"; if (r.r2.submitted) return "completed"; return r.r2.diag.log.length > 1 || r.r2.interpretation ? "in_progress" : "action"; }
+function r2Status(r = rec()) { if (!S.released.r2) return "locked"; if (r.r2.submitted) return "completed"; return r.r2.diag.log.length > 1 || r.r2.interpretation ? "in_progress" : "action"; }
 function r3Status(r = rec()) { if (!S.released.r3 || !r.r2.submitted) return "locked"; if (r.r3.done) return "completed"; return r.r3.appraisal.status === "not_started" ? "action" : "in_progress"; }
 function appraisalStatus(r = rec()) { if (r3Status(r) === "locked" || !r.r3.dataset) return "locked"; if (r.r3.done) return "completed"; return r.r3.appraisal.status; }
 function evidenceStatus(r = rec()) { if (!goalsApproved(r)) return "locked"; return r.evidence.length ? "in_progress" : "not_started"; }

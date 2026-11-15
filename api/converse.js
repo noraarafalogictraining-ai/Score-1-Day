@@ -51,6 +51,14 @@ module.exports = H.handler(async (body) => {
     stance = ready ? SC.ALIGNMENT.stance.ready : dismissive ? SC.ALIGNMENT.stance.guarded : SC.ALIGNMENT.stance.open;
   }
   let complete = false;
+  if (kind === "diagnostic") {
+    /* Same pattern as the January conversation: a structured reading of the manager's messages decides Omar's stance;
+       constructive coaching (listening + exploring + agreed next steps) lets the conversation conclude. */
+    const t = PR.task("diagnostic_turn", { history });
+    const v = await AI.assessJSON({ system: PR.ASSESSOR, user: t.user, schema: t.schema, effort: "low" });
+    complete = !!(v.perspective_explored && v.next_steps_agreed && !v.blaming);
+    stance = complete ? SC.DIAGNOSTIC.stance.complete : (!v.blaming && v.perspective_explored) ? SC.DIAGNOSTIC.stance.open : null;
+  }
   if (kind === "appraisal") {
     const t = PR.task("appraisal_turn", { appraisal: ctx.appraisal, pathway: ctx.pathway, history });
     const v = await AI.assessJSON({ system: PR.ASSESSOR, user: t.user, schema: t.schema, effort: "low" });

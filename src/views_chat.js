@@ -5,7 +5,7 @@
    (see chatThread / activeChatContext in state.js); each context is sent to the
    AI and assessed separately.
    ========================================================= */
-const CHAT_PAGES = ["inbox", "home", "employee", "goals", "evidence", "business", "round2", "profile"];
+const CHAT_PAGES = ["inbox", "home", "employee", "history", "goals", "evidence", "business", "round2", "profile"];
 function chatBubbleVisible(r = rec()) {
   if (!S.session || !UI.signedIn || UI.chatOpen || UI.route === "chat") return false;
   return UI.route === "inbox" || chatUnread(r) > 0 || (activeChatContext(r) && CHAT_PAGES.includes(UI.route));
@@ -28,7 +28,7 @@ function chatBody(r, closeBtn) {
   const ctx = activeChatContext(r), busy = !!UI.busy && ["alignment", "diagnostic"].includes(UI.busy), err = UI.chatErr;
   const draftPath = P("drafts", "chat"), draft = val(draftPath);
   let foot;
-  if (!ctx) foot = `<div class="chat-off">${icon("clock", "i-sm")} Omar is away right now.</div>`;
+  if (!ctx) foot = r.r2.diag.completed ? `<div class="chat-off" id="chat-done">${icon("check", "i-sm")} Conversation completed. Next: the Final Appraisal in the Evidence Log.</div>` : `<div class="chat-off">${icon("clock", "i-sm")} Omar is away right now.</div>`;
   else if (!aiReady()) foot = `<div class="notice risk">${icon("alert", "i-sm")}<span>Chat is unavailable${AIS.provider === "offline" ? ": the server could not be reached" : ": no AI provider is configured on the server"}.</span></div>`;
   else foot = `<div class="composer"><label class="sr" for="${draftPath}">Message Omar</label><textarea class="ta" id="${draftPath}" ${bind(draftPath)} rows="2" maxlength="${CHAT_LIMITS.message}" placeholder="Message Omar…" ${busy ? "disabled" : ""}>${esc(draft)}</textarea><button class="btn primary send-btn" data-act="chatSend" id="send-chat" aria-label="Send" ${busy ? "disabled" : ""}>${icon("send", "i-sm")}</button></div>`;
   return `<div class="chat-head">${avatar(S.emp)}<div class="grow"><b>Omar Hassan</b><div class="xs muted">Market Intelligence Analyst</div></div>${closeBtn ? `<button class="icon-btn" data-act="closeChat" aria-label="Close chat">${icon("x")}</button>` : ""}</div>

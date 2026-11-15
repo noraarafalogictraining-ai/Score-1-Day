@@ -54,7 +54,7 @@ Object.assign(EMPLOYEES.omar, {
 delete EMPLOYEES.omar.prevEvidence; delete EMPLOYEES.omar.prevFeedback;
 const STAKEHOLDERS = {
   nadine: { name: "Nadine Farouk", title: "Operations Director", initials: "NF", img: "assets/people/nadine.jpg" },
-  nour: { name: "Nour", title: "Account Manager", initials: "N", img: "assets/people/nour.jpg" },
+  nour: { name: "Nour Khalil", title: "Account Manager", initials: "N", img: "assets/people/nour.jpg" },
   youssef: { name: "Youssef Ali", title: "Business Development Manager", emp: "youssef" },
   salma: { name: "Salma Tarek", title: "Sales Executive", emp: "salma" },
   mariam: { name: "Mariam Adel", title: "Proposal Designer", emp: "mariam" },
@@ -116,16 +116,16 @@ const DASHBOARD = {
    The two stakeholders who reported defensive, overly detailed responses are Nadine and Youssef.
    Released with the business event. "me" = the participant (Commercial Director). */
 const STAKEHOLDER_EMAILS = [
-  { id: "nadine", from: "nadine", to: ["me"], subject: "NextWave Insights — Omar's Input in Our Review", date: "Mon 5 Jul 2027",
+  { id: "nadine", from: "nadine", to: ["me"], subject: "NextWave Insights - Omar's Input in Our Review", date: "Mon 5 Jul 2027",
     body: ["Hi,", "Omar's work on Valtora Technologies' AI direction has been useful, and with their announcement it looks like he raised the issue at the right time.", "In our planning review he challenged our assumption that NextWave Insights could keep its current release plan. That was a fair point to raise. However, when I questioned his conclusions, his responses became defensive and he went into a lot of detail rather than helping us see the options.", "Now that we're accelerating the NextWave Insights enhancement, Operations needs his input in a form we can act on quickly.", "Could we discuss how we work together on this?", "Best,\nNadine\nOperations Director"] },
-  { id: "youssef", from: "youssef", to: ["me"], subject: "Valtora Announcement — Working With Omar's Analysis", date: "Mon 5 Jul 2027",
+  { id: "youssef", from: "youssef", to: ["me"], subject: "Valtora Announcement - Working With Omar's Analysis", date: "Mon 2 Aug 2027",
     body: ["Hi,", "Omar flagged early that Valtora's AI features could change how customers compare us. Some of us thought it was mostly marketing, and he challenged that view. The announcement shows he had a point.", "His analysis is useful to the team. My concern is how the discussions go: when I pushed back on some of his conclusions, he became defensive and his answers got very detailed, and the team struggled to take away what to do next.", "I'd like us to find a better way to work through his findings together.", "Thanks,\nYoussef"] },
-  { id: "salma", from: "salma", to: ["Youssef Ali — Business Development Manager"], cc: ["me"], subject: "Customer Questions — Valtora's AI Features", date: "Tue 6 Jul 2027",
+  { id: "salma", from: "salma", to: ["Youssef Ali, Business Development Manager"], cc: ["me"], subject: "Customer Questions - Valtora's AI Features", date: "Tue 3 Aug 2027",
     body: ["Hi Youssef,", "Since Valtora Technologies' announcement, a few customers have asked how NextWave Insights compares with Valtora's AI-supported features.", "Omar's competitor updates have helped me understand what Valtora is offering, which made these conversations easier.", "Could we agree what we can say to customers about our NextWave Insights plans before the next meetings?", "Thanks,\nSalma"] },
-  { id: "mariam", from: "mariam", to: ["me"], subject: "Concern About Omar", date: "Tue 6 Jul 2027", secondhand: true,
+  { id: "mariam", from: "mariam", to: ["me"], subject: "Concern About Omar", date: "Wed 8 Sep 2027",
     body: ["Hi,", "I wanted to flag something following a conversation I had with Omar.", "He seemed quite frustrated after the recent planning discussions. He feels that when his analysis challenges what senior people expect, the discussion turns to how he said it rather than what the evidence shows.", "He also said he isn't sure it's worth raising difficult findings if they're not welcome.", "I thought you should know because he seemed more frustrated than usual.", "Best,\nMariam"] },
-  { id: "nour", from: "nour", to: ["Sales Team", "Account Management Team", "Operations Team", "HR Team"], cc: ["Chief Executive Officer (CEO)", "Chief Human Resources Officer (CHRO)", "Nadine Farouk — Operations Director", "me"], subject: "Great Customer Feedback — Well Done, Team!", date: "Wed 7 Jul 2027",
-    body: ["Hi everyone,", "I wanted to share some great feedback we received from one of our customers!", "The customer recently launched a new product and told us that the insights provided by NextWave helped them better understand their target market and make more confident launch decisions.", "They particularly appreciated the quality of our analysis and how useful the findings were in shaping their launch approach.", "It's great to see our work making a real difference for customers.", "Well done to everyone involved!", "Best,\nNour\nAccount Manager"] }
+  { id: "nour", from: "nour", to: ["Sales Team", "Account Management Team", "Operations Team", "HR Team"], cc: ["Chief Executive Officer (CEO)", "Chief Human Resources Officer (CHRO)", "Nadine Farouk, Operations Director", "me"], subject: "Great Customer Feedback - Well Done, Team!", date: "Wed 6 Oct 2027",
+    body: ["Hi everyone,", "I wanted to share some great feedback we received from one of our customers!", "The customer recently launched a new product and told us that the insights provided by NextWave helped them better understand their target market and make more confident launch decisions.", "They particularly appreciated the quality of our analysis and how useful the findings were in shaping their launch approach.", "It's great to see our work making a real difference for customers.", "Well done to everyone involved!", "Best,\nNour Khalil\nAccount Manager"] }
 ];
 
 /* ---------- Employee Pulse (deterministic rules engine; configurable pilot values) ---------- */

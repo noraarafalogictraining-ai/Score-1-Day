@@ -5,6 +5,11 @@ let _undo = null;
 function afterBind(path) {
   const r = rec();
   if (path.includes(".goals.") && r.goals.status === "not_started") r.goals.status = "draft";
+  /* Due dates must fall in 2027 */
+  if (/\.goals\.objectives\.\d+\.due$/.test(path)) {
+    const v = getPath(S, path);
+    if (v && !(v >= APPRAISAL_CONFIG.ratingPeriod.from && v <= APPRAISAL_CONFIG.ratingPeriod.to)) { setPath(S, path, ""); const el = document.getElementById(path); if (el) el.value = ""; toast("Choose a due date in 2027 (1 January – 31 December)."); }
+  }
   if (path.includes(".r3.appraisal.") && r.r3.appraisal.status === "not_started") r.r3.appraisal.status = "draft";
 }
 const wire = (log) => log.filter(m => m.from === "manager" || m.from === "employee").map(m => ({ from: m.from, text: m.text }));
@@ -35,8 +40,8 @@ async function assessRound1() {
   } else if (a.status === "rejected") r.align.error = `Alignment assessment failed: ${a.reason.message}`;
   save(); render();
 }
-async function assessRound2() {
-  const r = rec(); UI.busy = "round2"; r.r2.error = null; render();
+async function assessRound2(quiet) {
+  const r = rec(); if (!quiet) UI.busy = "round2"; r.r2.error = null; render();
   try {
     const res = await api("/api/assess", { task: "round2", payload: { plan: planPayload(r), history: wire(r.r2.diag.log), evidence: evidencePayload(r), interpretation: r.r2.interpretation } });
     r.r2.assessment = res;
@@ -44,7 +49,7 @@ async function assessRound2() {
     if (res.events.length) applyEvents(r, res.events, clsReason(res, "Mid-year conversation assessed."));
     else pulseNote(r, "coaching", "Mid-year conversation: no clear pattern", "Neither clearly constructive nor punitive: no Pulse change.", 2);
   } catch (e) { r.r2.error = `The mid-year review could not be processed: ${e.message}`; }
-  UI.busy = null; save(); render();
+  if (!quiet) UI.busy = null; save(); render();
 }
 /* Final learning-score assessment: runs in the background after the conversation is completed (never blocks closure). */
 async function assessRound3() {
@@ -99,6 +104,7 @@ async function sendChat(kind, text) {
     const res = await api("/api/converse", { kind, history: wire(log), context: convContext(kind, r) });
     log.push({ from: "employee", text: res.reply });
     if (kind === "alignment") r.align.ready = !!res.ready;
+    if (kind === "diagnostic" && res.complete && !r.r2.diag.completed) { r.r2.diag.completed = true; r.r2.diag.ended = true; log.push({ from: "sys", text: "Conversation completed" }); }
     if (kind === "appraisal" && res.complete && !r.r3.conv.completed) { r.r3.conv.completed = true; log.push({ from: "sys", text: "Appraisal Discussion Completed" }); }
   } catch (e) {
     if (text) { log.pop(); setPath(S, P("drafts", kind), text); }
@@ -137,7 +143,8 @@ const ACTIONS = {
   respToggle(el) { UI.respOpen = UI.respOpen || { strategy: true }; UI.respOpen[el.dataset.id] = !UI.respOpen[el.dataset.id]; render(); },
   apOpen(el, ev) { if (ev && ev.target.closest("input,select,textarea,button:not(.ap-row)")) return; const cur = UI.apOpen === undefined ? (rec().goals.objectives[0] || {}).id : UI.apOpen; UI.apOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   compOpen(el) { const cur = UI.compOpen === undefined ? (rec().goals.comps[0] || {}).id : UI.compOpen; UI.compOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
-  pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },
+  soundToggle() { const v = !SOUND.on(); SOUND.set(v); if (v) { SOUND.unlock(); SOUND.play("chat"); } toast(v ? "Notification sounds on." : "Notification sounds off."); render(); },
+  groupToggle(el) { const id = el.dataset.id, g = navItems().find(n => n.id === id); if (!g || g.children.some(c => c.id === UI.route)) return; UI.groupOpen = UI.groupOpen || {}; UI.groupOpen[id] = UI.groupOpen[id] === false; render(); },
   kpi(el) { UI.kpiOpen = UI.kpiOpen === el.dataset.id ? null : el.dataset.id; render(); },
   period(el) { if (!periodAvailable(el.dataset.v)) return; UI.period = el.dataset.v; UI.month = null; UI.kpiOpen = null; render(); },
   focus(el) { UI.focus = el.dataset.v; render(); },
@@ -161,8 +168,6 @@ const ACTIONS = {
   submitGoals() {
     const r = rec(), v = planValidation(r);
     if (r.goals.status !== "not_started" && r.goals.status !== "draft") return;   /* repeated clicks */
-    r.goals.tried = true;
-    if (!v.ok) { save(); toast(`${plural(v.errors.length, "item needs", "items need")} attention before submitting.`); UI.edit = null; render(); return; }
     r.goals.objectives.forEach(o => { o.agreed = deriveDefinition(o); });   /* agreed target / calculation definition used at year-end */
     r.goals.status = "pending_alignment"; r.goals.submits++; r.goals.tried = false; UI.edit = null; r.align.ready = false;
     r.align.log.push({ from: "sys", text: r.goals.submits === 1 ? `Performance plan shared with Omar · ${SIM_DATES.submitted}` : "Revised performance plan shared with Omar" });
@@ -221,6 +226,12 @@ const ACTIONS = {
 
   /* --- rounds --- */
   startMidyear() { if (pendingRelease() !== "r2") return; releaseRound("r2"); toast("Business update received. Check Home, your Inbox and Chat."); go("home"); },
+  completeFA() {
+    const r = rec(); if (r.fa.completed) return;
+    r.fa.completed = true; save(); toast("Final appraisal completed.");
+    render();   /* delivers HR's closing email (new, unread, with its notification sound) */
+    if (aiReady() && !r.r2.assessment && r.r2.diag.log.some(m => m.from === "manager")) assessRound2(true);   /* background: drives the Employee Pulse only */
+  },
   submitR2() { const r = rec(); if (r.r2.submitted || UI.busy) return; r.r2.submitted = true; if (!r.r2.diag.ended) { r.r2.diag.ended = true; r.r2.diag.log.push({ from: "sys", text: "Conversation closed" }); } save(); assessRound2(); },
   rate(el) { setPath(S, el.dataset.path, +el.dataset.v); afterBind(el.dataset.path); save(); render(); },
   submitAppraisal() {
@@ -233,7 +244,6 @@ const ACTIONS = {
     save(); toast("Appraisal submitted to Omar."); render();
   },
   apGoto(el) { UI.apPart = el.dataset.v; go("appraisal"); },
-  prevToggle() { UI.prevOpen = !UI.prevOpen; render(); const el = document.getElementById(UI.prevOpen ? "prev-2026" : "prev-btn"); if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" }); },
   saveDraft() { save(true); toast("Draft saved."); },
   apPart(el) { UI.apPart = el.dataset.v; UI.endConfirm = false; render(); const f = document.getElementById("appraisal-form"); if (f) f.scrollIntoView({ block: "start" }); },
   pdpAdd(el) { const p = rec().r3.appraisal.pdp, k = el.dataset.k; (p[k] = p[k] || []).push(k === "ld" ? { area: "", action: "" } : { course: "", source: "", date: "" }); save(); render(); },

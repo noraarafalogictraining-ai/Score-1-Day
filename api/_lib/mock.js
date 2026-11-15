@@ -47,6 +47,8 @@ function converse(kind, history, ctx) {
       [/(tool|resource|support|data|help)/, "I have the data and tools. I only contact Operations and Customer Success when I need something."],
       [/(plan|next step|agree|going forward|what could|what would)/, "I could send a one-page options summary before meetings, talk to Nadine and Youssef first, and set up a regular slot with Operations."]
     ];
+    const nMgr = mgr.length, asked = /(what|how|why|tell me|walk me)/.test(lc(all)), agreed = /(let's agree|agree|next step|plan|i will|i'll|check-in|follow up|follow-up)/.test(lc(last));
+    if (nMgr >= 3 && asked && agreed) return { reply: "That works for me. I'll start with the one-page summary before the next meeting. Thanks for listening.", complete: true };
     const hit = rules.find(([rx]) => rx.test(lc(last)));
     return { reply: hit ? hit[1] : "It's been a tense few weeks. Where would you like to start?" };
   }
