@@ -235,7 +235,7 @@ function sidebar() {
   </aside>`;
 }
 function pageHead(crumb, title, right = "", sub = "") {
-  return `<div class="page-head"><div><div class="crumb">${crumb}</div><h1>${title}</h1>${sub ? `<p class="t2 small" style="margin-top:4px">${sub}</p>` : ""}</div><div class="row">${right}</div></div>`;
+  return `<div class="page-head"><div>${crumb ? `<div class="crumb">${crumb}</div>` : ""}<h1>${title}</h1>${sub ? `<p class="t2 small" style="margin-top:4px">${sub}</p>` : ""}</div><div class="row">${right}</div></div>`;
 }
 function empChip() { const E = EMP(); return `<span class="row nowrap" style="gap:8px">${avatar(S.emp, "sm")}<span class="small"><b>${esc(E.name)}</b> · <span class="muted">${esc(E.title)}</span></span></span>`; }
 function lockedPanel(title, text) { return `<div class="card"><div class="empty">${icon("lock")}<h3>${title}</h3><p class="small" style="max-width:58ch">${text}</p></div></div>`; }

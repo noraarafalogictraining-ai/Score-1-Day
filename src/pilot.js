@@ -178,8 +178,8 @@ const DIRECTOR = {
 };
 /* Company-wide 2027 priorities with the Director's documented contribution. Figures exactly as in the company profile. */
 const CEO_OBJECTIVES = [
-  { id: "GROW", title: "GROW", kpi: "Achieve 18% revenue growth.", target: "18% revenue growth", short: "Company-wide revenue growth", contribution: "Build qualified opportunities, improve conversion and support customer expansion." },
-  { id: "RETAIN", title: "RETAIN", kpi: "Improve customer retention from 88% to 93%.", target: "88% → 93%", short: "Company-wide customer retention", contribution: "Strengthen expectations, handovers and proactive customer communication." },
-  { id: "SCALE", title: "SCALE", kpi: "Improve on-time delivery from 82% to 92%.", target: "82% → 92%", short: "Company-wide on-time delivery", contribution: "Coordinate realistic commitments and escalate delivery risks early." },
+  { id: "GROW", title: "GROW", kpi: "Achieve 18% revenue growth.", target: "18% revenue growth", short: "Revenue growth", contribution: "Build qualified opportunities, improve conversion and support customer expansion." },
+  { id: "RETAIN", title: "RETAIN", kpi: "Improve customer retention from 88% to 93%.", target: "88% → 93%", short: "Customer retention", contribution: "Strengthen expectations, handovers and proactive customer communication." },
+  { id: "SCALE", title: "SCALE", kpi: "Improve on-time delivery from 82% to 92%.", target: "82% → 92%", short: "On-time delivery", contribution: "Coordinate realistic commitments and escalate delivery risks early." },
   { id: "BUILD", title: "BUILD", kpi: "Strengthen critical capabilities, succession readiness and the talent pipeline; reduce key-person dependency.", target: "Capability & talent", short: "Capabilities, succession and talent pipeline", contribution: "Develop people, share knowledge and reduce reliance on individuals." }
 ];

@@ -20,7 +20,7 @@ VIEWS.login = function () {
 /* ---------- Home: the dashboard only ---------- */
 VIEWS.home = function () {
   const r = rec();
-  return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", `${DIRECTOR.title} · Commercial Department`) + `
+  return pageHead("Home", `Welcome, ${esc(S.session.name)}`, "", DIRECTOR.title) + `
   <div class="stack-lg">
     ${commercialOverview(r)}
   </div>`;
@@ -29,9 +29,8 @@ VIEWS.home = function () {
 /* ---------- Omar Hassan – Employee Profile (dedicated sidebar section) ---------- */
 VIEWS.employee = function () {
   const E = EMP(), open = !!UI.prevOpen;
-  return pageHead("Omar Hassan – Employee Profile", "Employee Profile") + `<div class="stack-lg">
+  return pageHead("", "Employee Profile") + `<div class="stack-lg">
     <div class="card pad-lg emp-overview"><div class="emp-hero">${avatar(S.emp, "xl")}<div class="stack-sm grow" style="gap:3px"><div class="eyebrow">Employee profile</div><h2>${esc(E.name)}</h2><div class="t2">${esc(E.title)} · Commercial</div><div class="xs muted">${esc(E.tenure)}</div></div></div></div>
-    <div class="info-grid">${[["clipboard", "Job title", E.title], ["layers", "Department", "Commercial"], ["arrow", "Reports to", E.role.reportsToRole], ["clock", "Time in current position", E.tenure.replace(" in position", "")], ["star", "Previous overall rating", E.prevRating]].map(([ic, k, v]) => `<div class="info-card"><span class="info-ic">${icon(ic, "i-sm")}</span><span><span class="xs muted">${k}</span><b class="small">${esc(v)}</b></span></div>`).join("")}</div>
     <section class="purpose-card">${icon("compass")}<div><div class="eyebrow" style="color:#5ED3E2">Role purpose</div><p>${esc(E.role.purpose)}</p></div></section>
     <section class="card"><div class="card-h"><h3>Core responsibilities</h3></div><ul class="acc-b" id="emp-resp">${E.role.responsibilities.map(x => `<li>${icon("check", "i-sm")}<span>${esc(x)}</span></li>`).join("")}</ul></section>
     <section class="card"><div class="card-h"><h3>What Omar brings to the team</h3></div><div class="card-b stack-sm"><div class="row" style="gap:6px">${E.strengths.map(x => `<span class="tag">${esc(x)}</span>`).join("")}</div><p class="small t2">${esc(E.prevPerformance)}</p></div></section>
@@ -46,17 +45,14 @@ VIEWS.employee = function () {
 VIEWS.profile = function () {
   const n = S.session.name, D = DIRECTOR, tab = ["responsibilities", "objectives"].includes(UI.sub) ? UI.sub : "overview";
   const tabs = [["overview", "Overview", "user"], ["responsibilities", "My Responsibilities", "book"], ["objectives", "My Performance Objectives", "target"]];
-  return pageHead("My Profile", "My Profile") + `<div class="stack-lg">
+  return pageHead("", "My Profile") + `<div class="stack-lg">
     <div class="profile-hero"><span class="initials xl">${esc(initials(n))}</span><div class="grow"><h2>${esc(n)}</h2><div>${D.title} · ${D.department}</div><div class="ph-meta"><span>${icon("building", "i-xs")} ${D.company}</span><span>${icon("calendar", "i-xs")} Joined ${D.joined}</span><span>${icon("people", "i-xs")} ${D.directReports} direct reports</span></div></div><span class="chip st-approved">${D.status}</span></div>
     <div class="tabs" role="tablist">${tabs.map(([id, l, ic]) => `<button class="tab ${tab === id ? "on" : ""}" role="tab" aria-selected="${tab === id}" data-act="go" data-go="profile/${id}">${icon(ic, "i-sm")} ${l}</button>`).join("")}</div>
     ${tab === "responsibilities" ? profileResponsibilities() : tab === "objectives" ? profileObjectives() : profileOverview()}
   </div>`;
 };
 function profileOverview() {
-  const D = DIRECTOR, n = S.session.name;
-  const info = [["user", "Employee name", n], ["clipboard", "Position", D.title], ["layers", "Department", D.department], ["building", "Company", D.company], ["calendar", "Joining date", D.joined], ["arrow", "Reporting line", D.reportsTo], ["check", "Employment status", D.status], ["home", "Work location", D.location], ["people", "Direct reports", `${D.directReports} (plus 1 indirect)`], ["clock", "Performance year", D.year], ["info", "Leave information", D.leave]];
-  return `<div class="info-grid">${info.map(([ic, k, v]) => `<div class="info-card"><span class="info-ic">${icon(ic, "i-sm")}</span><span><span class="xs muted">${k}</span><b class="small">${esc(v)}</b></span></div>`).join("")}</div>
-    <section class="card"><div class="card-h"><div><h3>My team</h3><div class="xs muted">Commercial Department · select a person for details</div></div></div><div class="card-b">${orgChart()}</div></section>`;
+  return `<section class="card"><div class="card-h"><div><h3>My team</h3><div class="xs muted">Commercial Department · select a person for details</div></div></div><div class="card-b">${orgChart()}</div></section>`;
 }
 function orgPerson(e, extra = "") {
   const E = EMPLOYEES[e];
@@ -85,19 +81,19 @@ function profileResponsibilities() {
   </div>`;
 }
 function profileObjectives() {
-  return `<div class="stack"><p class="small t2">NextWave Digital's ${APP.cycleYear} strategic targets are company-wide. As Commercial Director you contribute to them, but you do not own every result on your own. Read-only.</p>
-    <div class="obj-grid">${CEO_OBJECTIVES.map((o, i) => { const on = UI.ceoOpen === o.id; return `<div class="ceo-card ${on ? "open" : ""}"><button class="ceo-btn" data-act="ceoToggle" data-id="${o.id}" aria-expanded="${on}"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span><span class="xs ceo-more">${on ? "Hide details" : "View details"} ${icon(on ? "chevdown" : "chev", "i-xs")}</span></button>
-      ${on ? `<div class="ceo-detail small"><div><span class="muted">Company objective</span>${esc(o.kpi)}</div><div><span class="muted">Your contribution</span>${esc(o.contribution)}</div><div><span class="muted">Strategic context</span>A company-wide ${APP.cycleYear} priority from the NextWave Digital company profile. Read-only.</div></div>` : ""}</div>`; }).join("")}</div></div>`;
+  return `<div class="stack"><p class="small t2">NextWave Digital's ${APP.cycleYear} strategic targets are company-wide. As Commercial Director you contribute to them, but you do not own every result on your own.</p>
+    <div class="obj-row">${CEO_OBJECTIVES.map((o, i) => `<div class="ceo-card fixed"><div class="ceo-top"><span class="row between nowrap"><span class="goal-n">${i + 1}</span><span class="tag blue">${esc(o.target)}</span></span><b>${esc(o.title)}</b><span class="xs muted">${esc(o.short)}</span></div>
+      <div class="ceo-detail small"><div><span class="muted">Company objective</span>${esc(o.kpi)}</div><div><span class="muted">Your contribution</span>${esc(o.contribution)}</div></div></div>`).join("")}</div></div>`;
 }
 function prev2026(P) {
   return `<div class="stack-sm" id="prev-2026"><h4>Last year's appraisal (2026)</h4>
-    <div class="xs muted">Rating period ${esc(P.period)} · Supervisor: ${esc(P.supervisor)} · Time in position: ${esc(P.timeInPosition)} · Historical record, read-only</div>
     <div class="xs muted">Part I · Competencies (40%) · Rating scale: ${esc(P.scale)}</div>
     <div class="table-wrap"><table class="tbl"><thead><tr><th>Competency</th><th style="width:60px">Rating</th><th>Performance evidence</th></tr></thead><tbody>${P.competencies.map(([c, n, r, e]) => `<tr><td><span class="xs muted">${esc(c)}</span><br>${esc(n)}</td><td class="num">${r}</td><td class="small">${esc(e)}</td></tr>`).join("")}</tbody></table></div>
     <div class="xs">Competency score: <b>${esc(P.competencyScore)}</b> · Average rating: ${esc(P.average)}</div>
     <div class="xs muted">Part II · Objectives (60%)</div>
-    <div class="table-wrap"><table class="tbl"><thead><tr><th>Objective</th><th>Measure</th><th>Target</th><th>Actual</th><th>Achieved</th><th>Weight</th><th>Score</th></tr></thead><tbody>${P.objectives.map(o => `<tr><td>${esc(o[0])}<div class="xs muted">Comment: ${esc(o[7])}</div></td><td class="small">${esc(o[1])}</td>${o.slice(2, 7).map(x => `<td class="num">${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+    <div class="table-wrap"><table class="tbl"><thead><tr><th>Objective</th><th>Measure</th><th>Target</th><th>Actual</th><th>Achieved</th><th>Weight</th><th>Score</th></tr></thead><tbody>${P.objectives.map(o => `<tr><td>${esc(o[0])}</td><td class="small">${esc(o[1])}</td>${o.slice(2, 7).map(x => `<td class="num">${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
     <div class="xs">Objectives score: <b>${esc(P.objectivesScore)}</b></div>
+    <div class="obj-comments" id="obj-comments"><h4>Objective-Level Comments</h4><ol class="small t2">${P.objectives.map(o => `<li>${esc(o[7])}</li>`).join("")}</ol></div>
     <div class="xs">Overall: ${P.overall.map(([c, w, sc, wc]) => `${esc(c)} ${esc(w)} × ${esc(sc)} = ${esc(wc)}`).join(" · ")} → <b>${esc(P.overallScore)}</b></div>
   </div>`;
 }
@@ -116,7 +112,7 @@ MODALS.profile = function (m) {
 VIEWS.inbox = function () {
   const ms = mailList(), cur = ms.find(m => m.id === UI.sub) || ms[0];
   if (cur && cur.unread) { markRead(cur.id); cur.unread = false; }
-  return pageHead("My Inbox", "My Inbox") + `<div class="card split">
+  return pageHead("", "My Inbox") + `<div class="card split">
     <div class="list"><div class="list-h">Email</div>${ms.map(m => `<button class="msg-item ${m === cur ? "on" : ""} ${m.unread ? "unread" : ""}" data-act="go" data-go="inbox/${m.id}">${senderAvatar(m, "sm")}<span class="stack-sm grow" style="gap:1px"><span class="row between nowrap"><span class="xs muted">${esc(senderOf(m).name)}</span><span class="xs muted">${m.date.replace(/^\w+ /, "")}</span></span><span class="subj">${m.attach ? icon("clip", "i-xs") + " " : ""}${esc(m.subject)}</span></span></button>`).join("")}</div>
     <div>${cur ? mailView(cur) : `<div class="empty">No messages.</div>`}</div>
   </div>`;

@@ -21,7 +21,7 @@ VIEWS.evidence = function () {
   const r = rec(), E = EMP();
   const items = planItems(r), f = UI.evFilter;
   const rows = r.evidence.filter(e => f === "all" || e.link === f);
-  return pageHead(`Evidence Log / ${esc(E.name)}`, "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
+  return pageHead("", "Evidence Log", `${empChip()}<button class="btn primary" data-act="evNew" id="ev-add">${icon("plus", "i-sm")} Add evidence entry</button>`, "Record evidence and observations in your own words: facts, sources, impact and your follow-up. The system does not fill the log for you.") + `
   <div class="stack">
     ${waitCard(r)}
     <div class="row" style="gap:8px">${r2Status(r) !== "locked" ? `<span class="xs muted">Refer back to:</span><button class="btn ghost sm" data-act="go" data-go="home">${icon("bars", "i-sm")} Dashboard</button><button class="btn ghost sm" data-act="go" data-go="inbox">${icon("mail", "i-sm")} Stakeholder emails</button><button class="btn ghost sm" data-act="openChat">${icon("chat", "i-sm")} Chat with Omar</button>` : ""}<button class="btn ghost sm" data-act="go" data-go="goals/submit">${icon("target", "i-sm")} Performance plan</button>${""}</div>
@@ -66,7 +66,7 @@ function evMissing(d) { const m = []; if (!d.period.trim()) m.push("Date / Perio
    ========================================================= */
 const PERIODS_DASH = [
   { id: "start", l: "Start of Year", sub: "January 2027" },
-  { id: "mid", l: "Mid-Year", sub: "July 2027" }
+  { id: "mid", l: "End of Year", sub: "" }
 ];
 function periodAvailable(id) { return id === "start" || (id === "mid" && S.released.r2); }
 function currentPeriod() {
@@ -78,7 +78,7 @@ function commercialOverview(r) {
   if (period === "mid" && !r.r2.seenDashboard) { r.r2.seenDashboard = true; save(); }
   const pinfo = PERIODS_DASH.find(p => p.id === period);
   const filter = `<div class="period-filter" role="tablist" aria-label="Period">${PERIODS_DASH.map(p => { const ok = periodAvailable(p.id); return `<button role="tab" class="${period === p.id ? "on" : ""}" data-act="period" data-v="${p.id}" aria-selected="${period === p.id}" ${ok ? "" : `disabled title="Not yet available"`}>${ok ? "" : icon("lock", "i-xs")}${p.l}</button>`; }).join("")}</div>`;
-  const head = `<div class="dash-bar"><div><h2>Dashboard</h2><span class="xs">${pinfo.l} · ${pinfo.sub}</span></div>${filter}</div>`;
+  const head = `<div class="dash-bar"><div><h2>Dashboard</h2><span class="xs">${pinfo.sub ? `${pinfo.l} · ${pinfo.sub}` : pinfo.l}</span></div>${filter}</div>`;
   const note = `<div class="insight neutral">${icon("info", "i-sm")}<span>Company and department results reflect many factors. They are not, on their own, evidence of any one employee's performance.</span></div>`;
   if (period === "start") return `<section class="dash" id="dash">${head}<div class="dash-body stack">
     <div class="card"><div class="card-b insights"><div class="insight neutral">${icon("info", "i-sm")}<span>No business updates have been published yet. Updates appear here when your facilitator releases them.</span></div></div></div>
@@ -102,10 +102,10 @@ VIEWS.business = function () { setTimeout(() => go("home"), 0); return ""; };
 /* ---------- Round 2 checklist & submission ---------- */
 VIEWS.round2 = function () {
   const r = rec();
-  if (r2Status(r) === "locked") return pageHead("Mid-year review", "Mid-year performance review") + lockedPanel("Not available yet", "The mid-year review opens at the mid-year checkpoint.");
+  if (r2Status(r) === "locked") return pageHead("", "Mid-year performance review") + lockedPanel("Not available yet", "The mid-year review opens at the mid-year checkpoint.");
   const items = [["Reviewed the mid-year business update and Omar's evidence on Home", r.r2.seenDashboard, "home"], ["Wrote your interpretation of the mid-year information (below)", r.r2.interpretation.trim().length >= 15, "round2"], ["Talked with Omar about what has been happening", managerCount(r.r2.diag.log) >= CHAT_LIMITS.diagnosticMin, "chat"], ["Recorded evidence in the Evidence Log", r.evidence.length > 0, "evidence"]];
   const ok = items.every(x => x[1]), a = r.r2.assessment;
-  return pageHead("Performance Management / Mid-year review", "Mid-year performance review", statusChip(r2Status(r)), "Omar Hassan · July 2027") + `<div class="stack-lg">
+  return pageHead("", "Mid-year performance review", statusChip(r2Status(r)), "Omar Hassan · July 2027") + `<div class="stack-lg">
     <div class="card"><div class="card-h"><h3>Checklist</h3></div><div class="card-b checklist">${items.map(([l, done, goTo]) => `<button class="ck-row ${done ? "ok" : ""}" ${goTo === "chat" ? `data-act="openChat"` : `data-act="go" data-go="${goTo}"`}>${icon(done ? "check" : "info", "i-sm")}<span class="grow">${l}</span>${icon("chev", "i-sm")}</button>`).join("")}</div></div>
     <div class="card"><div class="card-h"><div><h3>Your interpretation of the mid-year information</h3><div class="xs muted">What does the business event mean for your team, what does Omar's evidence show, and what does it not tell you?</div></div></div><div class="card-b">
       ${r.r2.submitted ? `<div class="small t2" style="white-space:pre-line">${esc(r.r2.interpretation) || "<span class='muted'>None written</span>"}</div>` : `<textarea class="ta" rows="4" id="${P("r2", "interpretation")}" ${bind(P("r2", "interpretation"))} maxlength="3000" placeholder="Summarise what the business event means, what Omar's evidence shows, and what you still need to find out.">${esc(r.r2.interpretation)}</textarea>`}

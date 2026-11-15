@@ -115,6 +115,13 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 - **Omar Hassan – Employee Profile** (`#employee`, `VIEWS.employee` in `src/views_core.js`) is the only place Omar's profile appears. It shows his role, responsibilities and strengths. A **Last Year's Performance Evidence** button opens and closes his 2026 appraisal (objectives, results, competency ratings, comments). Omar's card was removed from Home and Objectives; the Objectives submit button moved to the page header.
 - **Home** shows only the dashboard. At the start of the year it says no updates have been published. After the mid-year release it shows the business event and Omar's mid-year evidence. The GROW/RETAIN/SCALE/BUILD cards and "What happens next" box were removed from Home; the company targets remain under My Profile → My Performance Objectives.
 
+## UI refinements (owner request)
+
+- Home: subtitle shows only "Commercial Director"; dashboard filters are **Start of Year** and **End of Year** (the second shows the business event and Omar's mid-year evidence, unchanged).
+- My Profile → Overview: the information cards under the header were removed (the header and My team remain). My Performance Objectives: the four priorities sit in one row (2×2 on tablets, stacked on phones), always expanded, with no "View/Hide details", no "Strategic context", no "Read-only" and no "Company-wide" descriptions.
+- Small grey breadcrumbs that repeated the page heading were removed (Chat, Inbox, My Profile, Omar's profile, Objectives, Evidence Log, Mid-year review).
+- Omar Hassan – Employee Profile: the information cards under his header were removed. In Last Year's Performance Evidence, the rating-period line was removed and the four comments now appear in an **Objective-Level Comments** list after the objectives table and before the overall result.
+
 ## Alignment with the five participant documents
 
 Full comparison: `docs/DOCUMENT_ALIGNMENT_REVIEW.md`. Applied:

@@ -135,7 +135,6 @@ const ACTIONS = {
   libOpen(el) { UI.libOpen = UI.libOpen === el.dataset.id ? null : el.dataset.id; render(); },
   orgToggle() { UI.orgOpen = UI.orgOpen === false; render(); },
   respToggle(el) { UI.respOpen = UI.respOpen || { strategy: true }; UI.respOpen[el.dataset.id] = !UI.respOpen[el.dataset.id]; render(); },
-  ceoToggle(el) { UI.ceoOpen = UI.ceoOpen === el.dataset.id ? null : el.dataset.id; render(); },
   apOpen(el, ev) { if (ev && ev.target.closest("input,select,textarea,button:not(.ap-row)")) return; const cur = UI.apOpen === undefined ? (rec().goals.objectives[0] || {}).id : UI.apOpen; UI.apOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   compOpen(el) { const cur = UI.compOpen === undefined ? (rec().goals.comps[0] || {}).id : UI.compOpen; UI.compOpen = cur === el.dataset.id ? null : el.dataset.id; render(); },
   pmToggle() { UI.pmOpen = !(UI.pmOpen !== false || PM_ROUTES.includes(UI.route)); if (!UI.pmOpen && PM_ROUTES.includes(UI.route)) UI.pmOpen = true; render(); },

@@ -47,7 +47,7 @@ function chatPanel() {
 VIEWS.chat = function () {
   const r = rec(), last = chatThread(r).slice(-1)[0];
   markChatSeen(r);
-  return pageHead("Chat", "Chat") + `<div class="card split chat-page">
+  return pageHead("", "Chat") + `<div class="card split chat-page">
     <div class="list"><div class="list-h">Conversations</div><button class="msg-item chat-item on" id="chat-omar">${avatar(S.emp, "sm")}<span class="stack-sm grow" style="gap:1px"><b class="small">Omar Hassan</b><span class="xs muted ellipsis">${last ? `${last.from === "manager" ? "You: " : ""}${esc(last.text)}` : "Market Intelligence Analyst"}</span></span></button></div>
     <section class="chat-pane" aria-label="Chat with Omar Hassan">${chatBody(r, false)}</section>
   </div>`;
