@@ -544,10 +544,12 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             shot(pg, "p11_chat_page")
             check("Website section at the bottom of every page, collapsed by default", pg.locator("#nw-site").count() == 1 and "NextWave Company Website" in pg.inner_text("#nw-site") and pg.locator("#nw-site .site-b").count() == 0)
             pg.click("#nw-site-toggle"); pg.wait_for_timeout(250)
-            check("Without an approved address it says so, no invented URL", pg.locator("#nw-site-pending").count() == 1 and pg.locator("#nw-site iframe, #nw-site a[href^='http']").count() == 0)
-            pg.evaluate("NEXTWAVE_WEBSITE.url = 'https://example.org/'; render()"); pg.wait_for_timeout(300)
-            check("With an address it embeds the site and offers 'Open in a new tab'", pg.locator("#nw-site iframe.site-frame").get_attribute("src") == "https://example.org/" and pg.locator("#nw-site-newtab").get_attribute("target") == "_blank")
-            pg.evaluate("NEXTWAVE_WEBSITE.url = ''; UI.siteOpen = false; render()")
+            check("Approved website opens in a new tab (the site blocks embedding); no broken frame", pg.locator("#nw-site-newtab").get_attribute("href") == "https://nextwave-website-beta.vercel.app/" and pg.locator("#nw-site-newtab").get_attribute("target") == "_blank" and pg.locator("#nw-site iframe").count() == 0)
+            pg.evaluate("NEXTWAVE_WEBSITE.embed = true; render()"); pg.wait_for_timeout(300)
+            check("If embedding is allowed later, the site shows inside the page with a new-tab fallback", pg.locator("#nw-site iframe.site-frame").get_attribute("src") == "https://nextwave-website-beta.vercel.app/" and pg.locator("#nw-site-newtab").count() == 1)
+            pg.evaluate("NEXTWAVE_WEBSITE.embed = false; NEXTWAVE_WEBSITE.url = ''; render()"); pg.wait_for_timeout(200)
+            check("Without an address it says so, no invented URL", pg.locator("#nw-site-pending").count() == 1 and pg.locator("#nw-site iframe, #nw-site a[href^='http']").count() == 0)
+            pg.evaluate("NEXTWAVE_WEBSITE.url = 'https://nextwave-website-beta.vercel.app/'; UI.siteOpen = false; render()")
             r = R(pg)
             hist = r["pulse"]["history"]; base = {"performance": 80, "trust": 60, "development": 55}
             summed = {k: base[k] + sum(h["delta"][k] for h in hist) for k in base}

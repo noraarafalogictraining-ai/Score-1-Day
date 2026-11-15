@@ -242,10 +242,12 @@ function websiteSection() {
   const url = (NEXTWAVE_WEBSITE.url || "").trim(), open = !!UI.siteOpen;
   return `<section class="site-sec" id="nw-site">
     <button class="site-h" data-act="siteToggle" aria-expanded="${open}" id="nw-site-toggle">${icon("home", "i-sm")}<b class="grow">NextWave Company Website</b>${url ? `<span class="xs muted">${esc(url.replace(/^https?:\/\//, ""))}</span>` : ""}${icon("chevdown", "i-sm")}</button>
-    ${open ? `<div class="site-b">${url
+    ${open ? `<div class="site-b">${!url
+      ? `<p class="small t2" id="nw-site-pending">The NextWave company website will be available here soon.</p>`
+      : NEXTWAVE_WEBSITE.embed
       ? `<div class="row between site-bar"><span class="xs muted">Browse the website here, or open it in a new tab if it does not display.</span><a class="btn sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer" id="nw-site-newtab">${icon("eye", "i-sm")} Open in a new tab</a></div>
          <iframe class="site-frame" src="${esc(url)}" title="NextWave Company Website" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>`
-      : `<p class="small t2" id="nw-site-pending">The NextWave company website will be available here soon.</p>`}</div>` : ""}
+      : `<div class="site-card"><div class="grow stack-sm"><b>NextWave Digital</b><span class="small t2">${esc(COMPANY.slogan || "")} Explore our company, solutions and values on the NextWave website.</span><span class="xs muted">The website opens in a new tab, so your work here stays open.</span></div><a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener noreferrer" id="nw-site-newtab">${icon("eye", "i-sm")} Open the NextWave website</a></div>`}</div>` : ""}
   </section>`;
 }
 function render() {

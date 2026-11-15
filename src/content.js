@@ -15,8 +15,10 @@ const SIM_DATES = {
   alert: "Mon 5 Jul 2027", midyear: "Wed 7 Jul 2027", yearend: "Wed 1 Dec 2027", closed: "Fri 9 Jul 2027"
 };
 /* NextWave company website shown in the collapsible section at the bottom of each page.
-   Leave url empty until the approved address is provided; never invent one. */
-const NEXTWAVE_WEBSITE = { url: "" };
+   embed: false because the site currently sends "X-Frame-Options: SAMEORIGIN", which blocks showing it
+   inside another site; participants open it in a new tab instead. Set embed: true if that header is removed
+   (or replaced by "Content-Security-Policy: frame-ancestors https://score-short-simulation.vercel.app"). */
+const NEXTWAVE_WEBSITE = { url: "https://nextwave-website-beta.vercel.app/", embed: false };
 /* Codes the facilitator announces in the room; participants enter them on the "Wait for the facilitator message" card.
    (A local gate on each device; visible in the page source.) */
 const RELEASE_CODES = { r2: "4826" };   /* the year-end round (former code 7319) was removed */
