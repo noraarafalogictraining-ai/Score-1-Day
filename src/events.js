@@ -190,7 +190,9 @@ const ACTIONS = {
   /* --- chat --- */
   openChat() { UI.chatOpen = true; UI.dd = null; UI.side = false; markChatSeen(); render(); const t = document.querySelector(".chat-win textarea"); if (t) t.focus({ preventScroll: true }); },
   closeChat() { UI.chatOpen = false; render(); },
+  dictate() { DICTATION.on ? DICTATION.stop() : DICTATION.start(); },
   chatSend() {
+    if (DICTATION.on) DICTATION.stop();
     const r = rec(), kind = activeChatContext(r), path = P("drafts", "chat"), text = String(val(path)).trim();
     if (!kind || !text || UI.busy) return;
     if (text.length > CHAT_LIMITS.message) { UI.chatErr = { kind, message: `Please keep messages under ${CHAT_LIMITS.message} characters.` }; return render(); }

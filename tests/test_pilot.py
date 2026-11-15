@@ -429,8 +429,23 @@ console.log(JSON.stringify({a:A.includes('actual: 9 of 12')&&A.includes('rating 
             check("Open-text composer only, no multiple choice", pg.locator(".reply-opt").count() == 0 and pg.locator('[data-bind$="drafts.chat"]').count() == 1)
             check("No stage or locked conversation lists", not re.search(r"Round \d|alignment conversation|Mid-year conversation|locked|Not yet open", chat, re.I))
             shot(pg, "v04_chat_january", False)
-            say(pg, "alignment", "What's the concern?")
+            # ---- Dictation (simulated browser speech recognition) ----
+            pg.evaluate("""() => { window.__srLang = null; window.webkitSpeechRecognition = class { constructor() { window.__sr = this; } start() { window.__srLang = this.lang;
+                setTimeout(() => this.onresult && this.onresult({ resultIndex: 0, results: [Object.assign([{ transcript: "what's the" }], { isFinal: false })] }), 50);
+                setTimeout(() => this.onresult && this.onresult({ resultIndex: 0, results: [Object.assign([{ transcript: "what's the concern?" }], { isFinal: true })] }), 120); }
+                stop() { setTimeout(() => this.onend && this.onend(), 20); } }; window.SpeechRecognition = undefined; render(); }""")
+            check("Chat shows a microphone button next to Send", pg.locator(".chat-win #mic-btn").count() == 1 and pg.locator(".chat-win #send-chat").count() == 1)
+            pg.click("#mic-btn"); pg.wait_for_timeout(80)
+            check("Listening state is visible", pg.locator("#mic-btn.on").count() == 1 and "Listening" in pg.inner_text(".chat-win"))
+            pg.wait_for_timeout(250)
+            check("Spoken words appear in the message box for checking before sending", pg.locator('[data-bind$="drafts.chat"]').input_value() == "What's the concern?" and pg.evaluate("window.__srLang").startswith("en"))
+            pg.click("#mic-btn"); pg.wait_for_timeout(150)
+            check("Clicking again stops listening; the text stays editable", pg.locator("#mic-btn.on").count() == 0 and pg.locator('[data-bind$="drafts.chat"]').input_value() == "What's the concern?")
+            pg.click("#send-chat"); pg.wait_for_function("() => UI.busy === null", timeout=15000); pg.wait_for_timeout(150)
+            check("The dictated message is sent like a typed one", [m["text"] for m in R(pg)["align"]["log"] if m["from"] == "manager"][-1] == "What's the concern?")
             check("Omar explains the concern when asked", "weren't adopted" in pg.inner_text(".chat-log"))
+            pg.evaluate("window.webkitSpeechRecognition = undefined; render()")
+            check("Browsers without speech recognition: no microphone button, typing still works", pg.locator("#mic-btn").count() == 0 and pg.locator("#send-chat").count() == 1)
             say(pg, "alignment", "I understand your concern.")
             check("“I understand” alone does not align the contract", not R(pg)["align"]["ready"] and pg.locator("#align-confirm").count() == 0)
             check("Omar asks how recommendations will be evaluated", "would that affect my rating" in pg.inner_text(".chat-log"))

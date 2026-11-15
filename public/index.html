@@ -468,6 +468,13 @@ button.org-node:hover { border-color: var(--blue-line); }
 .chat-win .composer { flex-direction: row; align-items: flex-end; gap: 8px; }
 .chat-win .composer .ta { min-height: 42px; max-height: 120px; resize: none; border-radius: 12px; }
 .send-btn { width: 42px; height: 42px; padding: 0; border-radius: 50%; flex: none; }
+.composer-btns { display: flex; gap: 6px; align-items: center; justify-content: flex-end; flex: none; }
+.mic-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: #fff; color: var(--text2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; flex: none; }
+.mic-btn:hover { border-color: var(--blue); color: var(--blue); }
+.mic-btn.on { background: #E5484D; border-color: #E5484D; color: #fff; animation: micpulse 1.4s ease-out infinite; }
+@keyframes micpulse { 0% { box-shadow: 0 0 0 0 rgba(229,72,77,.45); } 100% { box-shadow: 0 0 0 10px rgba(229,72,77,0); } }
+.mic-hint { display: flex; align-items: center; gap: 6px; color: #C2363B; }
+.mic-dot { width: 8px; height: 8px; border-radius: 50%; background: #E5484D; animation: micpulse 1.4s ease-out infinite; }
 .chat-off { font-size: .82rem; color: var(--muted); display: flex; gap: 6px; align-items: center; padding: 6px 2px; }
 .list-h { padding: 8px 14px 6px; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--surface2); border-bottom: 1px solid var(--line); }
 .chat-item .ellipsis { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 230px; }
@@ -1821,6 +1828,8 @@ function objectiveEvidence(o, d, r = rec()) {
    ========================================================= */
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const ICONS = {
+  mic: '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
+  stop: '<rect x="7" y="7" width="10" height="10" rx="2"/>',
   sound: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
   mute: '<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/>',
   globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.4 3.5 5.3 3.5 8.5s-1.1 6.1-3.5 8.5c-2.4-2.4-3.5-5.3-3.5-8.5s1.1-6.1 3.5-8.5Z"/>',
@@ -2453,7 +2462,7 @@ function chatBody(r, closeBtn) {
   let foot;
   if (!ctx) foot = r.r2.diag.completed ? `<div class="chat-off" id="chat-done">${icon("check", "i-sm")} Conversation completed. Next: the Final Appraisal in the Evidence Log.</div>` : `<div class="chat-off">${icon("clock", "i-sm")} Omar is away right now.</div>`;
   else if (!aiReady()) foot = `<div class="notice risk">${icon("alert", "i-sm")}<span>Chat is unavailable${AIS.provider === "offline" ? ": the server could not be reached" : ": no AI provider is configured on the server"}.</span></div>`;
-  else foot = `<div class="composer"><label class="sr" for="${draftPath}">Message Omar</label><textarea class="ta" id="${draftPath}" ${bind(draftPath)} rows="2" maxlength="${CHAT_LIMITS.message}" placeholder="Message Omar…" ${busy ? "disabled" : ""}>${esc(draft)}</textarea><button class="btn primary send-btn" data-act="chatSend" id="send-chat" aria-label="Send" ${busy ? "disabled" : ""}>${icon("send", "i-sm")}</button></div>`;
+  else foot = `<div class="composer"><label class="sr" for="${draftPath}">Message Omar</label><textarea class="ta" id="${draftPath}" ${bind(draftPath)} rows="2" maxlength="${CHAT_LIMITS.message}" placeholder="Message Omar…" ${busy ? "disabled" : ""}>${esc(draft)}</textarea><span class="composer-btns">${DICTATION.supported() ? `<button class="mic-btn ${DICTATION.on ? "on" : ""}" data-act="dictate" id="mic-btn" aria-pressed="${DICTATION.on}" aria-label="${DICTATION.on ? "Stop dictation" : "Speak instead of typing"}" title="${DICTATION.on ? "Listening… click to stop" : "Speak instead of typing"}" ${busy ? "disabled" : ""}>${icon(DICTATION.on ? "stop" : "mic", "i-sm")}</button>` : ""}<button class="btn primary send-btn" data-act="chatSend" id="send-chat" aria-label="Send" ${busy ? "disabled" : ""}>${icon("send", "i-sm")}</button></span></div>${DICTATION.on ? `<div class="xs mic-hint" id="mic-hint" role="status"><span class="mic-dot"></span> Listening… speak now. Check the text, then press Send.</div>` : ""}`;
   return `<div class="chat-head">${avatar(S.emp)}<div class="grow"><b>Omar Hassan</b><div class="xs muted">Market Intelligence Analyst</div></div>${closeBtn ? `<button class="icon-btn" data-act="closeChat" aria-label="Close chat">${icon("x")}</button>` : ""}</div>
     <div class="chat-log" id="chat-log" aria-live="polite">${chatBubbles(chatThread(r))}${busy ? `<div class="bubble-row">${avatar(S.emp, "sm")}<div class="bubble typing" aria-label="Omar is typing"><span></span><span></span><span></span></div></div>` : ""}</div>
     <div class="chat-foot">
@@ -2477,6 +2486,50 @@ VIEWS.chat = function () {
 };
 /* The former conversations page now opens the Chat page (no dead route). */
 VIEWS.conversations = function () { setTimeout(() => go("chat"), 0); return ""; };
+
+/* ---------- Dictation: speak instead of typing (browser speech recognition) ----------
+   The spoken words appear in the message box; the participant checks them and presses Send as usual,
+   so Omar and the assessments still work on text. Chrome, Edge and Safari support it; elsewhere the
+   microphone button is not shown. In Chrome the audio is converted to text by Google's speech service. */
+const DICTATION = {
+  on: false, rec: null, base: "", finals: "",
+  supported() { return !!(window.SpeechRecognition || window.webkitSpeechRecognition); },
+  path() { return P("drafts", "chat"); },
+  write(text) {
+    const t = text.slice(0, CHAT_LIMITS.message);
+    setPath(S, DICTATION.path(), t);
+    const el = document.querySelector(`[data-bind="${CSS.escape(DICTATION.path())}"]`);
+    if (el) { el.value = t; el.scrollTop = el.scrollHeight; }
+  },
+  start() {
+    if (DICTATION.on || !DICTATION.supported()) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition, rec = new SR();
+    const lang = (navigator.language || "en-US"); rec.lang = /^en\b/i.test(lang) ? lang : "en-US";
+    rec.continuous = true; rec.interimResults = true;
+    const cur = String(val(DICTATION.path()) || "");
+    DICTATION.base = cur && !/\s$/.test(cur) ? cur + " " : cur; DICTATION.finals = "";
+    rec.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) DICTATION.finals += (DICTATION.finals && !/\s$/.test(DICTATION.finals) ? " " : "") + t.trim();
+        else interim += t;
+      }
+      const joined = (DICTATION.finals + (interim ? " " + interim.trim() : "")).trim();
+      DICTATION.write(DICTATION.base + (joined ? joined.charAt(0).toUpperCase() + joined.slice(1) : ""));
+    };
+    rec.onerror = (e) => {
+      const msg = e.error === "not-allowed" || e.error === "service-not-allowed" ? "Microphone access is blocked. Allow the microphone in your browser, or type your message."
+        : e.error === "no-speech" ? "No speech was heard. Click the microphone and try again."
+        : e.error === "audio-capture" ? "No microphone was found. You can type your message instead."
+        : e.error === "network" ? "Speech recognition needs an internet connection. You can type your message instead." : null;
+      if (msg) toast(msg);
+    };
+    rec.onend = () => { DICTATION.on = false; DICTATION.rec = null; save(); render(); };
+    try { rec.start(); DICTATION.rec = rec; DICTATION.on = true; render(); } catch (e) { toast("Dictation could not start. You can type your message instead."); }
+  },
+  stop() { if (DICTATION.rec) { try { DICTATION.rec.stop(); } catch (e) {} } else { DICTATION.on = false; render(); } }
+};
 
 /* =========================================================
    MONITORING: EVIDENCE LOG · MID-YEAR CHECK-IN · NEXT-EVENT CODE
@@ -2790,7 +2843,9 @@ const ACTIONS = {
   /* --- chat --- */
   openChat() { UI.chatOpen = true; UI.dd = null; UI.side = false; markChatSeen(); render(); const t = document.querySelector(".chat-win textarea"); if (t) t.focus({ preventScroll: true }); },
   closeChat() { UI.chatOpen = false; render(); },
+  dictate() { DICTATION.on ? DICTATION.stop() : DICTATION.start(); },
   chatSend() {
+    if (DICTATION.on) DICTATION.stop();
     const r = rec(), kind = activeChatContext(r), path = P("drafts", "chat"), text = String(val(path)).trim();
     if (!kind || !text || UI.busy) return;
     if (text.length > CHAT_LIMITS.message) { UI.chatErr = { kind, message: `Please keep messages under ${CHAT_LIMITS.message} characters.` }; return render(); }

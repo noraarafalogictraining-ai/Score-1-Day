@@ -115,6 +115,10 @@ Configuration: the director profile, job description and CEO objectives are `DIR
 - **Omar Hassan – Employee Profile** (`#employee`, `VIEWS.employee` in `src/views_core.js`) is the only place Omar's profile appears. It shows his role, responsibilities and strengths. A **Last Year's Performance Evidence** button opens and closes his 2026 appraisal (objectives, results, competency ratings, comments). Omar's card was removed from Home and Objectives; the Objectives submit button moved to the page header.
 - **Home** shows only the dashboard. At the start of the year it says no updates have been published. After the mid-year release it shows the business event and Omar's mid-year evidence. The GROW/RETAIN/SCALE/BUILD cards and "What happens next" box were removed from Home; the company targets remain under My Profile → My Performance Objectives.
 
+## Dictation in the chat with Omar
+
+A microphone button next to Send lets participants speak instead of typing (`DICTATION` in `src/views_chat.js`). The words appear in the message box as they speak; they check or correct the text and press Send as usual, so Omar and the assessments still work on text. It uses the browser's built-in speech recognition: Chrome, Edge and Safari (laptop and phone). In browsers without it (e.g. Firefox) the button is hidden and typing works as before. The browser asks for microphone permission the first time; if it is refused, or no speech is heard, a short message explains it and typing still works. Privacy note: in Chrome the spoken audio is converted to text by Google's speech service. In a busy training room, headsets give the best accuracy.
+
 ## Final revisions (owner request)
 
 - **Flow (all sections unlocked, nothing mandatory):** start of year → one objective + three competencies → January conversation with Omar → **End-year** (Evidence Log, available at any time) releases the business event, emails and Omar's second message → Evidence Log → second conversation → **Final Appraisal** (bottom of the Evidence Log) → HR's closing email.
